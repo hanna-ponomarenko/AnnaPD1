@@ -211,8 +211,10 @@ namespace Featurehole.Runner.Core
         {
             GameObject flameObject = new GameObject("BoostFlame");
             flameObject.transform.SetParent(parent, false);
-            CreateBoostFireLayer(flameObject.transform, "Core", 64f, 0.45f, 0.72f, 0.25f, 0.42f);
-            CreateBoostFireLayer(flameObject.transform, "Outer", 42f, 0.72f, 1.1f, 0.3f, 0.52f);
+            CreateBoostFireLayer(flameObject.transform, "Core", 82f, 0.42f, 0.68f, 0.22f, 0.38f);
+            CreateBoostFireLayer(flameObject.transform, "Outer", 56f, 0.66f, 1.05f, 0.28f, 0.48f);
+            CreateSparkLayer(flameObject.transform);
+            CreateGlowLayer(flameObject.transform);
             return flameObject;
         }
 
@@ -306,6 +308,135 @@ namespace Featurehole.Runner.Core
             particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 
+        private void CreateSparkLayer(Transform parent)
+        {
+            GameObject layerObject = new GameObject("Sparks");
+            layerObject.transform.SetParent(parent, false);
+
+            ParticleSystem particleSystem = layerObject.AddComponent<ParticleSystem>();
+            particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+            ParticleSystemRenderer renderer = layerObject.GetComponent<ParticleSystemRenderer>();
+            renderer.material = GetRuntimeBoostFireMaterial();
+            renderer.renderMode = ParticleSystemRenderMode.Stretch;
+            renderer.lengthScale = 1.8f;
+            renderer.velocityScale = 0.35f;
+            renderer.sortingOrder = 76;
+
+            var main = particleSystem.main;
+            main.duration = 0.55f;
+            main.loop = true;
+            main.playOnAwake = false;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.18f, 0.32f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(1.8f, 3.2f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.08f, 0.16f);
+            main.startColor = Color.white;
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            main.maxParticles = 64;
+
+            var emission = particleSystem.emission;
+            emission.enabled = true;
+            emission.rateOverTime = 16f;
+
+            var shape = particleSystem.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.Cone;
+            shape.angle = 10f;
+            shape.radius = 0.04f;
+
+            var velocityOverLifetime = particleSystem.velocityOverLifetime;
+            velocityOverLifetime.enabled = true;
+            velocityOverLifetime.space = ParticleSystemSimulationSpace.Local;
+            velocityOverLifetime.x = new ParticleSystem.MinMaxCurve(-0.12f, 0.12f);
+            velocityOverLifetime.y = new ParticleSystem.MinMaxCurve(0.15f, 0.45f);
+            velocityOverLifetime.z = new ParticleSystem.MinMaxCurve(1.6f, 2.8f);
+
+            var colorOverLifetime = particleSystem.colorOverLifetime;
+            colorOverLifetime.enabled = true;
+            Gradient gradient = new Gradient();
+            gradient.SetKeys(
+                new[]
+                {
+                    new GradientColorKey(new Color(1f, 1f, 0.95f), 0f),
+                    new GradientColorKey(new Color(1f, 0.9f, 0.45f), 0.3f),
+                    new GradientColorKey(new Color(1f, 0.45f, 0.1f), 0.75f),
+                    new GradientColorKey(new Color(0.4f, 0.18f, 0.08f), 1f)
+                },
+                new[]
+                {
+                    new GradientAlphaKey(0f, 0f),
+                    new GradientAlphaKey(1f, 0.1f),
+                    new GradientAlphaKey(0.65f, 0.75f),
+                    new GradientAlphaKey(0f, 1f)
+                });
+            colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
+
+            particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
+        private void CreateGlowLayer(Transform parent)
+        {
+            GameObject layerObject = new GameObject("Glow");
+            layerObject.transform.SetParent(parent, false);
+
+            ParticleSystem particleSystem = layerObject.AddComponent<ParticleSystem>();
+            particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+            ParticleSystemRenderer renderer = layerObject.GetComponent<ParticleSystemRenderer>();
+            renderer.material = GetRuntimeGlowMaterial();
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+            renderer.sortingOrder = 74;
+
+            var main = particleSystem.main;
+            main.duration = 0.7f;
+            main.loop = true;
+            main.playOnAwake = false;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.3f, 0.55f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.15f, 0.35f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.9f, 1.5f);
+            main.startColor = new Color(1f, 0.8f, 0.3f, 0.45f);
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            main.maxParticles = 32;
+
+            var emission = particleSystem.emission;
+            emission.enabled = true;
+            emission.rateOverTime = 10f;
+
+            var shape = particleSystem.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.Cone;
+            shape.angle = 18f;
+            shape.radius = 0.06f;
+
+            var sizeOverLifetime = particleSystem.sizeOverLifetime;
+            sizeOverLifetime.enabled = true;
+            AnimationCurve sizeCurve = new AnimationCurve();
+            sizeCurve.AddKey(0f, 0.2f);
+            sizeCurve.AddKey(0.35f, 1f);
+            sizeCurve.AddKey(1f, 0.1f);
+            sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1f, sizeCurve);
+
+            var colorOverLifetime = particleSystem.colorOverLifetime;
+            colorOverLifetime.enabled = true;
+            Gradient gradient = new Gradient();
+            gradient.SetKeys(
+                new[]
+                {
+                    new GradientColorKey(new Color(1f, 0.95f, 0.7f), 0f),
+                    new GradientColorKey(new Color(1f, 0.7f, 0.16f), 0.45f),
+                    new GradientColorKey(new Color(0.6f, 0.2f, 0.05f), 1f)
+                },
+                new[]
+                {
+                    new GradientAlphaKey(0f, 0f),
+                    new GradientAlphaKey(0.6f, 0.18f),
+                    new GradientAlphaKey(0f, 1f)
+                });
+            colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
+
+            particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
         private Material GetRuntimeBoostFireMaterial()
         {
             if (runtimeBoostFireMaterial != null)
@@ -329,23 +460,33 @@ namespace Featurehole.Runner.Core
                 name = "RuntimeBoostFireMaterial"
             };
 
-            Texture mainTexture = null;
-            if (boostFireMaterial != null && boostFireMaterial.HasProperty("_MainTexture"))
-            {
-                mainTexture = boostFireMaterial.GetTexture("_MainTexture");
-            }
-
-            if (mainTexture == null && boostFireMaterial != null && boostFireMaterial.HasProperty("_MainTex"))
-            {
-                mainTexture = boostFireMaterial.GetTexture("_MainTex");
-            }
-
-            runtimeBoostFireMaterial.mainTexture = mainTexture != null
-                ? mainTexture
-                : CreateRuntimeFireTexture();
+            runtimeBoostFireMaterial.mainTexture = CreateRuntimeFireTexture();
 
             runtimeBoostFireMaterial.color = new Color(1f, 0.92f, 0.8f, 0.95f);
             return runtimeBoostFireMaterial;
+        }
+
+        private Material GetRuntimeGlowMaterial()
+        {
+            Shader particleShader = Shader.Find("Legacy Shaders/Particles/Additive");
+            if (particleShader == null)
+            {
+                particleShader = Shader.Find("Particles/Standard Unlit");
+            }
+
+            if (particleShader == null)
+            {
+                return GetRuntimeBoostFireMaterial();
+            }
+
+            Material material = new Material(particleShader)
+            {
+                name = "RuntimeBoostGlowMaterial",
+                mainTexture = CreateRuntimeGlowTexture(),
+                color = new Color(1f, 0.85f, 0.35f, 0.55f)
+            };
+
+            return material;
         }
 
         private Texture2D CreateRuntimeFireTexture()
@@ -387,11 +528,45 @@ namespace Featurehole.Runner.Core
             return texture;
         }
 
+        private Texture2D CreateRuntimeGlowTexture()
+        {
+            const int textureSize = 128;
+
+            Texture2D texture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false)
+            {
+                name = "RuntimeGlowTexture",
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp
+            };
+
+            Vector2 center = new Vector2(textureSize * 0.5f, textureSize * 0.5f);
+            float radius = textureSize * 0.48f;
+
+            for (int y = 0; y < textureSize; y++)
+            {
+                for (int x = 0; x < textureSize; x++)
+                {
+                    float distance = Vector2.Distance(new Vector2(x, y), center) / radius;
+                    if (distance >= 1f)
+                    {
+                        texture.SetPixel(x, y, Color.clear);
+                        continue;
+                    }
+
+                    float alpha = Mathf.Pow(1f - distance, 2.2f);
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            texture.Apply();
+            return texture;
+        }
+
         private void ConfigureBoostFlame(Transform boostFlame)
         {
-            boostFlame.localPosition = new Vector3(0f, 0.08f, 0.72f);
+            boostFlame.localPosition = new Vector3(0f, 0.04f, 0.68f);
             boostFlame.localRotation = Quaternion.Euler(-90f, 0f, 0f);
-            boostFlame.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+            boostFlame.localScale = new Vector3(0.92f, 0.92f, 0.92f);
 
             foreach (ParticleSystemRenderer renderer in boostFlame.GetComponentsInChildren<ParticleSystemRenderer>(true))
             {
