@@ -144,6 +144,8 @@ namespace Featurehole.Runner.Core
             flameObject.transform.SetParent(parent, false);
 
             ParticleSystem particleSystem = flameObject.AddComponent<ParticleSystem>();
+            particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
             ParticleSystemRenderer renderer = flameObject.GetComponent<ParticleSystemRenderer>();
             renderer.material = boostFireMaterial;
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
