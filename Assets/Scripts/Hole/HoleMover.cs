@@ -13,6 +13,7 @@ namespace Featurehole.Runner.Hole
         private Transform visualTransform;
         private GameObject boostFlameObject;
         private ParticleSystem[] boostFlames;
+        private ParticleSystemRenderer[] boostFlameRenderers;
         private float currentDiameter;
 
         public float CurrentDiameter => currentDiameter;
@@ -26,6 +27,9 @@ namespace Featurehole.Runner.Hole
             boostFlameObject = boostFlameTransform != null ? boostFlameTransform.gameObject : null;
             boostFlames = boostFlameTransform != null
                 ? boostFlameTransform.GetComponentsInChildren<ParticleSystem>(true)
+                : null;
+            boostFlameRenderers = boostFlameTransform != null
+                ? boostFlameTransform.GetComponentsInChildren<ParticleSystemRenderer>(true)
                 : null;
             transform.position = startPosition;
             ResetSize();
@@ -66,7 +70,16 @@ namespace Featurehole.Runner.Hole
                 return;
             }
 
-            boostFlameObject.SetActive(isActive);
+            if (boostFlameRenderers != null)
+            {
+                foreach (ParticleSystemRenderer renderer in boostFlameRenderers)
+                {
+                    if (renderer != null)
+                    {
+                        renderer.enabled = isActive;
+                    }
+                }
+            }
 
             foreach (ParticleSystem boostFlame in boostFlames)
             {
@@ -77,12 +90,10 @@ namespace Featurehole.Runner.Hole
 
                 if (isActive)
                 {
-                    if (!boostFlame.isPlaying)
-                    {
-                        boostFlame.Play(true);
-                    }
+                    boostFlame.Clear(true);
+                    boostFlame.Play(true);
                 }
-                else if (boostFlame.isPlaying)
+                else
                 {
                     boostFlame.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 }

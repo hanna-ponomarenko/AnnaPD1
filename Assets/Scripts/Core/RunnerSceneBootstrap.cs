@@ -136,14 +136,18 @@ namespace Featurehole.Runner.Core
         {
             boostFlame.localPosition = new Vector3(0f, 0.7f, -0.45f);
             boostFlame.localRotation = Quaternion.identity;
-            boostFlame.localScale = new Vector3(0.6f, 0.6f, 0.6f);
+            boostFlame.localScale = new Vector3(1.1f, 1.1f, 1.1f);
 
             foreach (ParticleSystemRenderer renderer in boostFlame.GetComponentsInChildren<ParticleSystemRenderer>(true))
             {
                 renderer.sortingOrder = 75;
+                renderer.enabled = false;
             }
 
-            boostFlame.gameObject.SetActive(false);
+            foreach (ParticleSystem particleSystem in boostFlame.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
 
         private TrackSegmentSpawner CreateTrackSpawner()
