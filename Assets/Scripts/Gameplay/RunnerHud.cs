@@ -33,6 +33,10 @@ namespace Featurehole.Runner.Gameplay
             {
                 GUI.Label(new Rect(28f, 110f, boxWidth - 24, 22f), $"Hole Size: {holeMover.CurrentDiameter:0.0}");
             }
+            if (runtime.IsBoostActive)
+            {
+                GUI.Label(new Rect(28f, 132f, boxWidth - 24, 22f), $"Boost: {runtime.BoostTimeRemaining:0.0}s");
+            }
 
             if (runtime.IsGameOver)
             {

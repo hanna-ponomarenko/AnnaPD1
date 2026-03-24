@@ -11,7 +11,7 @@ namespace Featurehole.Runner.Core
         [SerializeField] private RunnerGameConfig config;
         [SerializeField] private HoleMover holeMover;
         [SerializeField] private TrackSegmentSpawner trackSpawner;
-        [SerializeField] private CollectibleLaneSpawner collectibleSpawner;
+        [SerializeField] private PepperBoostSpawner pepperSpawner;
         [SerializeField] private RunnerHud hud;
         [SerializeField] private bool autoStart = true;
 
@@ -23,14 +23,14 @@ namespace Featurehole.Runner.Core
             RunnerGameConfig runnerConfig,
             HoleMover runnerHoleMover,
             TrackSegmentSpawner runnerTrackSpawner,
-            CollectibleLaneSpawner runnerCollectibleSpawner,
+            PepperBoostSpawner runnerPepperSpawner,
             RunnerHud runnerHud,
             bool shouldAutoStart = true)
         {
             config = runnerConfig;
             holeMover = runnerHoleMover;
             trackSpawner = runnerTrackSpawner;
-            collectibleSpawner = runnerCollectibleSpawner;
+            pepperSpawner = runnerPepperSpawner;
             hud = runnerHud;
             autoStart = shouldAutoStart;
         }
@@ -45,7 +45,7 @@ namespace Featurehole.Runner.Core
 
             holeMover.Initialize(config);
             trackSpawner.Initialize(config);
-            collectibleSpawner.Initialize(config, holeMover);
+            pepperSpawner.Initialize(config, holeMover);
             hud.Initialize(runtime, holeMover);
 
             if (autoStart)
@@ -68,11 +68,13 @@ namespace Featurehole.Runner.Core
             }
 
             float deltaTime = Time.deltaTime;
+            float currentForwardSpeed = config.ForwardSpeed * runtime.SpeedMultiplier;
 
             holeMover.Tick(deltaTime);
-            trackSpawner.Tick(deltaTime);
-            collectibleSpawner.Tick(deltaTime, runtime);
+            trackSpawner.Tick(deltaTime, currentForwardSpeed);
+            pepperSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             runtime.Tick(deltaTime, config.ForwardSpeed);
+            holeMover.SetBoostActive(runtime.IsBoostActive);
 
             if (runtime.IsGameOver)
             {
@@ -85,7 +87,8 @@ namespace Featurehole.Runner.Core
             trackSpawner.ResetTrack();
             holeMover.ResetPosition();
             holeMover.ResetSize();
-            collectibleSpawner.ResetField();
+            holeMover.SetBoostActive(false);
+            pepperSpawner.ResetField();
             runtime.StartRun(config.MaxMissedCollectibles);
         }
 
@@ -100,7 +103,8 @@ namespace Featurehole.Runner.Core
             trackSpawner.ResetTrack();
             holeMover.ResetPosition();
             holeMover.ResetSize();
-            collectibleSpawner.ResetField();
+            holeMover.SetBoostActive(false);
+            pepperSpawner.ResetField();
         }
 
         private bool ValidateScene()
@@ -108,7 +112,7 @@ namespace Featurehole.Runner.Core
             if (config != null
                 && holeMover != null
                 && trackSpawner != null
-                && collectibleSpawner != null
+                && pepperSpawner != null
                 && hud != null)
             {
                 return true;

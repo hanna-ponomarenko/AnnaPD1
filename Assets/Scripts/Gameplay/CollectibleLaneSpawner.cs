@@ -38,12 +38,6 @@ namespace Featurehole.Runner.Gameplay
             }
 
             ClearItems();
-            nextSpawnZ = config.SegmentLength;
-
-            for (int index = 0; index < config.InitialSegmentCount * 2; index++)
-            {
-                SpawnItem(index);
-            }
         }
 
         public void Tick(float deltaTime, RunnerRuntime runtime)

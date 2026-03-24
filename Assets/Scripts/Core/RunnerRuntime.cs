@@ -7,6 +7,10 @@ namespace Featurehole.Runner.Core
         public int CollectedCount { get; private set; }
         public int MissedCount { get; private set; }
         public int MaxMissedCount { get; private set; }
+        public float SpeedMultiplier { get; private set; } = 1f;
+        public float BoostTimeRemaining { get; private set; }
+
+        public bool IsBoostActive => BoostTimeRemaining > 0f;
 
         public bool IsGameOver => MissedCount >= MaxMissedCount && MaxMissedCount > 0;
 
@@ -16,6 +20,8 @@ namespace Featurehole.Runner.Core
             CollectedCount = 0;
             MissedCount = 0;
             MaxMissedCount = maxMissedCount;
+            SpeedMultiplier = 1f;
+            BoostTimeRemaining = 0f;
             IsRunning = true;
         }
 
@@ -34,6 +40,12 @@ namespace Featurehole.Runner.Core
             MissedCount++;
         }
 
+        public void ActivateBoost(float duration, float speedMultiplier)
+        {
+            BoostTimeRemaining = duration;
+            SpeedMultiplier = speedMultiplier;
+        }
+
         public void Tick(float deltaTime, float speed)
         {
             if (!IsRunning)
@@ -41,7 +53,17 @@ namespace Featurehole.Runner.Core
                 return;
             }
 
-            DistanceTravelled += speed * deltaTime;
+            if (BoostTimeRemaining > 0f)
+            {
+                BoostTimeRemaining = System.Math.Max(0f, BoostTimeRemaining - deltaTime);
+
+                if (BoostTimeRemaining <= 0f)
+                {
+                    SpeedMultiplier = 1f;
+                }
+            }
+
+            DistanceTravelled += speed * SpeedMultiplier * deltaTime;
         }
     }
 }

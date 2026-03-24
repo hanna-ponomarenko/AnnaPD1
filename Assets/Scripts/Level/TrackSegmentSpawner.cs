@@ -39,14 +39,14 @@ namespace Featurehole.Runner.Level
             BuildInitialTrack();
         }
 
-        public void Tick(float deltaTime)
+        public void Tick(float deltaTime, float forwardSpeed)
         {
             if (config == null || activeSegments.Count == 0)
             {
                 return;
             }
 
-            float moveDelta = -config.ForwardSpeed * deltaTime;
+            float moveDelta = -forwardSpeed * deltaTime;
 
             foreach (TrackSegment segment in activeSegments)
             {

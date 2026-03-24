@@ -11,6 +11,7 @@ namespace Featurehole.Runner.Hole
         private RunnerGameConfig config;
         private Vector3 startPosition;
         private Transform visualTransform;
+        private ParticleSystem boostFlame;
         private float currentDiameter;
 
         public float CurrentDiameter => currentDiameter;
@@ -20,8 +21,11 @@ namespace Featurehole.Runner.Hole
             config = runnerConfig;
             startPosition = transform.position;
             visualTransform = transform.Find("Visual");
+            Transform boostFlameTransform = transform.Find("BoostFlame");
+            boostFlame = boostFlameTransform != null ? boostFlameTransform.GetComponent<ParticleSystem>() : null;
             transform.position = startPosition;
             ResetSize();
+            SetBoostActive(false);
         }
 
         public void ResetPosition()
@@ -49,6 +53,26 @@ namespace Featurehole.Runner.Hole
 
             currentDiameter = Mathf.Min(currentDiameter + config.GrowthPerCollectible, config.MaxHoleDiameter);
             ApplyVisualScale();
+        }
+
+        public void SetBoostActive(bool isActive)
+        {
+            if (boostFlame == null)
+            {
+                return;
+            }
+
+            if (isActive)
+            {
+                if (!boostFlame.isPlaying)
+                {
+                    boostFlame.Play();
+                }
+            }
+            else if (boostFlame.isPlaying)
+            {
+                boostFlame.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
 
         public void Tick(float deltaTime)

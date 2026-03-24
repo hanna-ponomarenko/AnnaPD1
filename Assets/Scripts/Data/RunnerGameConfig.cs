@@ -50,6 +50,19 @@ namespace Featurehole.Runner.Data
         [Min(0.1f)]
         [SerializeField] private float maxHoleDiameter = 4.5f;
 
+        [Header("Pepper Boost")]
+        [Min(0.1f)]
+        [SerializeField] private float pepperSize = 1f;
+
+        [Min(1f)]
+        [SerializeField] private float pepperSpawnSpacing = 18f;
+
+        [Min(0f)]
+        [SerializeField] private float boostDuration = 3f;
+
+        [Min(1f)]
+        [SerializeField] private float boostSpeedMultiplier = 1.8f;
+
         public float ForwardSpeed => forwardSpeed;
         public float LateralSpeed => lateralSpeed;
         public float LateralLimit => lateralLimit;
@@ -63,6 +76,10 @@ namespace Featurehole.Runner.Data
         public int MaxMissedCollectibles => maxMissedCollectibles;
         public float GrowthPerCollectible => growthPerCollectible;
         public float MaxHoleDiameter => maxHoleDiameter;
+        public float PepperSize => pepperSize;
+        public float PepperSpawnSpacing => pepperSpawnSpacing;
+        public float BoostDuration => boostDuration;
+        public float BoostSpeedMultiplier => boostSpeedMultiplier;
 
         public static RunnerGameConfig CreateRuntimeDefault()
         {
@@ -80,6 +97,10 @@ namespace Featurehole.Runner.Data
             config.maxMissedCollectibles = 3;
             config.growthPerCollectible = 0.2f;
             config.maxHoleDiameter = 4.5f;
+            config.pepperSize = 1f;
+            config.pepperSpawnSpacing = 18f;
+            config.boostDuration = 3f;
+            config.boostSpeedMultiplier = 1.8f;
             return config;
         }
     }

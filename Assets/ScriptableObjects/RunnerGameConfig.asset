@@ -25,3 +25,7 @@ MonoBehaviour:
   maxMissedCollectibles: 3
   growthPerCollectible: 0.2
   maxHoleDiameter: 4.5
+  pepperSize: 1
+  pepperSpawnSpacing: 18
+  boostDuration: 3
+  boostSpeedMultiplier: 1.8
