@@ -120,7 +120,7 @@ namespace Featurehole.Runner.Core
                 visual,
                 "SlopeOuter",
                 new Vector3(0f, -0.03f, 0f),
-                new Vector3(0.985f, 0.5f, 0.985f),
+                new Vector3(0.993f, 0.5f, 0.993f),
                 new Color(0.74f, 0.7f, 0.64f));
 
             ConfigureHoleLayer(
