@@ -9,6 +9,7 @@ namespace Featurehole.Runner.Core
     public sealed class RunnerSceneBootstrap : MonoBehaviour
     {
         [SerializeField] private RunnerGameConfig config;
+        [SerializeField] private Sprite pepperSprite;
         [SerializeField] private Material boostFireMaterial;
         [SerializeField] private UnityEngine.Object boostFirePrefab;
         [SerializeField] private bool autoStart = true;
@@ -29,6 +30,7 @@ namespace Featurehole.Runner.Core
             HoleMover holeMover = CreateHole(runtimeConfig);
             TrackSegmentSpawner trackSpawner = CreateTrackSpawner();
             PepperBoostSpawner pepperSpawner = CreatePepperSpawner();
+            pepperSpawner.SetPepperSprite(pepperSprite);
             RunnerHud hud = CreateHud();
 
             controller.Configure(runtimeConfig, holeMover, trackSpawner, pepperSpawner, hud, autoStart);

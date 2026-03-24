@@ -15,7 +15,13 @@ namespace Featurehole.Runner.Gameplay
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
+        private Sprite pepperSprite;
         private float nextSpawnZ;
+
+        public void SetPepperSprite(Sprite sprite)
+        {
+            pepperSprite = sprite;
+        }
 
         public void Initialize(RunnerGameConfig runnerConfig, HoleMover runnerHoleMover)
         {
@@ -128,28 +134,23 @@ namespace Featurehole.Runner.Gameplay
 
             PepperPickup pepper = root.AddComponent<PepperPickup>();
 
-            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.name = "Body";
-            body.transform.SetParent(root.transform, false);
-            body.transform.localPosition = Vector3.zero;
-            body.transform.localRotation = Quaternion.Euler(0f, 0f, 35f);
-            body.transform.localScale = new Vector3(config.PepperSize * 0.55f, config.PepperSize * 0.75f, config.PepperSize * 0.55f);
-            Renderer bodyRenderer = body.GetComponent<Renderer>();
-            if (bodyRenderer != null)
-            {
-                bodyRenderer.material.color = new Color(0.92f, 0.14f, 0.08f);
-            }
+            GameObject visual = new GameObject("Visual");
+            visual.transform.SetParent(root.transform, false);
+            visual.transform.localPosition = new Vector3(0f, 0.05f, 0f);
 
-            GameObject stem = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            stem.name = "Stem";
-            stem.transform.SetParent(root.transform, false);
-            stem.transform.localPosition = new Vector3(0.18f, 0.55f, 0f);
-            stem.transform.localRotation = Quaternion.Euler(0f, 0f, 30f);
-            stem.transform.localScale = new Vector3(config.PepperSize * 0.12f, config.PepperSize * 0.18f, config.PepperSize * 0.12f);
-            Renderer stemRenderer = stem.GetComponent<Renderer>();
-            if (stemRenderer != null)
+            SpriteRenderer spriteRenderer = visual.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = pepperSprite;
+            spriteRenderer.sortingOrder = 25;
+
+            if (pepperSprite != null && pepperSprite.bounds.size.y > 0f)
             {
-                stemRenderer.material.color = new Color(0.14f, 0.48f, 0.11f);
+                float targetHeight = config.PepperSize * 1.35f;
+                float uniformScale = targetHeight / pepperSprite.bounds.size.y;
+                visual.transform.localScale = Vector3.one * uniformScale;
+            }
+            else
+            {
+                visual.transform.localScale = Vector3.one * 0.75f;
             }
 
             return pepper;
