@@ -147,7 +147,7 @@ namespace Featurehole.Runner.Core
             particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
             ParticleSystemRenderer renderer = flameObject.GetComponent<ParticleSystemRenderer>();
-            renderer.material = boostFireMaterial;
+            renderer.material = CreateCompatibleBoostMaterial();
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
             renderer.sortingOrder = 75;
 
@@ -208,6 +208,47 @@ namespace Featurehole.Runner.Core
 
             particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             return flameObject;
+        }
+
+        private Material CreateCompatibleBoostMaterial()
+        {
+            if (boostFireMaterial == null)
+            {
+                return null;
+            }
+
+            Shader particleShader = Shader.Find("Legacy Shaders/Particles/Additive");
+            if (particleShader == null)
+            {
+                particleShader = Shader.Find("Particles/Standard Unlit");
+            }
+
+            if (particleShader == null)
+            {
+                return boostFireMaterial;
+            }
+
+            Material runtimeMaterial = new Material(particleShader);
+            runtimeMaterial.name = "RuntimeBoostFireMaterial";
+
+            Texture mainTexture = null;
+            if (boostFireMaterial.HasProperty("_MainTexture"))
+            {
+                mainTexture = boostFireMaterial.GetTexture("_MainTexture");
+            }
+
+            if (mainTexture == null && boostFireMaterial.HasProperty("_MainTex"))
+            {
+                mainTexture = boostFireMaterial.GetTexture("_MainTex");
+            }
+
+            if (mainTexture != null)
+            {
+                runtimeMaterial.mainTexture = mainTexture;
+            }
+
+            runtimeMaterial.color = new Color(1f, 0.8f, 0.45f, 0.9f);
+            return runtimeMaterial;
         }
 
         private void ConfigureBoostFlame(Transform boostFlame)
