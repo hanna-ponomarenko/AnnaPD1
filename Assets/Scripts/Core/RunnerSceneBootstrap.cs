@@ -84,7 +84,7 @@ namespace Featurehole.Runner.Core
             }
 
             visual.localPosition = Vector3.zero;
-            visual.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.08f, runtimeConfig.HoleDiameter);
+            ConfigureHoleVisual(visual, runtimeConfig);
 
             Transform boostFlame = holeRoot.Find("BoostFlame");
             if (boostFlame == null)
@@ -103,6 +103,73 @@ namespace Featurehole.Runner.Core
             }
 
             return holeMover;
+        }
+
+        private void ConfigureHoleVisual(Transform visual, RunnerGameConfig runtimeConfig)
+        {
+            visual.localPosition = Vector3.zero;
+            visual.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.08f, runtimeConfig.HoleDiameter);
+
+            Renderer rimRenderer = visual.GetComponent<Renderer>();
+            if (rimRenderer != null)
+            {
+                rimRenderer.material.color = new Color(0.83f, 0.66f, 0.18f);
+            }
+
+            ConfigureHoleLayer(
+                visual,
+                "InnerLight",
+                new Vector3(0f, 0.01f, 0f),
+                new Vector3(0.8f, 0.35f, 0.8f),
+                new Color(0.95f, 0.88f, 0.68f));
+
+            ConfigureHoleLayer(
+                visual,
+                "InnerMid",
+                new Vector3(0f, -0.005f, 0f),
+                new Vector3(0.62f, 0.6f, 0.62f),
+                new Color(0.36f, 0.26f, 0.16f));
+
+            ConfigureHoleLayer(
+                visual,
+                "InnerDark",
+                new Vector3(0f, -0.02f, 0f),
+                new Vector3(0.42f, 0.9f, 0.42f),
+                new Color(0.05f, 0.04f, 0.03f));
+        }
+
+        private void ConfigureHoleLayer(
+            Transform parent,
+            string layerName,
+            Vector3 localPosition,
+            Vector3 localScale,
+            Color color)
+        {
+            Transform layer = parent.Find(layerName);
+            if (layer == null)
+            {
+                GameObject layerObject = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                layerObject.name = layerName;
+                layerObject.transform.SetParent(parent, false);
+
+                Collider layerCollider = layerObject.GetComponent<Collider>();
+                if (layerCollider != null)
+                {
+                    Destroy(layerCollider);
+                }
+
+                layer = layerObject.transform;
+            }
+
+            layer.localPosition = localPosition;
+            layer.localRotation = Quaternion.identity;
+            layer.localScale = localScale;
+
+            Renderer layerRenderer = layer.GetComponent<Renderer>();
+            if (layerRenderer != null)
+            {
+                layerRenderer.material.color = color;
+            }
         }
 
         private GameObject CreateBoostFire(Transform parent)
