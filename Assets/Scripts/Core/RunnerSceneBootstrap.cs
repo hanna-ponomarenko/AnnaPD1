@@ -108,7 +108,7 @@ namespace Featurehole.Runner.Core
         private void ConfigureHoleVisual(Transform visual, RunnerGameConfig runtimeConfig)
         {
             visual.localPosition = Vector3.zero;
-            visual.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.14f, runtimeConfig.HoleDiameter);
+            visual.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.1f, runtimeConfig.HoleDiameter);
 
             Renderer rimRenderer = visual.GetComponent<Renderer>();
             if (rimRenderer != null)
@@ -118,30 +118,37 @@ namespace Featurehole.Runner.Core
 
             ConfigureHoleLayer(
                 visual,
+                "TopCover",
+                new Vector3(0f, 0.018f, 0f),
+                new Vector3(0.94f, 0.16f, 0.94f),
+                new Color(0.82f, 0.8f, 0.76f));
+
+            ConfigureHoleLayer(
+                visual,
                 "SlopeOuter",
-                new Vector3(0f, -0.03f, 0f),
-                new Vector3(0.998f, 0.5f, 0.998f),
-                new Color(0.74f, 0.7f, 0.64f));
+                new Vector3(0f, -0.045f, 0f),
+                new Vector3(0.78f, 0.42f, 0.78f),
+                new Color(0.62f, 0.62f, 0.6f));
 
             ConfigureHoleLayer(
                 visual,
                 "SlopeMid",
-                new Vector3(0f, -0.09f, 0f),
-                new Vector3(0.62f, 0.95f, 0.62f),
-                new Color(0.42f, 0.42f, 0.42f));
+                new Vector3(0f, -0.11f, 0f),
+                new Vector3(0.56f, 0.82f, 0.56f),
+                new Color(0.3f, 0.3f, 0.3f));
 
             ConfigureHoleLayer(
                 visual,
                 "SlopeInner",
-                new Vector3(0f, -0.16f, 0f),
-                new Vector3(0.38f, 1.2f, 0.38f),
-                new Color(0.15f, 0.15f, 0.15f));
+                new Vector3(0f, -0.17f, 0f),
+                new Vector3(0.38f, 1.08f, 0.38f),
+                new Color(0.12f, 0.12f, 0.12f));
 
             ConfigureHoleLayer(
                 visual,
                 "CoreDark",
-                new Vector3(0f, -0.24f, 0f),
-                new Vector3(0.24f, 1.35f, 0.24f),
+                new Vector3(0f, -0.235f, 0f),
+                new Vector3(0.22f, 1.25f, 0.22f),
                 new Color(0.01f, 0.01f, 0.01f));
         }
 
