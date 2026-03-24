@@ -16,6 +16,7 @@ namespace Featurehole.Runner.Core
         [SerializeField] private bool configureMainCamera = true;
 
         private Material runtimeBoostFireMaterial;
+        private Material runtimeHoleDecalMaterial;
 
         private void Awake()
         {
@@ -69,7 +70,7 @@ namespace Featurehole.Runner.Core
                 visual = visualObject.transform;
             }
 
-            ConfigureHoleVisual(visual, runtimeConfig);
+            ConfigureHoleDecal(visual, runtimeConfig);
 
             Transform boostFlame = holeRoot.Find("BoostFlame");
             if (boostFlame == null)
@@ -90,89 +91,115 @@ namespace Featurehole.Runner.Core
             return holeMover;
         }
 
-        private void ConfigureHoleVisual(Transform visualRoot, RunnerGameConfig runtimeConfig)
+        private void ConfigureHoleDecal(Transform visualRoot, RunnerGameConfig runtimeConfig)
         {
-            visualRoot.localPosition = Vector3.zero;
+            visualRoot.localPosition = new Vector3(0f, 0.01f, 0f);
             visualRoot.localRotation = Quaternion.identity;
-            visualRoot.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.085f, runtimeConfig.HoleDiameter);
+            visualRoot.localScale = new Vector3(runtimeConfig.HoleDiameter, 1f, runtimeConfig.HoleDiameter);
 
-            ConfigureHoleMesh(
-                visualRoot,
-                "OuterRim",
-                new Vector3(0f, 0f, 0f),
-                new Vector3(1f, 1f, 1f),
-                new Color(0.93f, 0.73f, 0.2f));
-
-            ConfigureHoleMesh(
-                visualRoot,
-                "RimHighlight",
-                new Vector3(0f, 0.05f, 0f),
-                new Vector3(0.985f, 0.12f, 0.985f),
-                new Color(1f, 0.9f, 0.55f));
-
-            ConfigureHoleMesh(
-                visualRoot,
-                "InnerRing",
-                new Vector3(0f, -0.018f, 0f),
-                new Vector3(0.9f, 0.16f, 0.9f),
-                new Color(0.72f, 0.56f, 0.16f));
-
-            ConfigureHoleMesh(
-                visualRoot,
-                "BowlOuter",
-                new Vector3(0f, -0.28f, 0f),
-                new Vector3(0.78f, 0.75f, 0.78f),
-                new Color(0.34f, 0.26f, 0.08f));
-
-            ConfigureHoleMesh(
-                visualRoot,
-                "BowlInner",
-                new Vector3(0f, -0.52f, 0f),
-                new Vector3(0.58f, 1.2f, 0.58f),
-                new Color(0.12f, 0.09f, 0.03f));
-
-            ConfigureHoleMesh(
-                visualRoot,
-                "Core",
-                new Vector3(0f, -0.9f, 0f),
-                new Vector3(0.34f, 1.55f, 0.34f),
-                new Color(0.01f, 0.01f, 0.01f));
-        }
-
-        private void ConfigureHoleMesh(
-            Transform parent,
-            string name,
-            Vector3 localPosition,
-            Vector3 localScale,
-            Color color)
-        {
-            Transform meshTransform = parent.Find(name);
-            if (meshTransform == null)
+            Transform decalTransform = visualRoot.Find("Decal");
+            if (decalTransform == null)
             {
-                GameObject meshObject = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                meshObject.name = name;
-                meshObject.transform.SetParent(parent, false);
+                GameObject decalObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                decalObject.name = "Decal";
+                decalObject.transform.SetParent(visualRoot, false);
 
-                Collider meshCollider = meshObject.GetComponent<Collider>();
-                if (meshCollider != null)
+                Collider decalCollider = decalObject.GetComponent<Collider>();
+                if (decalCollider != null)
                 {
-                    Destroy(meshCollider);
+                    Destroy(decalCollider);
                 }
 
-                meshTransform = meshObject.transform;
+                decalTransform = decalObject.transform;
             }
 
-            meshTransform.localPosition = localPosition;
-            meshTransform.localRotation = Quaternion.identity;
-            meshTransform.localScale = localScale;
+            decalTransform.localPosition = Vector3.zero;
+            decalTransform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            decalTransform.localScale = Vector3.one;
 
-            Renderer renderer = meshTransform.GetComponent<Renderer>();
-            if (renderer != null)
+            Renderer decalRenderer = decalTransform.GetComponent<Renderer>();
+            if (decalRenderer != null)
             {
-                renderer.material.color = color;
-                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                renderer.receiveShadows = false;
+                decalRenderer.material = GetRuntimeHoleDecalMaterial();
+                decalRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                decalRenderer.receiveShadows = false;
             }
+        }
+
+        private Material GetRuntimeHoleDecalMaterial()
+        {
+            if (runtimeHoleDecalMaterial != null)
+            {
+                return runtimeHoleDecalMaterial;
+            }
+
+            Shader shader = Shader.Find("Unlit/Transparent");
+            if (shader == null)
+            {
+                shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+            }
+
+            runtimeHoleDecalMaterial = new Material(shader)
+            {
+                name = "RuntimeHoleDecalMaterial",
+                mainTexture = CreateHoleDecalTexture()
+            };
+
+            return runtimeHoleDecalMaterial;
+        }
+
+        private Texture2D CreateHoleDecalTexture()
+        {
+            const int textureSize = 256;
+
+            Texture2D texture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false)
+            {
+                name = "HoleDecalTexture",
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp
+            };
+
+            Vector2 center = new Vector2(textureSize * 0.5f, textureSize * 0.5f);
+            float radius = textureSize * 0.48f;
+
+            for (int y = 0; y < textureSize; y++)
+            {
+                for (int x = 0; x < textureSize; x++)
+                {
+                    Vector2 point = new Vector2(x, y);
+                    float distance = Vector2.Distance(point, center) / radius;
+                    Color color = Color.clear;
+
+                    if (distance <= 1f)
+                    {
+                        if (distance > 0.88f)
+                        {
+                            color = new Color(1f, 0.9f, 0.45f, 1f);
+                        }
+                        else if (distance > 0.76f)
+                        {
+                            float t = Mathf.InverseLerp(0.88f, 0.76f, distance);
+                            color = Color.Lerp(
+                                new Color(0.96f, 0.77f, 0.2f, 1f),
+                                new Color(0.55f, 0.4f, 0.14f, 1f),
+                                t);
+                        }
+                        else
+                        {
+                            float t = Mathf.InverseLerp(0.76f, 0.08f, distance);
+                            color = Color.Lerp(
+                                new Color(0.18f, 0.14f, 0.06f, 1f),
+                                new Color(0.01f, 0.01f, 0.01f, 1f),
+                                t);
+                        }
+                    }
+
+                    texture.SetPixel(x, y, color);
+                }
+            }
+
+            texture.Apply();
+            return texture;
         }
 
         private GameObject CreateBoostFire(Transform parent)

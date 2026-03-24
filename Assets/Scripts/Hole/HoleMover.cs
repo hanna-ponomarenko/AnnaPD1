@@ -15,7 +15,6 @@ namespace Featurehole.Runner.Hole
         private ParticleSystem[] boostFlames;
         private ParticleSystemRenderer[] boostFlameRenderers;
         private float currentDiameter;
-        private float visualHeightScale = 0.08f;
 
         public float CurrentDiameter => currentDiameter;
 
@@ -24,10 +23,6 @@ namespace Featurehole.Runner.Hole
             config = runnerConfig;
             startPosition = transform.position;
             visualTransform = transform.Find("Visual");
-            if (visualTransform != null)
-            {
-                visualHeightScale = visualTransform.localScale.y;
-            }
             Transform boostFlameTransform = transform.Find("BoostFlame");
             boostFlameObject = boostFlameTransform != null ? boostFlameTransform.gameObject : null;
             boostFlames = boostFlameTransform != null
@@ -176,7 +171,7 @@ namespace Featurehole.Runner.Hole
             }
 
             visualTransform.localPosition = Vector3.zero;
-            visualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
+            visualTransform.localScale = new Vector3(currentDiameter, 0.08f, currentDiameter);
         }
     }
 }
