@@ -74,6 +74,7 @@ namespace Featurehole.Runner.Gameplay
                 if (lateralDistance <= absorbRadius && forwardDistance <= config.PepperSize)
                 {
                     pepper.Collect();
+                    runtime.RegisterCollected();
                     runtime.ActivateBoost(config.BoostDuration, config.BoostSpeedMultiplier);
                     holeMover.Grow();
                     RespawnPepper(pepper);

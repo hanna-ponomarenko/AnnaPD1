@@ -23,7 +23,7 @@ namespace Featurehole.Runner.Gameplay
             }
 
             const int boxWidth = 240;
-            const int boxHeight = 132;
+            const int boxHeight = 154;
 
             GUI.Box(new Rect(16f, 16f, boxWidth, boxHeight), "Runner");
             GUI.Label(new Rect(28f, 44f, boxWidth - 24, 22f), $"Distance: {runtime.DistanceTravelled:0}");
@@ -40,8 +40,8 @@ namespace Featurehole.Runner.Gameplay
 
             if (runtime.IsGameOver)
             {
-                GUI.Box(new Rect(16f, 136f, 260f, 72f), "Game Over");
-                GUI.Label(new Rect(28f, 164f, 230f, 22f), "Press R to restart");
+                GUI.Box(new Rect(16f, 176f, 260f, 72f), "Game Over");
+                GUI.Label(new Rect(28f, 204f, 230f, 22f), "Press R to restart");
             }
         }
     }
