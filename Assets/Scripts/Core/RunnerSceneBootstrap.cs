@@ -9,7 +9,7 @@ namespace Featurehole.Runner.Core
     public sealed class RunnerSceneBootstrap : MonoBehaviour
     {
         [SerializeField] private RunnerGameConfig config;
-        [SerializeField] private GameObject boostFirePrefab;
+        [SerializeField] private UnityEngine.Object boostFirePrefab;
         [SerializeField] private bool autoStart = true;
         [SerializeField] private bool configureMainCamera = true;
 
@@ -84,9 +84,9 @@ namespace Featurehole.Runner.Core
             Transform boostFlame = holeRoot.Find("BoostFlame");
             if (boostFlame == null)
             {
-                if (boostFirePrefab != null)
+                GameObject flameObject = InstantiateBoostFire(holeRoot);
+                if (flameObject != null)
                 {
-                    GameObject flameObject = Instantiate(boostFirePrefab, holeRoot);
                     flameObject.name = "BoostFlame";
 
                     Transform flameTransform = flameObject.transform;
@@ -102,6 +102,38 @@ namespace Featurehole.Runner.Core
             }
 
             return holeMover;
+        }
+
+        private GameObject InstantiateBoostFire(Transform parent)
+        {
+            if (boostFirePrefab == null)
+            {
+                return null;
+            }
+
+            Object instance = null;
+
+            if (boostFirePrefab is GameObject firePrefabGameObject)
+            {
+                instance = Instantiate(firePrefabGameObject, parent);
+            }
+            else if (boostFirePrefab is Component firePrefabComponent)
+            {
+                instance = Instantiate(firePrefabComponent, parent);
+            }
+
+            if (instance is GameObject fireObject)
+            {
+                return fireObject;
+            }
+
+            if (instance is Component fireComponent)
+            {
+                return fireComponent.gameObject;
+            }
+
+            Debug.LogWarning("Boost fire reference is not a prefab GameObject or Component.", this);
+            return null;
         }
 
         private TrackSegmentSpawner CreateTrackSpawner()
