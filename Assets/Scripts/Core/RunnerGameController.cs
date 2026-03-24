@@ -45,8 +45,8 @@ namespace Featurehole.Runner.Core
 
             holeMover.Initialize(config);
             trackSpawner.Initialize(config);
-            collectibleSpawner.Initialize(config, holeMover.transform);
-            hud.Initialize(runtime);
+            collectibleSpawner.Initialize(config, holeMover);
+            hud.Initialize(runtime, holeMover);
 
             if (autoStart)
             {
@@ -58,6 +58,12 @@ namespace Featurehole.Runner.Core
         {
             if (!runtime.IsRunning)
             {
+                if (runtime.IsGameOver && Input.GetKeyDown(KeyCode.R))
+                {
+                    ResetRun();
+                    StartRun();
+                }
+
                 return;
             }
 
@@ -72,18 +78,13 @@ namespace Featurehole.Runner.Core
             {
                 StopRun();
             }
-
-            if (!runtime.IsRunning && runtime.IsGameOver && Input.GetKeyDown(KeyCode.R))
-            {
-                ResetRun();
-                StartRun();
-            }
         }
 
         public void StartRun()
         {
             trackSpawner.ResetTrack();
             holeMover.ResetPosition();
+            holeMover.ResetSize();
             collectibleSpawner.ResetField();
             runtime.StartRun(config.MaxMissedCollectibles);
         }
@@ -98,6 +99,7 @@ namespace Featurehole.Runner.Core
             runtime.StopRun();
             trackSpawner.ResetTrack();
             holeMover.ResetPosition();
+            holeMover.ResetSize();
             collectibleSpawner.ResetField();
         }
 

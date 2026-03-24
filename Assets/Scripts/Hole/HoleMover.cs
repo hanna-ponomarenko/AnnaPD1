@@ -9,17 +9,45 @@ namespace Featurehole.Runner.Hole
 
         private RunnerGameConfig config;
         private Vector3 startPosition;
+        private Transform visualTransform;
+        private float currentDiameter;
+
+        public float CurrentDiameter => currentDiameter;
 
         public void Initialize(RunnerGameConfig runnerConfig)
         {
             config = runnerConfig;
             startPosition = transform.position;
+            visualTransform = transform.Find("Visual");
             transform.position = startPosition;
+            ResetSize();
         }
 
         public void ResetPosition()
         {
             transform.position = startPosition;
+        }
+
+        public void ResetSize()
+        {
+            if (config == null)
+            {
+                return;
+            }
+
+            currentDiameter = config.HoleDiameter;
+            ApplyVisualScale();
+        }
+
+        public void Grow()
+        {
+            if (config == null)
+            {
+                return;
+            }
+
+            currentDiameter = Mathf.Min(currentDiameter + config.GrowthPerCollectible, config.MaxHoleDiameter);
+            ApplyVisualScale();
         }
 
         public void Tick(float deltaTime)
@@ -37,6 +65,17 @@ namespace Featurehole.Runner.Hole
             position.y = startPosition.y;
 
             transform.position = position;
+        }
+
+        private void ApplyVisualScale()
+        {
+            if (visualTransform == null)
+            {
+                return;
+            }
+
+            visualTransform.localPosition = Vector3.zero;
+            visualTransform.localScale = new Vector3(currentDiameter, 0.08f, currentDiameter);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Featurehole.Runner.Core;
 using Featurehole.Runner.Data;
+using Featurehole.Runner.Hole;
 using UnityEngine;
 
 namespace Featurehole.Runner.Gameplay
@@ -13,13 +14,13 @@ namespace Featurehole.Runner.Gameplay
         private readonly List<CollectibleItem> activeItems = new List<CollectibleItem>();
 
         private RunnerGameConfig config;
-        private Transform holeTransform;
+        private HoleMover holeMover;
         private float nextSpawnZ;
 
-        public void Initialize(RunnerGameConfig runnerConfig, Transform runnerHoleTransform)
+        public void Initialize(RunnerGameConfig runnerConfig, HoleMover runnerHoleMover)
         {
             config = runnerConfig;
-            holeTransform = runnerHoleTransform;
+            holeMover = runnerHoleMover;
 
             if (collectiblesRoot == null)
             {
@@ -47,13 +48,14 @@ namespace Featurehole.Runner.Gameplay
 
         public void Tick(float deltaTime, RunnerRuntime runtime)
         {
-            if (config == null || holeTransform == null)
+            if (config == null || holeMover == null)
             {
                 return;
             }
 
             float moveDelta = -config.ForwardSpeed * deltaTime;
-            float absorbRadius = config.HoleDiameter * 0.5f;
+            Transform holeTransform = holeMover.transform;
+            float absorbRadius = holeMover.CurrentDiameter * 0.5f;
             float passedThreshold = holeTransform.position.z - config.CollectibleSize;
 
             foreach (CollectibleItem item in activeItems)
@@ -73,6 +75,7 @@ namespace Featurehole.Runner.Gameplay
                 {
                     item.MarkCollected();
                     runtime.RegisterCollected();
+                    holeMover.Grow();
                     RespawnItem(item);
                     continue;
                 }

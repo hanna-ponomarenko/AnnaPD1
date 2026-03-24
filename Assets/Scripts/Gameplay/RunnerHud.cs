@@ -1,4 +1,5 @@
 using Featurehole.Runner.Core;
+using Featurehole.Runner.Hole;
 using UnityEngine;
 
 namespace Featurehole.Runner.Gameplay
@@ -6,10 +7,12 @@ namespace Featurehole.Runner.Gameplay
     public sealed class RunnerHud : MonoBehaviour
     {
         private RunnerRuntime runtime;
+        private HoleMover holeMover;
 
-        public void Initialize(RunnerRuntime runnerRuntime)
+        public void Initialize(RunnerRuntime runnerRuntime, HoleMover runnerHoleMover)
         {
             runtime = runnerRuntime;
+            holeMover = runnerHoleMover;
         }
 
         private void OnGUI()
@@ -20,12 +23,16 @@ namespace Featurehole.Runner.Gameplay
             }
 
             const int boxWidth = 240;
-            const int boxHeight = 110;
+            const int boxHeight = 132;
 
             GUI.Box(new Rect(16f, 16f, boxWidth, boxHeight), "Runner");
             GUI.Label(new Rect(28f, 44f, boxWidth - 24, 22f), $"Distance: {runtime.DistanceTravelled:0}");
             GUI.Label(new Rect(28f, 66f, boxWidth - 24, 22f), $"Collected: {runtime.CollectedCount}");
             GUI.Label(new Rect(28f, 88f, boxWidth - 24, 22f), $"Missed: {runtime.MissedCount}/{runtime.MaxMissedCount}");
+            if (holeMover != null)
+            {
+                GUI.Label(new Rect(28f, 110f, boxWidth - 24, 22f), $"Hole Size: {holeMover.CurrentDiameter:0.0}");
+            }
 
             if (runtime.IsGameOver)
             {

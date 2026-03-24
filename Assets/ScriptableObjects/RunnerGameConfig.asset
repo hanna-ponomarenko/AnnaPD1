@@ -23,3 +23,5 @@ MonoBehaviour:
   collectibleSize: 0.9
   collectibleSpawnSpacing: 4
   maxMissedCollectibles: 3
+  growthPerCollectible: 0.2
+  maxHoleDiameter: 4.5

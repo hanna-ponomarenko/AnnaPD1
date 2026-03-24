@@ -43,6 +43,13 @@ namespace Featurehole.Runner.Data
         [Min(1)]
         [SerializeField] private int maxMissedCollectibles = 3;
 
+        [Header("Hole Growth")]
+        [Min(0f)]
+        [SerializeField] private float growthPerCollectible = 0.2f;
+
+        [Min(0.1f)]
+        [SerializeField] private float maxHoleDiameter = 4.5f;
+
         public float ForwardSpeed => forwardSpeed;
         public float LateralSpeed => lateralSpeed;
         public float LateralLimit => lateralLimit;
@@ -54,6 +61,8 @@ namespace Featurehole.Runner.Data
         public float CollectibleSize => collectibleSize;
         public float CollectibleSpawnSpacing => collectibleSpawnSpacing;
         public int MaxMissedCollectibles => maxMissedCollectibles;
+        public float GrowthPerCollectible => growthPerCollectible;
+        public float MaxHoleDiameter => maxHoleDiameter;
 
         public static RunnerGameConfig CreateRuntimeDefault()
         {
@@ -69,6 +78,8 @@ namespace Featurehole.Runner.Data
             config.collectibleSize = 0.9f;
             config.collectibleSpawnSpacing = 4f;
             config.maxMissedCollectibles = 3;
+            config.growthPerCollectible = 0.2f;
+            config.maxHoleDiameter = 4.5f;
             return config;
         }
     }
