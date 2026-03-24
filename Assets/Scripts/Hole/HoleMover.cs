@@ -11,6 +11,7 @@ namespace Featurehole.Runner.Hole
         private RunnerGameConfig config;
         private Vector3 startPosition;
         private Transform visualTransform;
+        private GameObject boostFlameObject;
         private ParticleSystem[] boostFlames;
         private float currentDiameter;
 
@@ -22,6 +23,7 @@ namespace Featurehole.Runner.Hole
             startPosition = transform.position;
             visualTransform = transform.Find("Visual");
             Transform boostFlameTransform = transform.Find("BoostFlame");
+            boostFlameObject = boostFlameTransform != null ? boostFlameTransform.gameObject : null;
             boostFlames = boostFlameTransform != null
                 ? boostFlameTransform.GetComponentsInChildren<ParticleSystem>(true)
                 : null;
@@ -59,10 +61,12 @@ namespace Featurehole.Runner.Hole
 
         public void SetBoostActive(bool isActive)
         {
-            if (boostFlames == null || boostFlames.Length == 0)
+            if (boostFlameObject == null || boostFlames == null || boostFlames.Length == 0)
             {
                 return;
             }
+
+            boostFlameObject.SetActive(isActive);
 
             foreach (ParticleSystem boostFlame in boostFlames)
             {

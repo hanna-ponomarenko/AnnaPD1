@@ -88,17 +88,13 @@ namespace Featurehole.Runner.Core
                 if (flameObject != null)
                 {
                     flameObject.name = "BoostFlame";
-
-                    Transform flameTransform = flameObject.transform;
-                    flameTransform.localPosition = new Vector3(0f, 0.14f, -1.05f);
-                    flameTransform.localRotation = Quaternion.identity;
-                    flameTransform.localScale = new Vector3(0.22f, 0.22f, 0.22f);
-
-                    foreach (ParticleSystemRenderer renderer in flameObject.GetComponentsInChildren<ParticleSystemRenderer>(true))
-                    {
-                        renderer.sortingOrder = 10;
-                    }
+                    boostFlame = flameObject.transform;
                 }
+            }
+
+            if (boostFlame != null)
+            {
+                ConfigureBoostFlame(boostFlame);
             }
 
             return holeMover;
@@ -134,6 +130,20 @@ namespace Featurehole.Runner.Core
 
             Debug.LogWarning("Boost fire reference is not a prefab GameObject or Component.", this);
             return null;
+        }
+
+        private void ConfigureBoostFlame(Transform boostFlame)
+        {
+            boostFlame.localPosition = new Vector3(0f, 0.1f, -1.15f);
+            boostFlame.localRotation = Quaternion.identity;
+            boostFlame.localScale = new Vector3(0.18f, 0.18f, 0.18f);
+
+            foreach (ParticleSystemRenderer renderer in boostFlame.GetComponentsInChildren<ParticleSystemRenderer>(true))
+            {
+                renderer.sortingOrder = 75;
+            }
+
+            boostFlame.gameObject.SetActive(false);
         }
 
         private TrackSegmentSpawner CreateTrackSpawner()

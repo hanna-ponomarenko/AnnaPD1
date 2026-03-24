@@ -307,6 +307,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 71e323cf1e754240969da0d8eca5444b, type: 2}
-  boostFirePrefab: {fileID: 100100000, guid: 43ca6b4775bfb1e45b1bfcce5303970b, type: 3}
+  boostFirePrefab: {fileID: 100100000, guid: 2362f9aec9184e1408fb5a9ce224113d, type: 3}
   autoStart: 1
   configureMainCamera: 1
