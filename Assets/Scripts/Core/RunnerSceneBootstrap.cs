@@ -113,14 +113,14 @@ namespace Featurehole.Runner.Core
             Renderer rimRenderer = visual.GetComponent<Renderer>();
             if (rimRenderer != null)
             {
-                rimRenderer.material.color = new Color(0.83f, 0.66f, 0.18f);
+                rimRenderer.material.color = new Color(0.96f, 0.78f, 0.18f);
             }
 
             ConfigureHoleLayer(
                 visual,
                 "SlopeOuter",
                 new Vector3(0f, -0.03f, 0f),
-                new Vector3(0.83f, 0.5f, 0.83f),
+                new Vector3(0.9f, 0.5f, 0.9f),
                 new Color(0.74f, 0.7f, 0.64f));
 
             ConfigureHoleLayer(
