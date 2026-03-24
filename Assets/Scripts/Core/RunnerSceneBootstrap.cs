@@ -107,13 +107,13 @@ namespace Featurehole.Runner.Core
 
         private GameObject CreateBoostFire(Transform parent)
         {
-            if (boostFireMaterial != null)
-            {
-                return CreateRuntimeBoostFire(parent);
-            }
-
             if (boostFirePrefab == null)
             {
+                if (boostFireMaterial != null)
+                {
+                    return CreateRuntimeBoostFire(parent);
+                }
+
                 return null;
             }
 
@@ -286,9 +286,9 @@ namespace Featurehole.Runner.Core
 
         private void ConfigureBoostFlame(Transform boostFlame)
         {
-            boostFlame.localPosition = new Vector3(0f, 0.05f, 0.9f);
-            boostFlame.localRotation = Quaternion.Euler(-90f, 0f, 0f);
-            boostFlame.localScale = Vector3.one;
+            boostFlame.localPosition = new Vector3(0f, 0.02f, 0.95f);
+            boostFlame.localRotation = Quaternion.identity;
+            boostFlame.localScale = new Vector3(0.55f, 0.55f, 0.55f);
 
             foreach (ParticleSystemRenderer renderer in boostFlame.GetComponentsInChildren<ParticleSystemRenderer>(true))
             {

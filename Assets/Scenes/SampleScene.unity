@@ -308,7 +308,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 71e323cf1e754240969da0d8eca5444b, type: 2}
   pepperSprite: {fileID: 7897533479186361835, guid: a4c1b8ddbe7307940a81952086769171, type: 3}
-  boostFireMaterial: {fileID: 2100000, guid: 5490836d7299d1e469af9a7186785e13, type: 2}
-  boostFirePrefab: {fileID: 100100000, guid: 6faa8b6076115314a803c476cd392cb6, type: 3}
+  boostFireMaterial: {fileID: 0}
+  boostFirePrefab: {fileID: 100100000, guid: dd986d04bcc6dc748a53d8c3d1d42a6d, type: 3}
   autoStart: 1
   configureMainCamera: 1
