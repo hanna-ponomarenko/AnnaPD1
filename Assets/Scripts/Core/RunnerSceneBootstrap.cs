@@ -62,10 +62,14 @@ namespace Featurehole.Runner.Core
             }
 
             Transform visual = holeRoot.Find("Visual");
-            if (visual != null)
+            if (visual == null)
             {
-                Destroy(visual.gameObject);
+                GameObject visualObject = new GameObject("Visual");
+                visualObject.transform.SetParent(holeRoot, false);
+                visual = visualObject.transform;
             }
+
+            ConfigureHoleVisual(visual, runtimeConfig);
 
             Transform boostFlame = holeRoot.Find("BoostFlame");
             if (boostFlame == null)
@@ -84,6 +88,91 @@ namespace Featurehole.Runner.Core
             }
 
             return holeMover;
+        }
+
+        private void ConfigureHoleVisual(Transform visualRoot, RunnerGameConfig runtimeConfig)
+        {
+            visualRoot.localPosition = Vector3.zero;
+            visualRoot.localRotation = Quaternion.identity;
+            visualRoot.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.085f, runtimeConfig.HoleDiameter);
+
+            ConfigureHoleMesh(
+                visualRoot,
+                "OuterRim",
+                new Vector3(0f, 0f, 0f),
+                new Vector3(1f, 1f, 1f),
+                new Color(0.93f, 0.73f, 0.2f));
+
+            ConfigureHoleMesh(
+                visualRoot,
+                "RimHighlight",
+                new Vector3(0f, 0.05f, 0f),
+                new Vector3(0.985f, 0.12f, 0.985f),
+                new Color(1f, 0.9f, 0.55f));
+
+            ConfigureHoleMesh(
+                visualRoot,
+                "InnerRing",
+                new Vector3(0f, -0.018f, 0f),
+                new Vector3(0.9f, 0.16f, 0.9f),
+                new Color(0.72f, 0.56f, 0.16f));
+
+            ConfigureHoleMesh(
+                visualRoot,
+                "BowlOuter",
+                new Vector3(0f, -0.28f, 0f),
+                new Vector3(0.78f, 0.75f, 0.78f),
+                new Color(0.34f, 0.26f, 0.08f));
+
+            ConfigureHoleMesh(
+                visualRoot,
+                "BowlInner",
+                new Vector3(0f, -0.52f, 0f),
+                new Vector3(0.58f, 1.2f, 0.58f),
+                new Color(0.12f, 0.09f, 0.03f));
+
+            ConfigureHoleMesh(
+                visualRoot,
+                "Core",
+                new Vector3(0f, -0.9f, 0f),
+                new Vector3(0.34f, 1.55f, 0.34f),
+                new Color(0.01f, 0.01f, 0.01f));
+        }
+
+        private void ConfigureHoleMesh(
+            Transform parent,
+            string name,
+            Vector3 localPosition,
+            Vector3 localScale,
+            Color color)
+        {
+            Transform meshTransform = parent.Find(name);
+            if (meshTransform == null)
+            {
+                GameObject meshObject = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                meshObject.name = name;
+                meshObject.transform.SetParent(parent, false);
+
+                Collider meshCollider = meshObject.GetComponent<Collider>();
+                if (meshCollider != null)
+                {
+                    Destroy(meshCollider);
+                }
+
+                meshTransform = meshObject.transform;
+            }
+
+            meshTransform.localPosition = localPosition;
+            meshTransform.localRotation = Quaternion.identity;
+            meshTransform.localScale = localScale;
+
+            Renderer renderer = meshTransform.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.material.color = color;
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                renderer.receiveShadows = false;
+            }
         }
 
         private GameObject CreateBoostFire(Transform parent)
