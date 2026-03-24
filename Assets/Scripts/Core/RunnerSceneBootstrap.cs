@@ -9,6 +9,7 @@ namespace Featurehole.Runner.Core
     public sealed class RunnerSceneBootstrap : MonoBehaviour
     {
         [SerializeField] private RunnerGameConfig config;
+        [SerializeField] private GameObject boostFirePrefab;
         [SerializeField] private bool autoStart = true;
         [SerializeField] private bool configureMainCamera = true;
 
@@ -83,48 +84,21 @@ namespace Featurehole.Runner.Core
             Transform boostFlame = holeRoot.Find("BoostFlame");
             if (boostFlame == null)
             {
-                GameObject flameObject = new GameObject("BoostFlame");
-                flameObject.transform.SetParent(holeRoot, false);
-                flameObject.transform.localPosition = new Vector3(0f, 0.08f, -0.9f);
-                flameObject.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+                if (boostFirePrefab != null)
+                {
+                    GameObject flameObject = Instantiate(boostFirePrefab, holeRoot);
+                    flameObject.name = "BoostFlame";
 
-                ParticleSystem flame = flameObject.AddComponent<ParticleSystem>();
-                var main = flame.main;
-                main.duration = 0.35f;
-                main.loop = true;
-                main.startLifetime = 0.25f;
-                main.startSpeed = 2.8f;
-                main.startSize = 0.5f;
-                main.startColor = new Color(1f, 0.45f, 0.05f, 0.95f);
-                main.simulationSpace = ParticleSystemSimulationSpace.Local;
+                    Transform flameTransform = flameObject.transform;
+                    flameTransform.localPosition = new Vector3(0f, 0.14f, -1.05f);
+                    flameTransform.localRotation = Quaternion.identity;
+                    flameTransform.localScale = new Vector3(0.22f, 0.22f, 0.22f);
 
-                var emission = flame.emission;
-                emission.rateOverTime = 26f;
-
-                var shape = flame.shape;
-                shape.shapeType = ParticleSystemShapeType.Cone;
-                shape.angle = 18f;
-                shape.radius = 0.2f;
-
-                var colorOverLifetime = flame.colorOverLifetime;
-                colorOverLifetime.enabled = true;
-                Gradient gradient = new Gradient();
-                gradient.SetKeys(
-                    new[]
+                    foreach (ParticleSystemRenderer renderer in flameObject.GetComponentsInChildren<ParticleSystemRenderer>(true))
                     {
-                        new GradientColorKey(new Color(1f, 0.9f, 0.2f), 0f),
-                        new GradientColorKey(new Color(1f, 0.35f, 0.05f), 0.5f),
-                        new GradientColorKey(new Color(0.35f, 0.35f, 0.35f), 1f)
-                    },
-                    new[]
-                    {
-                        new GradientAlphaKey(0.9f, 0f),
-                        new GradientAlphaKey(0.4f, 0.6f),
-                        new GradientAlphaKey(0f, 1f)
-                    });
-                colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
-
-                flame.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                        renderer.sortingOrder = 10;
+                    }
+                }
             }
 
             return holeMover;

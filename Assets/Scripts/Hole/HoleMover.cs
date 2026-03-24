@@ -11,7 +11,7 @@ namespace Featurehole.Runner.Hole
         private RunnerGameConfig config;
         private Vector3 startPosition;
         private Transform visualTransform;
-        private ParticleSystem boostFlame;
+        private ParticleSystem[] boostFlames;
         private float currentDiameter;
 
         public float CurrentDiameter => currentDiameter;
@@ -22,7 +22,9 @@ namespace Featurehole.Runner.Hole
             startPosition = transform.position;
             visualTransform = transform.Find("Visual");
             Transform boostFlameTransform = transform.Find("BoostFlame");
-            boostFlame = boostFlameTransform != null ? boostFlameTransform.GetComponent<ParticleSystem>() : null;
+            boostFlames = boostFlameTransform != null
+                ? boostFlameTransform.GetComponentsInChildren<ParticleSystem>(true)
+                : null;
             transform.position = startPosition;
             ResetSize();
             SetBoostActive(false);
@@ -57,21 +59,29 @@ namespace Featurehole.Runner.Hole
 
         public void SetBoostActive(bool isActive)
         {
-            if (boostFlame == null)
+            if (boostFlames == null || boostFlames.Length == 0)
             {
                 return;
             }
 
-            if (isActive)
+            foreach (ParticleSystem boostFlame in boostFlames)
             {
-                if (!boostFlame.isPlaying)
+                if (boostFlame == null)
                 {
-                    boostFlame.Play();
+                    continue;
                 }
-            }
-            else if (boostFlame.isPlaying)
-            {
-                boostFlame.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+                if (isActive)
+                {
+                    if (!boostFlame.isPlaying)
+                    {
+                        boostFlame.Play(true);
+                    }
+                }
+                else if (boostFlame.isPlaying)
+                {
+                    boostFlame.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                }
             }
         }
 
