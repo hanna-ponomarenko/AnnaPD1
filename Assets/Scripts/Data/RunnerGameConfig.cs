@@ -33,6 +33,16 @@ namespace Featurehole.Runner.Data
         [Min(0.1f)]
         [SerializeField] private float holeDiameter = 1.8f;
 
+        [Header("Collectibles")]
+        [Min(0.1f)]
+        [SerializeField] private float collectibleSize = 0.9f;
+
+        [Min(0.1f)]
+        [SerializeField] private float collectibleSpawnSpacing = 4f;
+
+        [Min(1)]
+        [SerializeField] private int maxMissedCollectibles = 3;
+
         public float ForwardSpeed => forwardSpeed;
         public float LateralSpeed => lateralSpeed;
         public float LateralLimit => lateralLimit;
@@ -41,6 +51,9 @@ namespace Featurehole.Runner.Data
         public float DespawnOffset => despawnOffset;
         public float TrackWidth => trackWidth;
         public float HoleDiameter => holeDiameter;
+        public float CollectibleSize => collectibleSize;
+        public float CollectibleSpawnSpacing => collectibleSpawnSpacing;
+        public int MaxMissedCollectibles => maxMissedCollectibles;
 
         public static RunnerGameConfig CreateRuntimeDefault()
         {
@@ -53,6 +66,9 @@ namespace Featurehole.Runner.Data
             config.despawnOffset = 14f;
             config.trackWidth = 8f;
             config.holeDiameter = 1.8f;
+            config.collectibleSize = 0.9f;
+            config.collectibleSpawnSpacing = 4f;
+            config.maxMissedCollectibles = 3;
             return config;
         }
     }

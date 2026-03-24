@@ -17,6 +17,11 @@ namespace Featurehole.Runner.Hole
             transform.position = startPosition;
         }
 
+        public void ResetPosition()
+        {
+            transform.position = startPosition;
+        }
+
         public void Tick(float deltaTime)
         {
             if (config == null)

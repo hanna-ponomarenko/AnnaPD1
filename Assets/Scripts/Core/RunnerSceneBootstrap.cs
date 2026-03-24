@@ -1,4 +1,5 @@
 using Featurehole.Runner.Data;
+using Featurehole.Runner.Gameplay;
 using Featurehole.Runner.Hole;
 using Featurehole.Runner.Level;
 using UnityEngine;
@@ -25,8 +26,10 @@ namespace Featurehole.Runner.Core
 
             HoleMover holeMover = CreateHole(runtimeConfig);
             TrackSegmentSpawner trackSpawner = CreateTrackSpawner();
+            CollectibleLaneSpawner collectibleSpawner = CreateCollectibleSpawner();
+            RunnerHud hud = CreateHud();
 
-            controller.Configure(runtimeConfig, holeMover, trackSpawner, autoStart);
+            controller.Configure(runtimeConfig, holeMover, trackSpawner, collectibleSpawner, hud, autoStart);
 
             if (configureMainCamera)
             {
@@ -97,6 +100,36 @@ namespace Featurehole.Runner.Core
             }
 
             return trackSpawner;
+        }
+
+        private CollectibleLaneSpawner CreateCollectibleSpawner()
+        {
+            Transform spawnerRoot = transform.Find("CollectibleSpawner");
+            if (spawnerRoot == null)
+            {
+                GameObject spawnerObject = new GameObject("CollectibleSpawner");
+                spawnerObject.transform.SetParent(transform, false);
+                spawnerRoot = spawnerObject.transform;
+            }
+
+            CollectibleLaneSpawner collectibleSpawner = spawnerRoot.GetComponent<CollectibleLaneSpawner>();
+            if (collectibleSpawner == null)
+            {
+                collectibleSpawner = spawnerRoot.gameObject.AddComponent<CollectibleLaneSpawner>();
+            }
+
+            return collectibleSpawner;
+        }
+
+        private RunnerHud CreateHud()
+        {
+            RunnerHud hud = GetComponent<RunnerHud>();
+            if (hud == null)
+            {
+                hud = gameObject.AddComponent<RunnerHud>();
+            }
+
+            return hud;
         }
 
         private void ConfigureCamera()

@@ -20,3 +20,6 @@ MonoBehaviour:
   despawnOffset: 14
   trackWidth: 8
   holeDiameter: 1.8
+  collectibleSize: 0.9
+  collectibleSpawnSpacing: 4
+  maxMissedCollectibles: 3

@@ -26,6 +26,16 @@ namespace Featurehole.Runner.Level
             BuildInitialTrack();
         }
 
+        public void ResetTrack()
+        {
+            if (config == null)
+            {
+                return;
+            }
+
+            BuildInitialTrack();
+        }
+
         public void Tick(float deltaTime)
         {
             if (config == null || activeSegments.Count == 0)
@@ -50,12 +60,6 @@ namespace Featurehole.Runner.Level
         private void BuildInitialTrack()
         {
             ClearSpawnedSegments();
-
-            if (segmentPrefab == null)
-            {
-                Debug.LogWarning("TrackSegmentSpawner needs a segment prefab to build the track.", this);
-                return;
-            }
 
             nextSpawnZ = 0f;
 

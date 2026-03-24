@@ -1,4 +1,5 @@
 using Featurehole.Runner.Data;
+using Featurehole.Runner.Gameplay;
 using Featurehole.Runner.Hole;
 using Featurehole.Runner.Level;
 using UnityEngine;
@@ -10,6 +11,8 @@ namespace Featurehole.Runner.Core
         [SerializeField] private RunnerGameConfig config;
         [SerializeField] private HoleMover holeMover;
         [SerializeField] private TrackSegmentSpawner trackSpawner;
+        [SerializeField] private CollectibleLaneSpawner collectibleSpawner;
+        [SerializeField] private RunnerHud hud;
         [SerializeField] private bool autoStart = true;
 
         private readonly RunnerRuntime runtime = new RunnerRuntime();
@@ -20,11 +23,15 @@ namespace Featurehole.Runner.Core
             RunnerGameConfig runnerConfig,
             HoleMover runnerHoleMover,
             TrackSegmentSpawner runnerTrackSpawner,
+            CollectibleLaneSpawner runnerCollectibleSpawner,
+            RunnerHud runnerHud,
             bool shouldAutoStart = true)
         {
             config = runnerConfig;
             holeMover = runnerHoleMover;
             trackSpawner = runnerTrackSpawner;
+            collectibleSpawner = runnerCollectibleSpawner;
+            hud = runnerHud;
             autoStart = shouldAutoStart;
         }
 
@@ -38,6 +45,8 @@ namespace Featurehole.Runner.Core
 
             holeMover.Initialize(config);
             trackSpawner.Initialize(config);
+            collectibleSpawner.Initialize(config, holeMover.transform);
+            hud.Initialize(runtime);
 
             if (autoStart)
             {
@@ -56,12 +65,27 @@ namespace Featurehole.Runner.Core
 
             holeMover.Tick(deltaTime);
             trackSpawner.Tick(deltaTime);
+            collectibleSpawner.Tick(deltaTime, runtime);
             runtime.Tick(deltaTime, config.ForwardSpeed);
+
+            if (runtime.IsGameOver)
+            {
+                StopRun();
+            }
+
+            if (!runtime.IsRunning && runtime.IsGameOver && Input.GetKeyDown(KeyCode.R))
+            {
+                ResetRun();
+                StartRun();
+            }
         }
 
         public void StartRun()
         {
-            runtime.StartRun();
+            trackSpawner.ResetTrack();
+            holeMover.ResetPosition();
+            collectibleSpawner.ResetField();
+            runtime.StartRun(config.MaxMissedCollectibles);
         }
 
         public void StopRun()
@@ -69,9 +93,21 @@ namespace Featurehole.Runner.Core
             runtime.StopRun();
         }
 
+        public void ResetRun()
+        {
+            runtime.StopRun();
+            trackSpawner.ResetTrack();
+            holeMover.ResetPosition();
+            collectibleSpawner.ResetField();
+        }
+
         private bool ValidateScene()
         {
-            if (config != null && holeMover != null && trackSpawner != null)
+            if (config != null
+                && holeMover != null
+                && trackSpawner != null
+                && collectibleSpawner != null
+                && hud != null)
             {
                 return true;
             }
