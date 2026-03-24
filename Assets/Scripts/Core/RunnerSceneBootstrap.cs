@@ -108,7 +108,7 @@ namespace Featurehole.Runner.Core
         private void ConfigureHoleVisual(Transform visual, RunnerGameConfig runtimeConfig)
         {
             visual.localPosition = Vector3.zero;
-            visual.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.08f, runtimeConfig.HoleDiameter);
+            visual.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.045f, runtimeConfig.HoleDiameter);
 
             Renderer rimRenderer = visual.GetComponent<Renderer>();
             if (rimRenderer != null)
@@ -119,43 +119,43 @@ namespace Featurehole.Runner.Core
             ConfigureHoleLayer(
                 visual,
                 "RimHighlight",
-                new Vector3(0f, 0.018f, 0f),
-                new Vector3(0.988f, 0.06f, 0.988f),
+                new Vector3(0f, 0.012f, 0f),
+                new Vector3(0.992f, 0.025f, 0.992f),
                 new Color(1f, 0.93f, 0.55f));
 
             ConfigureHoleLayer(
                 visual,
                 "InnerLip",
-                new Vector3(0f, 0.002f, 0f),
-                new Vector3(0.93f, 0.08f, 0.93f),
-                new Color(0.74f, 0.63f, 0.24f));
+                new Vector3(0f, -0.055f, 0f),
+                new Vector3(0.9f, 0.04f, 0.9f),
+                new Color(0.78f, 0.64f, 0.22f));
 
             ConfigureHoleLayer(
                 visual,
                 "SlopeOuter",
-                new Vector3(0f, -0.05f, 0f),
-                new Vector3(0.82f, 0.34f, 0.82f),
-                new Color(0.5f, 0.39f, 0.13f));
+                new Vector3(0f, -0.16f, 0f),
+                new Vector3(0.76f, 0.22f, 0.76f),
+                new Color(0.42f, 0.33f, 0.12f));
 
             ConfigureHoleLayer(
                 visual,
                 "SlopeMid",
-                new Vector3(0f, -0.13f, 0f),
-                new Vector3(0.63f, 0.64f, 0.63f),
-                new Color(0.26f, 0.2f, 0.08f));
+                new Vector3(0f, -0.285f, 0f),
+                new Vector3(0.56f, 0.34f, 0.56f),
+                new Color(0.18f, 0.14f, 0.06f));
 
             ConfigureHoleLayer(
                 visual,
                 "SlopeInner",
-                new Vector3(0f, -0.21f, 0f),
-                new Vector3(0.43f, 0.9f, 0.43f),
-                new Color(0.08f, 0.06f, 0.03f));
+                new Vector3(0f, -0.43f, 0f),
+                new Vector3(0.38f, 0.46f, 0.38f),
+                new Color(0.07f, 0.05f, 0.025f));
 
             ConfigureHoleLayer(
                 visual,
                 "CoreDark",
-                new Vector3(0f, -0.3f, 0f),
-                new Vector3(0.24f, 1.1f, 0.24f),
+                new Vector3(0f, -0.58f, 0f),
+                new Vector3(0.24f, 0.72f, 0.24f),
                 new Color(0.01f, 0.01f, 0.01f));
         }
 
