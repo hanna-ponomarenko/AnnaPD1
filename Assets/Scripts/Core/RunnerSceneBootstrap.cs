@@ -15,6 +15,8 @@ namespace Featurehole.Runner.Core
         [SerializeField] private bool autoStart = true;
         [SerializeField] private bool configureMainCamera = true;
 
+        private Material runtimeBoostFireMaterial;
+
         private void Awake()
         {
             RunnerGameConfig runtimeConfig = config != null
@@ -165,6 +167,7 @@ namespace Featurehole.Runner.Core
             particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
             ParticleSystemRenderer renderer = layerObject.GetComponent<ParticleSystemRenderer>();
+            renderer.material = GetRuntimeBoostFireMaterial();
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
             renderer.sortingOrder = 75;
 
@@ -236,6 +239,49 @@ namespace Featurehole.Runner.Core
             noise.frequency = 0.6f;
 
             particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
+        private Material GetRuntimeBoostFireMaterial()
+        {
+            if (runtimeBoostFireMaterial != null)
+            {
+                return runtimeBoostFireMaterial;
+            }
+
+            Shader particleShader = Shader.Find("Legacy Shaders/Particles/Additive");
+            if (particleShader == null)
+            {
+                particleShader = Shader.Find("Particles/Standard Unlit");
+            }
+
+            if (particleShader == null || boostFireMaterial == null)
+            {
+                return runtimeBoostFireMaterial;
+            }
+
+            runtimeBoostFireMaterial = new Material(particleShader)
+            {
+                name = "RuntimeBoostFireMaterial"
+            };
+
+            Texture mainTexture = null;
+            if (boostFireMaterial.HasProperty("_MainTexture"))
+            {
+                mainTexture = boostFireMaterial.GetTexture("_MainTexture");
+            }
+
+            if (mainTexture == null && boostFireMaterial.HasProperty("_MainTex"))
+            {
+                mainTexture = boostFireMaterial.GetTexture("_MainTex");
+            }
+
+            if (mainTexture != null)
+            {
+                runtimeBoostFireMaterial.mainTexture = mainTexture;
+            }
+
+            runtimeBoostFireMaterial.color = new Color(1f, 0.92f, 0.8f, 0.95f);
+            return runtimeBoostFireMaterial;
         }
 
         private void ConfigureBoostFlame(Transform boostFlame)
