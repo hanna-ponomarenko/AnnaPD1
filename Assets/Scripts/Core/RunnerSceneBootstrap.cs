@@ -155,28 +155,29 @@ namespace Featurehole.Runner.Core
             main.duration = 0.55f;
             main.loop = true;
             main.playOnAwake = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(0.2f, 0.35f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(0.4f, 1.1f);
-            main.startSize = new ParticleSystem.MinMaxCurve(0.65f, 1.1f);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.35f, 0.65f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.8f, 1.8f);
+            main.startSize = new ParticleSystem.MinMaxCurve(1.2f, 2f);
             main.startColor = Color.white;
             main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            main.maxParticles = 128;
 
             var emission = particleSystem.emission;
             emission.enabled = true;
-            emission.rateOverTime = 20f;
+            emission.rateOverTime = 42f;
 
             var shape = particleSystem.shape;
             shape.enabled = true;
             shape.shapeType = ParticleSystemShapeType.Cone;
-            shape.angle = 14f;
-            shape.radius = 0.16f;
+            shape.angle = 18f;
+            shape.radius = 0.28f;
 
             var velocityOverLifetime = particleSystem.velocityOverLifetime;
             velocityOverLifetime.enabled = true;
             velocityOverLifetime.space = ParticleSystemSimulationSpace.Local;
-            velocityOverLifetime.x = new ParticleSystem.MinMaxCurve(-0.2f, 0.2f);
-            velocityOverLifetime.y = new ParticleSystem.MinMaxCurve(0.4f, 1.2f);
-            velocityOverLifetime.z = new ParticleSystem.MinMaxCurve(-0.8f, -1.8f);
+            velocityOverLifetime.x = new ParticleSystem.MinMaxCurve(-0.35f, 0.35f);
+            velocityOverLifetime.y = new ParticleSystem.MinMaxCurve(0.6f, 1.8f);
+            velocityOverLifetime.z = new ParticleSystem.MinMaxCurve(-0.2f, 0.2f);
 
             var sizeOverLifetime = particleSystem.sizeOverLifetime;
             sizeOverLifetime.enabled = true;
@@ -211,9 +212,9 @@ namespace Featurehole.Runner.Core
 
         private void ConfigureBoostFlame(Transform boostFlame)
         {
-            boostFlame.localPosition = new Vector3(0f, 0.18f, -0.65f);
+            boostFlame.localPosition = new Vector3(0f, 0.95f, 0.8f);
             boostFlame.localRotation = Quaternion.identity;
-            boostFlame.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+            boostFlame.localScale = new Vector3(1.4f, 1.4f, 1.4f);
 
             foreach (ParticleSystemRenderer renderer in boostFlame.GetComponentsInChildren<ParticleSystemRenderer>(true))
             {
