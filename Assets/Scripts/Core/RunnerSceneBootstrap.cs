@@ -108,7 +108,7 @@ namespace Featurehole.Runner.Core
         private void ConfigureHoleVisual(Transform visual, RunnerGameConfig runtimeConfig)
         {
             visual.localPosition = Vector3.zero;
-            visual.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.08f, runtimeConfig.HoleDiameter);
+            visual.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.14f, runtimeConfig.HoleDiameter);
 
             Renderer rimRenderer = visual.GetComponent<Renderer>();
             if (rimRenderer != null)
@@ -118,24 +118,31 @@ namespace Featurehole.Runner.Core
 
             ConfigureHoleLayer(
                 visual,
-                "InnerLight",
-                new Vector3(0f, 0.01f, 0f),
-                new Vector3(0.8f, 0.35f, 0.8f),
-                new Color(0.95f, 0.88f, 0.68f));
+                "SlopeOuter",
+                new Vector3(0f, -0.03f, 0f),
+                new Vector3(0.83f, 0.5f, 0.83f),
+                new Color(0.74f, 0.7f, 0.64f));
 
             ConfigureHoleLayer(
                 visual,
-                "InnerMid",
-                new Vector3(0f, -0.005f, 0f),
-                new Vector3(0.62f, 0.6f, 0.62f),
-                new Color(0.36f, 0.26f, 0.16f));
+                "SlopeMid",
+                new Vector3(0f, -0.09f, 0f),
+                new Vector3(0.62f, 0.95f, 0.62f),
+                new Color(0.42f, 0.42f, 0.42f));
 
             ConfigureHoleLayer(
                 visual,
-                "InnerDark",
-                new Vector3(0f, -0.02f, 0f),
-                new Vector3(0.42f, 0.9f, 0.42f),
-                new Color(0.05f, 0.04f, 0.03f));
+                "SlopeInner",
+                new Vector3(0f, -0.16f, 0f),
+                new Vector3(0.38f, 1.2f, 0.38f),
+                new Color(0.15f, 0.15f, 0.15f));
+
+            ConfigureHoleLayer(
+                visual,
+                "CoreDark",
+                new Vector3(0f, -0.24f, 0f),
+                new Vector3(0.24f, 1.35f, 0.24f),
+                new Color(0.01f, 0.01f, 0.01f));
         }
 
         private void ConfigureHoleLayer(
