@@ -62,29 +62,10 @@ namespace Featurehole.Runner.Core
             }
 
             Transform visual = holeRoot.Find("Visual");
-            if (visual == null)
+            if (visual != null)
             {
-                GameObject visualObject = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                visualObject.name = "Visual";
-                visualObject.transform.SetParent(holeRoot, false);
-
-                Collider visualCollider = visualObject.GetComponent<Collider>();
-                if (visualCollider != null)
-                {
-                    Destroy(visualCollider);
-                }
-
-                Renderer renderer = visualObject.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    renderer.material.color = new Color(0.05f, 0.05f, 0.05f);
-                }
-
-                visual = visualObject.transform;
+                Destroy(visual.gameObject);
             }
-
-            visual.localPosition = Vector3.zero;
-            ConfigureHoleVisual(visual, runtimeConfig);
 
             Transform boostFlame = holeRoot.Find("BoostFlame");
             if (boostFlame == null)
@@ -103,94 +84,6 @@ namespace Featurehole.Runner.Core
             }
 
             return holeMover;
-        }
-
-        private void ConfigureHoleVisual(Transform visual, RunnerGameConfig runtimeConfig)
-        {
-            visual.localPosition = Vector3.zero;
-            visual.localScale = new Vector3(runtimeConfig.HoleDiameter, 0.045f, runtimeConfig.HoleDiameter);
-
-            Renderer rimRenderer = visual.GetComponent<Renderer>();
-            if (rimRenderer != null)
-            {
-                rimRenderer.material.color = new Color(0.96f, 0.79f, 0.24f);
-            }
-
-            ConfigureHoleLayer(
-                visual,
-                "RimHighlight",
-                new Vector3(0f, 0.012f, 0f),
-                new Vector3(0.992f, 0.025f, 0.992f),
-                new Color(1f, 0.93f, 0.55f));
-
-            ConfigureHoleLayer(
-                visual,
-                "InnerLip",
-                new Vector3(0f, -0.055f, 0f),
-                new Vector3(0.9f, 0.04f, 0.9f),
-                new Color(0.78f, 0.64f, 0.22f));
-
-            ConfigureHoleLayer(
-                visual,
-                "SlopeOuter",
-                new Vector3(0f, -0.16f, 0f),
-                new Vector3(0.76f, 0.22f, 0.76f),
-                new Color(0.42f, 0.33f, 0.12f));
-
-            ConfigureHoleLayer(
-                visual,
-                "SlopeMid",
-                new Vector3(0f, -0.285f, 0f),
-                new Vector3(0.56f, 0.34f, 0.56f),
-                new Color(0.18f, 0.14f, 0.06f));
-
-            ConfigureHoleLayer(
-                visual,
-                "SlopeInner",
-                new Vector3(0f, -0.43f, 0f),
-                new Vector3(0.38f, 0.46f, 0.38f),
-                new Color(0.07f, 0.05f, 0.025f));
-
-            ConfigureHoleLayer(
-                visual,
-                "CoreDark",
-                new Vector3(0f, -0.58f, 0f),
-                new Vector3(0.24f, 0.72f, 0.24f),
-                new Color(0.01f, 0.01f, 0.01f));
-        }
-
-        private void ConfigureHoleLayer(
-            Transform parent,
-            string layerName,
-            Vector3 localPosition,
-            Vector3 localScale,
-            Color color)
-        {
-            Transform layer = parent.Find(layerName);
-            if (layer == null)
-            {
-                GameObject layerObject = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                layerObject.name = layerName;
-                layerObject.transform.SetParent(parent, false);
-
-                Collider layerCollider = layerObject.GetComponent<Collider>();
-                if (layerCollider != null)
-                {
-                    Destroy(layerCollider);
-                }
-
-                layer = layerObject.transform;
-            }
-
-            layer.localPosition = localPosition;
-            layer.localRotation = Quaternion.identity;
-            layer.localScale = localScale;
-
-            Renderer layerRenderer = layer.GetComponent<Renderer>();
-            if (layerRenderer != null)
-            {
-                layerRenderer.material.color = color;
-            }
         }
 
         private GameObject CreateBoostFire(Transform parent)
