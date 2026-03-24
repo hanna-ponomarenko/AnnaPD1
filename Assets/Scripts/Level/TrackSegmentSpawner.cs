@@ -6,12 +6,15 @@ namespace Featurehole.Runner.Level
 {
     public sealed class TrackSegmentSpawner : MonoBehaviour
     {
+        private const int ContinuousSegmentCount = 2;
+
         [SerializeField] private TrackSegment segmentPrefab;
         [SerializeField] private Transform segmentsRoot;
 
         private readonly Queue<TrackSegment> activeSegments = new Queue<TrackSegment>();
 
         private RunnerGameConfig config;
+        private float continuousTrackLength;
         private float nextSpawnZ;
 
         public void Initialize(RunnerGameConfig runnerConfig)
@@ -51,7 +54,7 @@ namespace Featurehole.Runner.Level
             }
 
             TrackSegment firstSegment = activeSegments.Peek();
-            if (firstSegment.TailZ < -config.DespawnOffset)
+            if (firstSegment.MaxZ < -config.DespawnOffset)
             {
                 RecycleFirstSegment();
             }
@@ -60,10 +63,10 @@ namespace Featurehole.Runner.Level
         private void BuildInitialTrack()
         {
             ClearSpawnedSegments();
-
+            continuousTrackLength = config.InitialSegmentCount * config.SegmentLength;
             nextSpawnZ = 0f;
 
-            for (int index = 0; index < config.InitialSegmentCount; index++)
+            for (int index = 0; index < ContinuousSegmentCount; index++)
             {
                 SpawnSegment();
             }
@@ -76,10 +79,11 @@ namespace Featurehole.Runner.Level
                 : CreateRuntimeSegment(activeSegments.Count);
 
             segment.gameObject.name = $"{segment.gameObject.name}_{activeSegments.Count}";
+            segment.Configure(continuousTrackLength);
             segment.SetZ(nextSpawnZ);
 
             activeSegments.Enqueue(segment);
-            nextSpawnZ += config.SegmentLength;
+            nextSpawnZ += continuousTrackLength;
         }
 
         private void RecycleFirstSegment()
@@ -87,7 +91,7 @@ namespace Featurehole.Runner.Level
             TrackSegment segment = activeSegments.Dequeue();
             segment.SetZ(nextSpawnZ);
             activeSegments.Enqueue(segment);
-            nextSpawnZ += config.SegmentLength;
+            nextSpawnZ += continuousTrackLength;
         }
 
         private void ClearSpawnedSegments()
@@ -115,14 +119,12 @@ namespace Featurehole.Runner.Level
             visual.name = "Visual";
             visual.transform.SetParent(segmentObject.transform, false);
             visual.transform.localPosition = Vector3.zero;
-            visual.transform.localScale = new Vector3(config.TrackWidth, 1f, config.SegmentLength);
+            visual.transform.localScale = new Vector3(config.TrackWidth, 1f, 1f);
 
             Renderer renderer = visual.GetComponent<Renderer>();
             if (renderer != null)
             {
-                renderer.material.color = index % 2 == 0
-                    ? new Color(0.49f, 0.73f, 0.39f)
-                    : new Color(0.44f, 0.67f, 0.34f);
+                renderer.material.color = new Color(0.47f, 0.71f, 0.37f);
             }
 
             return segment;
