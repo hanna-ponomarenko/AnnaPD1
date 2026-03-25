@@ -220,7 +220,7 @@ namespace Featurehole.Runner.Hole
             }
         }
 
-        public void Tick(float deltaTime)
+        public void Tick(float deltaTime, float forwardSpeed)
         {
             if (config == null)
             {
@@ -228,27 +228,8 @@ namespace Featurehole.Runner.Hole
             }
 
             Vector3 position = transform.position;
-            float targetX;
-
-            if (TryGetPointerTargetX(out float pointerTargetX))
-            {
-                targetX = pointerTargetX;
-                position.x = Mathf.MoveTowards(position.x, targetX, config.LateralSpeed * deltaTime);
-            }
-            else
-            {
-                float horizontalInput = Input.GetAxisRaw(horizontalAxis);
-                position.x += horizontalInput * config.LateralSpeed * deltaTime;
-            }
-
-            position.x = Mathf.Clamp(position.x, -config.LateralLimit, config.LateralLimit);
-            if (IsSplitActive)
-            {
-                float splitOffset = GetSplitOffset();
-                float splitLimit = Mathf.Max(0f, config.LateralLimit - splitOffset);
-                position.x = Mathf.Clamp(position.x, -splitLimit, splitLimit);
-            }
-
+            position.x = 0f;
+            position.z += forwardSpeed * deltaTime;
             position.y = startPosition.y;
 
             transform.position = position;
@@ -276,42 +257,6 @@ namespace Featurehole.Runner.Hole
             }
 
             UpdateVisualLayout();
-        }
-
-        private bool TryGetPointerTargetX(out float targetX)
-        {
-            targetX = 0f;
-
-            if (!usePointerInput)
-            {
-                return false;
-            }
-
-            if (Input.touchCount > 0)
-            {
-                Touch touch = Input.GetTouch(0);
-                targetX = ScreenToLaneX(touch.position.x);
-                return true;
-            }
-
-            if (Input.GetMouseButton(0))
-            {
-                targetX = ScreenToLaneX(Input.mousePosition.x);
-                return true;
-            }
-
-            return false;
-        }
-
-        private float ScreenToLaneX(float screenX)
-        {
-            if (Screen.width <= 0)
-            {
-                return 0f;
-            }
-
-            float normalizedX = Mathf.Clamp01(screenX / Screen.width);
-            return Mathf.Lerp(-config.LateralLimit, config.LateralLimit, normalizedX);
         }
 
         private void ApplyVisualScale()

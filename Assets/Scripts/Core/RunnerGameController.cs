@@ -74,8 +74,8 @@ namespace Featurehole.Runner.Core
             float deltaTime = Time.deltaTime;
             float currentForwardSpeed = config.ForwardSpeed * runtime.SpeedMultiplier;
 
-            holeMover.Tick(deltaTime);
-            trackSpawner.Tick(deltaTime, currentForwardSpeed);
+            holeMover.Tick(deltaTime, currentForwardSpeed);
+            trackSpawner.Tick(holeMover.transform.position.z);
             appleSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             pepperSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             runtime.Tick(deltaTime, config.ForwardSpeed);
