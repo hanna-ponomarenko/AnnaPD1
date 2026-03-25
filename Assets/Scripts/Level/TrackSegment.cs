@@ -8,9 +8,11 @@ namespace Featurehole.Runner.Level
 
         private Transform visualTransform;
         private float length;
+        private float localMinZ;
+        private float localMaxZ;
 
-        public float MinZ => transform.position.z - length * 0.5f;
-        public float MaxZ => transform.position.z + length * 0.5f;
+        public float MinZ => transform.position.z + localMinZ;
+        public float MaxZ => transform.position.z + localMaxZ;
         public float Length => length;
 
         public void Configure(float segmentLength)
@@ -22,6 +24,8 @@ namespace Featurehole.Runner.Level
             ConfigureScaledChild("BankLeft");
             ConfigureScaledChild("BankRight");
             ConfigureScaledChild("UnderwaterSand");
+
+            RecalculateBounds();
         }
 
         public void Move(float deltaZ)
@@ -38,7 +42,7 @@ namespace Featurehole.Runner.Level
 
         public void SetMinZ(float worldMinZ)
         {
-            SetZ(worldMinZ + length * 0.5f);
+            SetZ(worldMinZ - localMinZ);
         }
 
         private void ConfigureScaledChild(string childName)
@@ -60,6 +64,20 @@ namespace Featurehole.Runner.Level
             Vector3 scale = childTransform.localScale;
             scale.z = length + SeamOverlap;
             childTransform.localScale = scale;
+        }
+
+        private void RecalculateBounds()
+        {
+            if (visualTransform == null)
+            {
+                localMinZ = -length * 0.5f;
+                localMaxZ = length * 0.5f;
+                return;
+            }
+
+            float halfVisualLength = visualTransform.localScale.z * 0.5f;
+            localMinZ = visualTransform.localPosition.z - halfVisualLength;
+            localMaxZ = visualTransform.localPosition.z + halfVisualLength;
         }
     }
 }
