@@ -19,8 +19,10 @@ namespace Featurehole.Runner.Hole
         private Vector3 startPosition;
         private Transform visualTransform;
         private Transform splitVisualTransform;
-        private GameObject boostHornsObject;
-        private GameObject splitBoostHornsObject;
+        private GameObject boostFrontFlameObject;
+        private GameObject splitBoostFrontFlameObject;
+        private ParticleSystem[] boostFrontFlames;
+        private ParticleSystem[] splitBoostFrontFlames;
         private GameObject boostFlameObject;
         private Renderer[] boostFlameVisualRenderers;
         private ParticleSystem[] boostFlames;
@@ -54,10 +56,16 @@ namespace Featurehole.Runner.Hole
                 splitVisualTransform = splitVisualObject.transform;
             }
 
-            Transform boostHornsTransform = transform.Find("Visual/BoostHorns");
-            boostHornsObject = boostHornsTransform != null ? boostHornsTransform.gameObject : null;
-            Transform splitBoostHornsTransform = transform.Find("VisualTwin/BoostHorns");
-            splitBoostHornsObject = splitBoostHornsTransform != null ? splitBoostHornsTransform.gameObject : null;
+            Transform boostFrontFlameTransform = transform.Find("Visual/BoostFrontFlame");
+            boostFrontFlameObject = boostFrontFlameTransform != null ? boostFrontFlameTransform.gameObject : null;
+            boostFrontFlames = boostFrontFlameTransform != null
+                ? boostFrontFlameTransform.GetComponentsInChildren<ParticleSystem>(true)
+                : null;
+            Transform splitBoostFrontFlameTransform = transform.Find("VisualTwin/BoostFrontFlame");
+            splitBoostFrontFlameObject = splitBoostFrontFlameTransform != null ? splitBoostFrontFlameTransform.gameObject : null;
+            splitBoostFrontFlames = splitBoostFrontFlameTransform != null
+                ? splitBoostFrontFlameTransform.GetComponentsInChildren<ParticleSystem>(true)
+                : null;
 
             Transform boostFlameTransform = transform.Find("BoostFlame");
             boostFlameObject = boostFlameTransform != null ? boostFlameTransform.gameObject : null;
@@ -157,15 +165,18 @@ namespace Featurehole.Runner.Hole
 
         public void SetBoostActive(bool isActive)
         {
-            if (boostHornsObject != null)
+            if (boostFrontFlameObject != null)
             {
-                boostHornsObject.SetActive(isActive);
+                boostFrontFlameObject.SetActive(isActive);
             }
 
-            if (splitBoostHornsObject != null)
+            if (splitBoostFrontFlameObject != null)
             {
-                splitBoostHornsObject.SetActive(isActive && (IsSplitActive || isMergeAnimating));
+                splitBoostFrontFlameObject.SetActive(isActive && (IsSplitActive || isMergeAnimating));
             }
+
+            SetParticleGroupActive(boostFrontFlames, isActive);
+            SetParticleGroupActive(splitBoostFrontFlames, isActive && (IsSplitActive || isMergeAnimating));
 
             if (boostFlameObject == null)
             {
@@ -216,6 +227,32 @@ namespace Featurehole.Runner.Hole
                 else
                 {
                     boostFlame.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                }
+            }
+        }
+
+        private static void SetParticleGroupActive(ParticleSystem[] particleSystems, bool isActive)
+        {
+            if (particleSystems == null)
+            {
+                return;
+            }
+
+            foreach (ParticleSystem particleSystem in particleSystems)
+            {
+                if (particleSystem == null)
+                {
+                    continue;
+                }
+
+                if (isActive)
+                {
+                    particleSystem.Clear(true);
+                    particleSystem.Play(true);
+                }
+                else
+                {
+                    particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 }
             }
         }
