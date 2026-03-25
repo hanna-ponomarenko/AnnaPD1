@@ -21,7 +21,7 @@ namespace Featurehole.Runner.Data
         [SerializeField] private float segmentLength = 12f;
 
         [Min(1)]
-        [SerializeField] private int initialSegmentCount = 12;
+        [SerializeField] private int initialSegmentCount = 1200;
 
         [Min(0f)]
         [SerializeField] private float despawnOffset = 14f;
@@ -97,7 +97,7 @@ namespace Featurehole.Runner.Data
             config.lateralSpeed = 8f;
             config.lateralLimit = 3.5f;
             config.segmentLength = 12f;
-            config.initialSegmentCount = 12;
+            config.initialSegmentCount = 1200;
             config.despawnOffset = 14f;
             config.trackWidth = 8f;
             config.holeDiameter = 0.9f;

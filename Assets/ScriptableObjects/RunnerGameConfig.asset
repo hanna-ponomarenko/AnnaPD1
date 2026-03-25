@@ -16,7 +16,7 @@ MonoBehaviour:
   lateralSpeed: 8
   lateralLimit: 3.5
   segmentLength: 12
-  initialSegmentCount: 12
+  initialSegmentCount: 1200
   despawnOffset: 14
   trackWidth: 8
   holeDiameter: 0.9
