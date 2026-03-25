@@ -673,8 +673,7 @@ namespace Featurehole.Runner.Core
                 Quaternion.Euler(90f, 0f, 0f),
                 new Vector3(110f, 80f, 1f),
                 new Color(0.77f, 0.58f, 0.31f));
-
-            CreateSun(new Vector3(0f, 24f, 40f), 9.5f);
+            RemoveSun();
         }
 
         private void CreateBackdropPlane(string name, Vector3 localPosition, Quaternion localRotation, Vector3 localScale, Color color)
@@ -730,6 +729,15 @@ namespace Featurehole.Runner.Core
             CreateSunRay(sunObject.transform, "RayHorizontal", Vector3.zero, new Vector3(0f, 0f, 90f), new Vector3(0.45f, 6.5f, 0.08f));
             CreateSunRay(sunObject.transform, "RayDiagA", Vector3.zero, new Vector3(0f, 0f, 45f), new Vector3(0.35f, 5.4f, 0.08f));
             CreateSunRay(sunObject.transform, "RayDiagB", Vector3.zero, new Vector3(0f, 0f, -45f), new Vector3(0.35f, 5.4f, 0.08f));
+        }
+
+        private void RemoveSun()
+        {
+            Transform sunTransform = transform.Find("Sun");
+            if (sunTransform != null)
+            {
+                Destroy(sunTransform.gameObject);
+            }
         }
 
         private void CreateSunRay(Transform parent, string name, Vector3 localPosition, Vector3 localEuler, Vector3 localScale)
