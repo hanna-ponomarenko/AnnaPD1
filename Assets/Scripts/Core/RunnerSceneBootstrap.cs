@@ -635,7 +635,6 @@ namespace Featurehole.Runner.Core
             mainCamera.orthographic = false;
             mainCamera.fieldOfView = 56f;
             mainCamera.backgroundColor = new Color(0.94f, 0.78f, 0.52f);
-            mainCamera.depthTextureMode |= DepthTextureMode.Depth;
         }
 
         private void ConfigureBackdrop(RunnerGameConfig runtimeConfig)
