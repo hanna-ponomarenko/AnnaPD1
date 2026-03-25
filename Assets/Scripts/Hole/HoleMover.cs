@@ -19,6 +19,8 @@ namespace Featurehole.Runner.Hole
         private Vector3 startPosition;
         private Transform visualTransform;
         private Transform splitVisualTransform;
+        private Transform boostHornsTransform;
+        private Transform splitBoostHornsTransform;
         private GameObject boostHornsObject;
         private GameObject splitBoostHornsObject;
         private GameObject boostFlameObject;
@@ -30,6 +32,8 @@ namespace Featurehole.Runner.Hole
         private float splitTimeRemaining;
         private float splitAnimationElapsed;
         private float mergeAnimationElapsed;
+        private float boostVisualElapsed;
+        private bool isBoostVisualActive;
         private bool isMergeAnimating;
 
         public float CurrentDiameter => currentDiameter;
@@ -54,9 +58,9 @@ namespace Featurehole.Runner.Hole
                 splitVisualTransform = splitVisualObject.transform;
             }
 
-            Transform boostHornsTransform = transform.Find("Visual/BoostHorns");
+            boostHornsTransform = transform.Find("Visual/BoostHorns");
             boostHornsObject = boostHornsTransform != null ? boostHornsTransform.gameObject : null;
-            Transform splitBoostHornsTransform = transform.Find("VisualTwin/BoostHorns");
+            splitBoostHornsTransform = transform.Find("VisualTwin/BoostHorns");
             splitBoostHornsObject = splitBoostHornsTransform != null ? splitBoostHornsTransform.gameObject : null;
 
             Transform boostFlameTransform = transform.Find("BoostFlame");
@@ -167,6 +171,14 @@ namespace Featurehole.Runner.Hole
                 splitBoostHornsObject.SetActive(isActive && (IsSplitActive || isMergeAnimating));
             }
 
+            isBoostVisualActive = isActive;
+            if (isActive)
+            {
+                boostVisualElapsed = 0f;
+            }
+
+            UpdateBoostVisualScale();
+
             if (boostFlameObject == null)
             {
                 return;
@@ -227,6 +239,11 @@ namespace Featurehole.Runner.Hole
                 return;
             }
 
+            if (isBoostVisualActive)
+            {
+                boostVisualElapsed += deltaTime;
+            }
+
             Vector3 position = transform.position;
             float targetX;
 
@@ -275,6 +292,7 @@ namespace Featurehole.Runner.Hole
                 }
             }
 
+            UpdateBoostVisualScale();
             UpdateVisualLayout();
         }
 
@@ -329,6 +347,7 @@ namespace Featurehole.Runner.Hole
             }
 
             splitVisualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
+            UpdateBoostVisualScale();
             UpdateVisualLayout();
         }
 
@@ -386,6 +405,7 @@ namespace Featurehole.Runner.Hole
                     splitVisualTransform.gameObject.SetActive(false);
                 }
 
+                UpdateBoostVisualScale();
                 return;
             }
 
@@ -419,6 +439,26 @@ namespace Featurehole.Runner.Hole
             splitVisualTransform.localPosition = new Vector3(mergeOffset, -sink, 0f);
             visualTransform.localScale = new Vector3(currentDiameter * widthScale, visualHeightScale, currentDiameter * depthScale);
             splitVisualTransform.localScale = new Vector3(currentDiameter * widthScale, visualHeightScale, currentDiameter * depthScale);
+            UpdateBoostVisualScale();
+        }
+
+        private void UpdateBoostVisualScale()
+        {
+            float pulse = 1f;
+            if (isBoostVisualActive)
+            {
+                pulse = 1.22f + Mathf.Sin(boostVisualElapsed * 14f) * 0.18f;
+            }
+
+            if (boostHornsTransform != null)
+            {
+                boostHornsTransform.localScale = Vector3.one * pulse;
+            }
+
+            if (splitBoostHornsTransform != null)
+            {
+                splitBoostHornsTransform.localScale = Vector3.one * pulse;
+            }
         }
 
         private static float EaseOutBack(float value)
