@@ -45,6 +45,8 @@ namespace Featurehole.Runner.Core
             {
                 ConfigureCamera();
             }
+
+            ConfigureBackdrop(runtimeConfig);
         }
 
         private HoleMover CreateHole(RunnerGameConfig runtimeConfig)
@@ -529,7 +531,105 @@ namespace Featurehole.Runner.Core
 
             mainCamera.orthographic = false;
             mainCamera.fieldOfView = 50f;
-            mainCamera.backgroundColor = new Color(0.65f, 0.86f, 0.98f);
+            mainCamera.backgroundColor = new Color(0.94f, 0.78f, 0.52f);
+        }
+
+        private void ConfigureBackdrop(RunnerGameConfig runtimeConfig)
+        {
+            CreateBackdropPlane(
+                "DesertBackdrop",
+                new Vector3(0f, 11f, 62f),
+                Quaternion.Euler(0f, 180f, 0f),
+                new Vector3(120f, 42f, 1f),
+                new Color(0.89f, 0.66f, 0.39f));
+
+            CreateBackdropPlane(
+                "DuneBand",
+                new Vector3(0f, 2.5f, 48f),
+                Quaternion.Euler(18f, 180f, 0f),
+                new Vector3(100f, 10f, 1f),
+                new Color(0.82f, 0.62f, 0.34f));
+
+            CreateSun(new Vector3(0f, 20f, 58f), 8.5f);
+        }
+
+        private void CreateBackdropPlane(string name, Vector3 localPosition, Quaternion localRotation, Vector3 localScale, Color color)
+        {
+            Transform existing = transform.Find(name);
+            GameObject plane = existing != null ? existing.gameObject : GameObject.CreatePrimitive(PrimitiveType.Quad);
+            plane.name = name;
+            plane.transform.SetParent(transform, false);
+            plane.transform.localPosition = localPosition;
+            plane.transform.localRotation = localRotation;
+            plane.transform.localScale = localScale;
+
+            Collider collider = plane.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Destroy(collider);
+            }
+
+            Renderer renderer = plane.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                renderer.receiveShadows = false;
+                renderer.material.color = color;
+            }
+        }
+
+        private void CreateSun(Vector3 localPosition, float size)
+        {
+            Transform sunTransform = transform.Find("Sun");
+            GameObject sunObject = sunTransform != null ? sunTransform.gameObject : GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sunObject.name = "Sun";
+            sunObject.transform.SetParent(transform, false);
+            sunObject.transform.localPosition = localPosition;
+            sunObject.transform.localScale = Vector3.one * size;
+
+            Collider sunCollider = sunObject.GetComponent<Collider>();
+            if (sunCollider != null)
+            {
+                Destroy(sunCollider);
+            }
+
+            Renderer sunRenderer = sunObject.GetComponent<Renderer>();
+            if (sunRenderer != null)
+            {
+                sunRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                sunRenderer.receiveShadows = false;
+                sunRenderer.material.color = new Color(1f, 0.87f, 0.44f);
+            }
+
+            CreateSunRay(sunObject.transform, "RayVertical", Vector3.zero, Vector3.zero, new Vector3(0.45f, 6.5f, 0.08f));
+            CreateSunRay(sunObject.transform, "RayHorizontal", Vector3.zero, new Vector3(0f, 0f, 90f), new Vector3(0.45f, 6.5f, 0.08f));
+            CreateSunRay(sunObject.transform, "RayDiagA", Vector3.zero, new Vector3(0f, 0f, 45f), new Vector3(0.35f, 5.4f, 0.08f));
+            CreateSunRay(sunObject.transform, "RayDiagB", Vector3.zero, new Vector3(0f, 0f, -45f), new Vector3(0.35f, 5.4f, 0.08f));
+        }
+
+        private void CreateSunRay(Transform parent, string name, Vector3 localPosition, Vector3 localEuler, Vector3 localScale)
+        {
+            Transform rayTransform = parent.Find(name);
+            GameObject rayObject = rayTransform != null ? rayTransform.gameObject : GameObject.CreatePrimitive(PrimitiveType.Cube);
+            rayObject.name = name;
+            rayObject.transform.SetParent(parent, false);
+            rayObject.transform.localPosition = localPosition;
+            rayObject.transform.localRotation = Quaternion.Euler(localEuler);
+            rayObject.transform.localScale = localScale;
+
+            Collider rayCollider = rayObject.GetComponent<Collider>();
+            if (rayCollider != null)
+            {
+                Destroy(rayCollider);
+            }
+
+            Renderer rayRenderer = rayObject.GetComponent<Renderer>();
+            if (rayRenderer != null)
+            {
+                rayRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                rayRenderer.receiveShadows = false;
+                rayRenderer.material.color = new Color(1f, 0.82f, 0.36f, 1f);
+            }
         }
     }
 }

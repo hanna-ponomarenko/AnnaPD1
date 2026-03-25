@@ -115,31 +115,29 @@ namespace Featurehole.Runner.Level
 
             TrackSegment segment = segmentObject.AddComponent<TrackSegment>();
 
-            float riverWidth = config.TrackWidth * 0.55f;
-            float bankWidth = (config.TrackWidth - riverWidth) * 0.5f + 0.15f;
+            float riverWidth = config.TrackWidth;
 
             CreateBlock(segmentObject.transform, "Visual", Vector3.zero, new Vector3(riverWidth, 0.8f, 1f), new Color(0.09f, 0.46f, 0.76f));
             CreateBlock(segmentObject.transform, "RiverGlow", new Vector3(0f, 0.18f, 0f), new Vector3(riverWidth * 0.92f, 0.06f, 1f), new Color(0.3f, 0.73f, 0.95f));
-            CreateBlock(segmentObject.transform, "BankLeft", new Vector3(-(riverWidth + bankWidth) * 0.5f, 0.02f, 0f), new Vector3(bankWidth, 0.86f, 1f), new Color(0.86f, 0.73f, 0.45f));
-            CreateBlock(segmentObject.transform, "BankRight", new Vector3((riverWidth + bankWidth) * 0.5f, 0.02f, 0f), new Vector3(bankWidth, 0.86f, 1f), new Color(0.86f, 0.73f, 0.45f));
-
             CreateBlock(segmentObject.transform, "UnderwaterSand", new Vector3(0f, -0.18f, 0f), new Vector3(riverWidth * 0.78f, 0.08f, 1f), new Color(0.71f, 0.63f, 0.39f));
-            CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.18f, -0.08f, -2.2f), new Color(0.99f, 0.72f, 0.34f), 0.22f);
-            CreateFish(segmentObject.transform, new Vector3(riverWidth * 0.14f, -0.05f, 1.4f), new Color(0.96f, 0.54f, 0.18f), 0.18f);
-            CreateShell(segmentObject.transform, new Vector3(-riverWidth * 0.08f, -0.12f, 3.6f), new Color(0.95f, 0.86f, 0.68f));
-            CreateShell(segmentObject.transform, new Vector3(riverWidth * 0.2f, -0.12f, -4.1f), new Color(0.84f, 0.8f, 0.69f));
+            CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.28f, -0.08f, -2.2f), new Color(0.99f, 0.72f, 0.34f), 0.22f);
+            CreateFish(segmentObject.transform, new Vector3(riverWidth * 0.22f, -0.05f, 1.4f), new Color(0.96f, 0.54f, 0.18f), 0.18f);
+            CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.06f, -0.09f, 5.1f), new Color(0.96f, 0.84f, 0.4f), 0.2f);
+            CreateShell(segmentObject.transform, new Vector3(-riverWidth * 0.18f, -0.12f, 3.6f), new Color(0.95f, 0.86f, 0.68f));
+            CreateShell(segmentObject.transform, new Vector3(riverWidth * 0.24f, -0.12f, -4.1f), new Color(0.84f, 0.8f, 0.69f));
             CreateCrocodile(segmentObject.transform, new Vector3(0f, -0.03f, 5.2f), new Color(0.34f, 0.47f, 0.26f));
 
-            CreateReeds(segmentObject.transform, new Vector3(-riverWidth * 0.5f - 0.08f, 0.15f, -3.5f), 5, -1f);
-            CreateReeds(segmentObject.transform, new Vector3(riverWidth * 0.5f + 0.08f, 0.15f, 2.8f), 4, 1f);
+            CreateReeds(segmentObject.transform, new Vector3(-riverWidth * 0.38f, 0.06f, -3.5f), 5, -1f);
+            CreateReeds(segmentObject.transform, new Vector3(riverWidth * 0.34f, 0.06f, 2.8f), 4, 1f);
+            CreateReeds(segmentObject.transform, new Vector3(-riverWidth * 0.12f, 0.05f, 6.2f), 3, 1f);
 
-            float sideOffsetX = config.TrackWidth * 0.5f + 2.6f;
-            CreatePyramid(segmentObject.transform, "PyramidLeft", new Vector3(-sideOffsetX, 1.4f, -2f), new Vector3(2.4f, 2.1f, 2.4f), new Color(0.82f, 0.69f, 0.42f));
-            CreatePyramid(segmentObject.transform, "PyramidRight", new Vector3(sideOffsetX + 0.6f, 1.2f, 4.2f), new Vector3(1.8f, 1.7f, 1.8f), new Color(0.76f, 0.63f, 0.36f));
-            CreateRock(segmentObject.transform, "RockLeft", new Vector3(-sideOffsetX - 0.8f, 0.35f, 5.4f), new Vector3(1.6f, 0.9f, 1.2f), new Color(0.58f, 0.49f, 0.39f));
-            CreateRock(segmentObject.transform, "RockRight", new Vector3(sideOffsetX + 1.4f, 0.3f, -5.2f), new Vector3(1.4f, 0.8f, 1f), new Color(0.64f, 0.56f, 0.43f));
-            CreateStatue(segmentObject.transform, "AnubisLeft", new Vector3(-sideOffsetX + 0.3f, 0.6f, 6.6f), new Color(0.29f, 0.25f, 0.18f));
-            CreateStatue(segmentObject.transform, "HorusRight", new Vector3(sideOffsetX - 0.2f, 0.6f, -6.8f), new Color(0.23f, 0.2f, 0.17f));
+            float sideOffsetX = config.TrackWidth * 0.5f + 16f;
+            CreatePyramid(segmentObject.transform, "PyramidLeft", new Vector3(-sideOffsetX, 8.5f, -6f), new Vector3(24f, 21f, 24f), new Color(0.82f, 0.69f, 0.42f));
+            CreatePyramid(segmentObject.transform, "PyramidRight", new Vector3(sideOffsetX + 6f, 7.2f, 12f), new Vector3(18f, 17f, 18f), new Color(0.76f, 0.63f, 0.36f));
+            CreateRock(segmentObject.transform, "RockLeft", new Vector3(-sideOffsetX - 8f, 2.8f, 14f), new Vector3(16f, 9f, 12f), new Color(0.58f, 0.49f, 0.39f));
+            CreateRock(segmentObject.transform, "RockRight", new Vector3(sideOffsetX + 14f, 2.6f, -14f), new Vector3(14f, 8f, 10f), new Color(0.64f, 0.56f, 0.43f));
+            CreateStatue(segmentObject.transform, "AnubisLeft", new Vector3(-sideOffsetX + 3f, 5.6f, 18f), new Color(0.29f, 0.25f, 0.18f), 10f);
+            CreateStatue(segmentObject.transform, "HorusRight", new Vector3(sideOffsetX - 2f, 5.6f, -18f), new Color(0.23f, 0.2f, 0.17f), 10f);
 
             return segment;
         }
@@ -252,11 +250,12 @@ namespace Featurehole.Runner.Level
             }
         }
 
-        private void CreateStatue(Transform parent, string name, Vector3 localPosition, Color color)
+        private void CreateStatue(Transform parent, string name, Vector3 localPosition, Color color, float scaleMultiplier)
         {
             GameObject statue = new GameObject(name);
             statue.transform.SetParent(parent, false);
             statue.transform.localPosition = localPosition;
+            statue.transform.localScale = Vector3.one * scaleMultiplier;
 
             CreateBlock(statue.transform, "Base", new Vector3(0f, -0.3f, 0f), new Vector3(0.9f, 0.3f, 0.9f), new Color(0.71f, 0.58f, 0.34f));
             CreateBlock(statue.transform, "Body", new Vector3(0f, 0.2f, 0f), new Vector3(0.42f, 1.2f, 0.32f), color);
