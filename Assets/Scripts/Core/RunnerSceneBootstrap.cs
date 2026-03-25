@@ -223,13 +223,13 @@ namespace Featurehole.Runner.Core
                 hornsRoot = hornsObject.transform;
             }
 
-            hornsRoot.localPosition = new Vector3(0f, 0.18f, -0.62f);
+            hornsRoot.localPosition = new Vector3(0f, 0.42f, -0.9f);
             hornsRoot.localRotation = Quaternion.identity;
             hornsRoot.localScale = Vector3.one;
             hornsRoot.gameObject.SetActive(false);
 
-            CreateHorn(hornsRoot, "LeftHorn", new Vector3(-0.36f, 0.14f, 0f), -28f);
-            CreateHorn(hornsRoot, "RightHorn", new Vector3(0.36f, 0.14f, 0f), 28f);
+            CreateHorn(hornsRoot, "LeftHorn", new Vector3(-1.2f, 0.45f, 0f), -28f);
+            CreateHorn(hornsRoot, "RightHorn", new Vector3(1.2f, 0.45f, 0f), 28f);
         }
 
         private void CreateHorn(Transform parent, string hornName, Vector3 localPosition, float zRotation)
@@ -252,7 +252,7 @@ namespace Featurehole.Runner.Core
 
             hornTransform.localPosition = localPosition;
             hornTransform.localRotation = Quaternion.Euler(68f, 0f, zRotation);
-            hornTransform.localScale = new Vector3(0.12f, 0.36f, 0.12f);
+            hornTransform.localScale = new Vector3(0.6f, 1.8f, 0.6f);
 
             Renderer hornRenderer = hornTransform.GetComponent<Renderer>();
             if (hornRenderer != null)
