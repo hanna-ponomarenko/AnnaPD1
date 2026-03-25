@@ -8,6 +8,8 @@ namespace Featurehole.Runner.Gameplay
 {
     public sealed class AppleSpawner : MonoBehaviour
     {
+        private const float AppleSpawnIntervalSeconds = 5f;
+
         [SerializeField] private ApplePickup applePrefab;
         [SerializeField] private Transform applesRoot;
 
@@ -46,10 +48,7 @@ namespace Featurehole.Runner.Gameplay
             ClearApples();
             nextSpawnZ = config.SegmentLength;
 
-            for (int index = 0; index < 4; index++)
-            {
-                SpawnApple(index);
-            }
+            SpawnApple(0, config.ForwardSpeed);
         }
 
         public void Tick(float deltaTime, RunnerRuntime runtime, float forwardSpeed)
@@ -79,19 +78,19 @@ namespace Featurehole.Runner.Gameplay
                     runtime.RegisterCollected();
                     holeMover.Grow();
                     holeMover.ActivateSplit(config.AppleSplitDuration);
-                    RespawnApple(apple);
+                    RespawnApple(apple, forwardSpeed);
                     continue;
                 }
 
                 if (applePosition.z < passedThreshold)
                 {
                     runtime.RegisterMissed();
-                    RespawnApple(apple);
+                    RespawnApple(apple, forwardSpeed);
                 }
             }
         }
 
-        private void SpawnApple(int index)
+        private void SpawnApple(int index, float forwardSpeed)
         {
             ApplePickup apple = applePrefab != null
                 ? Instantiate(applePrefab, applesRoot)
@@ -99,16 +98,17 @@ namespace Featurehole.Runner.Gameplay
 
             apple.gameObject.name = $"Apple_{index}";
             activeApples.Add(apple);
-            RespawnApple(apple);
+            RespawnApple(apple, forwardSpeed);
         }
 
-        private void RespawnApple(ApplePickup apple)
+        private void RespawnApple(ApplePickup apple, float forwardSpeed)
         {
             float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - config.CollectibleSize);
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
             Vector3 spawnPosition = new Vector3(laneX, 0.58f, nextSpawnZ);
             apple.SetPosition(spawnPosition);
-            nextSpawnZ += config.CollectibleSpawnSpacing;
+            float spawnSpacing = Mathf.Max(config.CollectibleSpawnSpacing, forwardSpeed * AppleSpawnIntervalSeconds);
+            nextSpawnZ += spawnSpacing;
         }
 
         private void ClearApples()
