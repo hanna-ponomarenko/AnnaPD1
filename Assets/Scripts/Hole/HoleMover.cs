@@ -8,6 +8,9 @@ namespace Featurehole.Runner.Hole
         private const float SplitAnimationDuration = 0.45f;
         private const float SplitJumpHeight = 0.42f;
         private const float SplitBounceHeight = 0.12f;
+        private const float MergeAnimationDuration = 0.38f;
+        private const float MergeSinkDepth = 0.08f;
+        private const float MergeStretchBoost = 0.16f;
 
         [SerializeField] private string horizontalAxis = "Horizontal";
         [SerializeField] private bool usePointerInput = true;
@@ -24,6 +27,8 @@ namespace Featurehole.Runner.Hole
         private float visualHeightScale = 1f;
         private float splitTimeRemaining;
         private float splitAnimationElapsed;
+        private float mergeAnimationElapsed;
+        private bool isMergeAnimating;
 
         public float CurrentDiameter => currentDiameter;
         public bool IsSplitActive { get; private set; }
@@ -78,7 +83,9 @@ namespace Featurehole.Runner.Hole
             currentDiameter = config.HoleDiameter;
             splitTimeRemaining = 0f;
             splitAnimationElapsed = 0f;
+            mergeAnimationElapsed = 0f;
             IsSplitActive = false;
+            isMergeAnimating = false;
             ApplyVisualScale();
         }
 
@@ -107,6 +114,8 @@ namespace Featurehole.Runner.Hole
 
             splitTimeRemaining = Mathf.Max(splitTimeRemaining, duration);
             IsSplitActive = true;
+            isMergeAnimating = false;
+            mergeAnimationElapsed = 0f;
             ApplyVisualScale();
         }
 
@@ -234,6 +243,17 @@ namespace Featurehole.Runner.Hole
                 if (splitTimeRemaining <= 0f)
                 {
                     IsSplitActive = false;
+                    isMergeAnimating = true;
+                    mergeAnimationElapsed = 0f;
+                }
+            }
+
+            if (isMergeAnimating)
+            {
+                mergeAnimationElapsed = Mathf.Min(MergeAnimationDuration, mergeAnimationElapsed + deltaTime);
+                if (mergeAnimationElapsed >= MergeAnimationDuration)
+                {
+                    isMergeAnimating = false;
                     ApplyVisualScale();
                 }
             }
@@ -338,22 +358,19 @@ namespace Featurehole.Runner.Hole
                 return;
             }
 
-            if (!IsSplitActive)
+            if (!IsSplitActive && !isMergeAnimating)
             {
                 visualTransform.localPosition = Vector3.zero;
+                visualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
                 if (splitVisualTransform != null)
                 {
                     splitVisualTransform.localPosition = Vector3.zero;
+                    splitVisualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
                     splitVisualTransform.gameObject.SetActive(false);
                 }
 
                 return;
             }
-
-            float splitOffset = GetCurrentSplitOffset();
-            float splitHeight = GetCurrentSplitHeight();
-
-            visualTransform.localPosition = new Vector3(-splitOffset, splitHeight, 0f);
 
             if (splitVisualTransform == null)
             {
@@ -361,7 +378,30 @@ namespace Featurehole.Runner.Hole
             }
 
             splitVisualTransform.gameObject.SetActive(true);
-            splitVisualTransform.localPosition = new Vector3(splitOffset, splitHeight, 0f);
+
+            if (IsSplitActive)
+            {
+                float splitOffset = GetCurrentSplitOffset();
+                float splitHeight = GetCurrentSplitHeight();
+
+                visualTransform.localPosition = new Vector3(-splitOffset, splitHeight, 0f);
+                splitVisualTransform.localPosition = new Vector3(splitOffset, splitHeight, 0f);
+                visualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
+                splitVisualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
+                return;
+            }
+
+            float mergeProgress = Mathf.Clamp01(mergeAnimationElapsed / MergeAnimationDuration);
+            float fluidProgress = EaseInOutSine(mergeProgress);
+            float mergeOffset = Mathf.Lerp(GetSplitOffset(), 0f, fluidProgress);
+            float sink = Mathf.Sin(fluidProgress * Mathf.PI) * MergeSinkDepth;
+            float widthScale = 1f + Mathf.Sin(fluidProgress * Mathf.PI) * MergeStretchBoost;
+            float depthScale = 1f - Mathf.Sin(fluidProgress * Mathf.PI) * (MergeStretchBoost * 0.55f);
+
+            visualTransform.localPosition = new Vector3(-mergeOffset, -sink, 0f);
+            splitVisualTransform.localPosition = new Vector3(mergeOffset, -sink, 0f);
+            visualTransform.localScale = new Vector3(currentDiameter * widthScale, visualHeightScale, currentDiameter * depthScale);
+            splitVisualTransform.localScale = new Vector3(currentDiameter * widthScale, visualHeightScale, currentDiameter * depthScale);
         }
 
         private static float EaseOutBack(float value)
@@ -369,6 +409,11 @@ namespace Featurehole.Runner.Hole
             const float overshoot = 1.70158f;
             float t = value - 1f;
             return 1f + (overshoot + 1f) * t * t * t + overshoot * t * t;
+        }
+
+        private static float EaseInOutSine(float value)
+        {
+            return -(Mathf.Cos(Mathf.PI * value) - 1f) * 0.5f;
         }
     }
 }
