@@ -74,7 +74,7 @@ namespace Featurehole.Runner.Core
             }
 
             ConfigureHoleDecal(visual, runtimeConfig);
-            ConfigureBoostFrontFlame(visual);
+            ConfigureBoostHorns(visual);
 
             Transform boostFlame = holeRoot.Find("BoostFlame");
             if (boostFlame == null)
@@ -206,23 +206,53 @@ namespace Featurehole.Runner.Core
             return texture;
         }
 
-        private void ConfigureBoostFrontFlame(Transform visualRoot)
+        private void ConfigureBoostHorns(Transform visualRoot)
         {
-            Transform flameRoot = visualRoot.Find("BoostFrontFlame");
-            if (flameRoot == null)
+            Transform hornsRoot = visualRoot.Find("BoostHorns");
+            if (hornsRoot == null)
             {
-                GameObject flameObject = new GameObject("BoostFrontFlame");
-                flameObject.transform.SetParent(visualRoot, false);
-                flameRoot = flameObject.transform;
+                GameObject hornsObject = new GameObject("BoostHorns");
+                hornsObject.transform.SetParent(visualRoot, false);
+                hornsRoot = hornsObject.transform;
             }
 
-            flameRoot.localPosition = new Vector3(0f, 0.05f, -0.58f);
-            flameRoot.localRotation = Quaternion.Euler(-90f, 0f, 0f);
-            flameRoot.localScale = new Vector3(0.34f, 0.34f, 0.34f);
-            flameRoot.gameObject.SetActive(false);
+            hornsRoot.localPosition = new Vector3(0f, 0.1f, -0.54f);
+            hornsRoot.localRotation = Quaternion.identity;
+            hornsRoot.gameObject.SetActive(false);
 
-            CreateBoostFireLayer(flameRoot, "Core", 26f, 0.18f, 0.32f, 0.14f, 0.22f);
-            CreateBoostFireLayer(flameRoot, "Outer", 18f, 0.28f, 0.48f, 0.18f, 0.28f);
+            CreateHorn(hornsRoot, "LeftHorn", new Vector3(-0.28f, 0.1f, 0f), -24f);
+            CreateHorn(hornsRoot, "RightHorn", new Vector3(0.28f, 0.1f, 0f), 24f);
+        }
+
+        private void CreateHorn(Transform parent, string hornName, Vector3 localPosition, float zRotation)
+        {
+            Transform hornTransform = parent.Find(hornName);
+            if (hornTransform == null)
+            {
+                GameObject hornObject = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                hornObject.name = hornName;
+                hornObject.transform.SetParent(parent, false);
+
+                Collider hornCollider = hornObject.GetComponent<Collider>();
+                if (hornCollider != null)
+                {
+                    Destroy(hornCollider);
+                }
+
+                hornTransform = hornObject.transform;
+            }
+
+            hornTransform.localPosition = localPosition;
+            hornTransform.localRotation = Quaternion.Euler(72f, 0f, zRotation);
+            hornTransform.localScale = new Vector3(0.08f, 0.24f, 0.08f);
+
+            Renderer hornRenderer = hornTransform.GetComponent<Renderer>();
+            if (hornRenderer != null)
+            {
+                hornRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                hornRenderer.receiveShadows = false;
+                hornRenderer.material.color = new Color(0.86f, 0.12f, 0.12f, 1f);
+            }
         }
 
         private GameObject CreateBoostFire(Transform parent)

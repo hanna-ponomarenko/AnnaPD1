@@ -31,7 +31,7 @@ namespace Featurehole.Runner.Data
         [SerializeField] private float trackWidth = 8f;
 
         [Min(0.1f)]
-        [SerializeField] private float holeDiameter = 1.8f;
+        [SerializeField] private float holeDiameter = 0.9f;
 
         [Header("Collectibles")]
         [Min(0.1f)]
@@ -45,7 +45,7 @@ namespace Featurehole.Runner.Data
 
         [Header("Hole Growth")]
         [Min(0f)]
-        [SerializeField] private float growthPerCollectible = 0.2f;
+        [SerializeField] private float growthPerCollectible = 0.1f;
 
         [Min(0.1f)]
         [SerializeField] private float maxHoleDiameter = 4.5f;
@@ -100,11 +100,11 @@ namespace Featurehole.Runner.Data
             config.initialSegmentCount = 6;
             config.despawnOffset = 14f;
             config.trackWidth = 8f;
-            config.holeDiameter = 1.8f;
+            config.holeDiameter = 0.9f;
             config.collectibleSize = 0.9f;
             config.collectibleSpawnSpacing = 4f;
             config.maxMissedCollectibles = 3;
-            config.growthPerCollectible = 0.2f;
+            config.growthPerCollectible = 0.1f;
             config.maxHoleDiameter = 4.5f;
             config.pepperSize = 1f;
             config.pepperSpawnSpacing = 18f;
