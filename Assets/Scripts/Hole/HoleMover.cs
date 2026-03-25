@@ -5,6 +5,10 @@ namespace Featurehole.Runner.Hole
 {
     public sealed class HoleMover : MonoBehaviour
     {
+        private const float SplitAnimationDuration = 0.45f;
+        private const float SplitJumpHeight = 0.42f;
+        private const float SplitBounceHeight = 0.12f;
+
         [SerializeField] private string horizontalAxis = "Horizontal";
         [SerializeField] private bool usePointerInput = true;
 
@@ -19,6 +23,7 @@ namespace Featurehole.Runner.Hole
         private float currentDiameter;
         private float visualHeightScale = 1f;
         private float splitTimeRemaining;
+        private float splitAnimationElapsed;
 
         public float CurrentDiameter => currentDiameter;
         public bool IsSplitActive { get; private set; }
@@ -72,6 +77,7 @@ namespace Featurehole.Runner.Hole
 
             currentDiameter = config.HoleDiameter;
             splitTimeRemaining = 0f;
+            splitAnimationElapsed = 0f;
             IsSplitActive = false;
             ApplyVisualScale();
         }
@@ -92,6 +98,11 @@ namespace Featurehole.Runner.Hole
             if (config == null || duration <= 0f)
             {
                 return;
+            }
+
+            if (!IsSplitActive)
+            {
+                splitAnimationElapsed = 0f;
             }
 
             splitTimeRemaining = Mathf.Max(splitTimeRemaining, duration);
@@ -119,7 +130,7 @@ namespace Featurehole.Runner.Hole
                 return false;
             }
 
-            float splitOffset = GetSplitOffset();
+            float splitOffset = GetCurrentSplitOffset();
             if (Mathf.Abs(worldPosition.x - (transform.position.x - splitOffset)) <= absorbRadius)
             {
                 return true;
@@ -218,6 +229,7 @@ namespace Featurehole.Runner.Hole
 
             if (IsSplitActive && splitTimeRemaining > 0f)
             {
+                splitAnimationElapsed = Mathf.Min(SplitAnimationDuration, splitAnimationElapsed + deltaTime);
                 splitTimeRemaining = Mathf.Max(0f, splitTimeRemaining - deltaTime);
                 if (splitTimeRemaining <= 0f)
                 {
@@ -225,6 +237,8 @@ namespace Featurehole.Runner.Hole
                     ApplyVisualScale();
                 }
             }
+
+            UpdateVisualLayout();
         }
 
         private bool TryGetPointerTargetX(out float targetX)
@@ -270,9 +284,6 @@ namespace Featurehole.Runner.Hole
                 return;
             }
 
-            float splitOffset = IsSplitActive ? GetSplitOffset() : 0f;
-
-            visualTransform.localPosition = new Vector3(-splitOffset, 0f, 0f);
             visualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
 
             if (splitVisualTransform == null)
@@ -281,13 +292,83 @@ namespace Featurehole.Runner.Hole
             }
 
             splitVisualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
-            splitVisualTransform.localPosition = new Vector3(splitOffset, 0f, 0f);
-            splitVisualTransform.gameObject.SetActive(IsSplitActive);
+            UpdateVisualLayout();
         }
 
         private float GetSplitOffset()
         {
             return currentDiameter * config.SplitHoleSpacingMultiplier;
+        }
+
+        private float GetCurrentSplitOffset()
+        {
+            if (!IsSplitActive)
+            {
+                return 0f;
+            }
+
+            float progress = Mathf.Clamp01(splitAnimationElapsed / SplitAnimationDuration);
+            return GetSplitOffset() * EaseOutBack(progress);
+        }
+
+        private float GetCurrentSplitHeight()
+        {
+            if (!IsSplitActive)
+            {
+                return 0f;
+            }
+
+            float progress = Mathf.Clamp01(splitAnimationElapsed / SplitAnimationDuration);
+            float jumpArc = Mathf.Sin(progress * Mathf.PI) * SplitJumpHeight;
+
+            if (progress <= 0.72f)
+            {
+                return jumpArc;
+            }
+
+            float bounceProgress = Mathf.InverseLerp(0.72f, 1f, progress);
+            float bounceArc = Mathf.Sin(bounceProgress * Mathf.PI) * SplitBounceHeight * (1f - bounceProgress);
+            return jumpArc + bounceArc;
+        }
+
+        private void UpdateVisualLayout()
+        {
+            if (visualTransform == null)
+            {
+                return;
+            }
+
+            if (!IsSplitActive)
+            {
+                visualTransform.localPosition = Vector3.zero;
+                if (splitVisualTransform != null)
+                {
+                    splitVisualTransform.localPosition = Vector3.zero;
+                    splitVisualTransform.gameObject.SetActive(false);
+                }
+
+                return;
+            }
+
+            float splitOffset = GetCurrentSplitOffset();
+            float splitHeight = GetCurrentSplitHeight();
+
+            visualTransform.localPosition = new Vector3(-splitOffset, splitHeight, 0f);
+
+            if (splitVisualTransform == null)
+            {
+                return;
+            }
+
+            splitVisualTransform.gameObject.SetActive(true);
+            splitVisualTransform.localPosition = new Vector3(splitOffset, splitHeight, 0f);
+        }
+
+        private static float EaseOutBack(float value)
+        {
+            const float overshoot = 1.70158f;
+            float t = value - 1f;
+            return 1f + (overshoot + 1f) * t * t * t + overshoot * t * t;
         }
     }
 }
