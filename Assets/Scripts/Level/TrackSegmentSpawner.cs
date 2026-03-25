@@ -10,6 +10,7 @@ namespace Featurehole.Runner.Level
 
         [SerializeField] private TrackSegment segmentPrefab;
         [SerializeField] private Transform segmentsRoot;
+        [SerializeField] private bool logSegmentGap = true;
 
         private readonly Queue<TrackSegment> activeSegments = new Queue<TrackSegment>();
 
@@ -80,7 +81,9 @@ namespace Featurehole.Runner.Level
 
             segment.gameObject.name = $"{segment.gameObject.name}_{activeSegments.Count}";
             segment.Configure(continuousTrackLength);
+            float previousEndZ = nextSpawnZ;
             segment.SetMinZ(nextSpawnZ);
+            LogSegmentGap("spawn", segment, previousEndZ);
 
             activeSegments.Enqueue(segment);
             nextSpawnZ = segment.MaxZ;
@@ -89,7 +92,9 @@ namespace Featurehole.Runner.Level
         private void RecycleFirstSegment()
         {
             TrackSegment segment = activeSegments.Dequeue();
+            float previousEndZ = nextSpawnZ;
             segment.SetMinZ(nextSpawnZ);
+            LogSegmentGap("recycle", segment, previousEndZ);
             activeSegments.Enqueue(segment);
             nextSpawnZ = segment.MaxZ;
         }
@@ -316,6 +321,20 @@ namespace Featurehole.Runner.Level
 
             mesh.RecalculateNormals();
             return mesh;
+        }
+
+        private void LogSegmentGap(string phase, TrackSegment segment, float previousEndZ)
+        {
+            if (!logSegmentGap || segment == null)
+            {
+                return;
+            }
+
+            float newStartZ = segment.MinZ;
+            float gapDistance = newStartZ - previousEndZ;
+            Debug.Log(
+                $"[TrackSegmentSpawner] {phase} segment='{segment.gameObject.name}' prevEnd={previousEndZ:0.###} newStart={newStartZ:0.###} gap={gapDistance:0.#####}",
+                this);
         }
     }
 }
