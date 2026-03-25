@@ -11,6 +11,7 @@ namespace Featurehole.Runner.Core
         [SerializeField] private RunnerGameConfig config;
         [SerializeField] private HoleMover holeMover;
         [SerializeField] private TrackSegmentSpawner trackSpawner;
+        [SerializeField] private AppleSpawner appleSpawner;
         [SerializeField] private PepperBoostSpawner pepperSpawner;
         [SerializeField] private RunnerHud hud;
         [SerializeField] private bool autoStart = true;
@@ -23,6 +24,7 @@ namespace Featurehole.Runner.Core
             RunnerGameConfig runnerConfig,
             HoleMover runnerHoleMover,
             TrackSegmentSpawner runnerTrackSpawner,
+            AppleSpawner runnerAppleSpawner,
             PepperBoostSpawner runnerPepperSpawner,
             RunnerHud runnerHud,
             bool shouldAutoStart = true)
@@ -30,6 +32,7 @@ namespace Featurehole.Runner.Core
             config = runnerConfig;
             holeMover = runnerHoleMover;
             trackSpawner = runnerTrackSpawner;
+            appleSpawner = runnerAppleSpawner;
             pepperSpawner = runnerPepperSpawner;
             hud = runnerHud;
             autoStart = shouldAutoStart;
@@ -45,6 +48,7 @@ namespace Featurehole.Runner.Core
 
             holeMover.Initialize(config);
             trackSpawner.Initialize(config);
+            appleSpawner.Initialize(config, holeMover);
             pepperSpawner.Initialize(config, holeMover);
             hud.Initialize(runtime, holeMover);
 
@@ -72,6 +76,7 @@ namespace Featurehole.Runner.Core
 
             holeMover.Tick(deltaTime);
             trackSpawner.Tick(deltaTime, currentForwardSpeed);
+            appleSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             pepperSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             runtime.Tick(deltaTime, config.ForwardSpeed);
             holeMover.SetBoostActive(runtime.IsBoostActive);
@@ -88,6 +93,7 @@ namespace Featurehole.Runner.Core
             holeMover.ResetPosition();
             holeMover.ResetSize();
             holeMover.SetBoostActive(false);
+            appleSpawner.ResetField();
             pepperSpawner.ResetField();
             runtime.StartRun(config.MaxMissedCollectibles);
         }
@@ -104,6 +110,7 @@ namespace Featurehole.Runner.Core
             holeMover.ResetPosition();
             holeMover.ResetSize();
             holeMover.SetBoostActive(false);
+            appleSpawner.ResetField();
             pepperSpawner.ResetField();
         }
 
@@ -112,6 +119,7 @@ namespace Featurehole.Runner.Core
             if (config != null
                 && holeMover != null
                 && trackSpawner != null
+                && appleSpawner != null
                 && pepperSpawner != null
                 && hud != null)
             {

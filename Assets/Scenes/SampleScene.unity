@@ -308,6 +308,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 71e323cf1e754240969da0d8eca5444b, type: 2}
   pepperSprite: {fileID: 7897533479186361835, guid: a4c1b8ddbe7307940a81952086769171, type: 3}
+  appleSprite: {fileID: -3946612055665836118, guid: 2bef337dee8cb9045a5b1da12cb5d5ab, type: 3}
   boostFireMaterial: {fileID: 0}
   boostFirePrefab: {fileID: 100100000, guid: 244b1cc8940bd0844a05812855fbe45d, type: 3}
   autoStart: 1

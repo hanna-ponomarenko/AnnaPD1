@@ -10,6 +10,7 @@ namespace Featurehole.Runner.Core
     {
         [SerializeField] private RunnerGameConfig config;
         [SerializeField] private Sprite pepperSprite;
+        [SerializeField] private Sprite appleSprite;
         [SerializeField] private Material boostFireMaterial;
         [SerializeField] private UnityEngine.Object boostFirePrefab;
         [SerializeField] private bool autoStart = true;
@@ -32,11 +33,13 @@ namespace Featurehole.Runner.Core
 
             HoleMover holeMover = CreateHole(runtimeConfig);
             TrackSegmentSpawner trackSpawner = CreateTrackSpawner();
+            AppleSpawner appleSpawner = CreateAppleSpawner();
+            appleSpawner.SetAppleSprite(appleSprite);
             PepperBoostSpawner pepperSpawner = CreatePepperSpawner();
             pepperSpawner.SetPepperSprite(pepperSprite);
             RunnerHud hud = CreateHud();
 
-            controller.Configure(runtimeConfig, holeMover, trackSpawner, pepperSpawner, hud, autoStart);
+            controller.Configure(runtimeConfig, holeMover, trackSpawner, appleSpawner, pepperSpawner, hud, autoStart);
 
             if (configureMainCamera)
             {
@@ -430,6 +433,25 @@ namespace Featurehole.Runner.Core
             }
 
             return pepperSpawner;
+        }
+
+        private AppleSpawner CreateAppleSpawner()
+        {
+            Transform spawnerRoot = transform.Find("AppleSpawner");
+            if (spawnerRoot == null)
+            {
+                GameObject spawnerObject = new GameObject("AppleSpawner");
+                spawnerObject.transform.SetParent(transform, false);
+                spawnerRoot = spawnerObject.transform;
+            }
+
+            AppleSpawner appleSpawner = spawnerRoot.GetComponent<AppleSpawner>();
+            if (appleSpawner == null)
+            {
+                appleSpawner = spawnerRoot.gameObject.AddComponent<AppleSpawner>();
+            }
+
+            return appleSpawner;
         }
 
         private RunnerHud CreateHud()
