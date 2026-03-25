@@ -304,8 +304,8 @@ namespace Featurehole.Runner.Level
                 runtimeRiverBaseMaterial.SetTexture("_WaveTex", runtimeRiverBaseTexture);
                 runtimeRiverBaseMaterial.SetTexture("_DetailTex", runtimeRiverCurrentTexture);
                 runtimeRiverBaseMaterial.SetTexture("_FoamTex", runtimeRiverFoamTexture);
-                runtimeRiverBaseMaterial.SetColor("_ShallowColor", new Color(0.53f, 0.88f, 0.94f, 0.82f));
-                runtimeRiverBaseMaterial.SetColor("_DeepColor", new Color(0.11f, 0.3f, 0.55f, 0.92f));
+                runtimeRiverBaseMaterial.SetColor("_ShallowColor", new Color(0.32f, 0.68f, 0.96f, 0.84f));
+                runtimeRiverBaseMaterial.SetColor("_DeepColor", new Color(0.06f, 0.18f, 0.58f, 0.94f));
                 runtimeRiverBaseMaterial.SetColor("_FoamColor", Color.white);
                 runtimeRiverBaseMaterial.SetFloat("_WaveScale", 2.1f);
                 runtimeRiverBaseMaterial.SetFloat("_DetailScale", 4.2f);
