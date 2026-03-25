@@ -46,8 +46,7 @@ namespace Featurehole.Runner.Gameplay
             }
 
             ClearApples();
-            float holeZ = holeMover != null ? holeMover.transform.position.z : 0f;
-            nextSpawnZ = holeZ + config.SegmentLength;
+            nextSpawnZ = config.SegmentLength;
 
             SpawnApple(0);
         }
@@ -59,6 +58,7 @@ namespace Featurehole.Runner.Gameplay
                 return;
             }
 
+            float moveDelta = -forwardSpeed * deltaTime;
             Transform holeTransform = holeMover.transform;
             float passedThreshold = holeTransform.position.z - config.CollectibleSize;
 
@@ -68,6 +68,8 @@ namespace Featurehole.Runner.Gameplay
                 {
                     continue;
                 }
+
+                apple.Move(moveDelta);
 
                 Vector3 applePosition = apple.transform.position;
                 if (holeMover.CanAbsorb(applePosition, config.CollectibleSize))
@@ -103,11 +105,9 @@ namespace Featurehole.Runner.Gameplay
         {
             float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - config.CollectibleSize);
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
-            float holeZ = holeMover != null ? holeMover.transform.position.z : 0f;
-            float spawnZ = Mathf.Max(nextSpawnZ, holeZ + config.SegmentLength);
-            Vector3 spawnPosition = new Vector3(laneX, 0.58f, spawnZ);
+            Vector3 spawnPosition = new Vector3(laneX, 0.58f, nextSpawnZ);
             apple.SetPosition(spawnPosition);
-            nextSpawnZ = spawnZ + GetCycleDistance();
+            nextSpawnZ += GetCycleDistance();
         }
 
         private void ClearApples()

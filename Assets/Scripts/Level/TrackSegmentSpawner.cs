@@ -39,15 +39,22 @@ namespace Featurehole.Runner.Level
             BuildInitialTrack();
         }
 
-        public void Tick(float holeZ)
+        public void Tick(float deltaTime, float forwardSpeed)
         {
             if (config == null || activeSegments.Count == 0)
             {
                 return;
             }
 
+            float moveDelta = -forwardSpeed * deltaTime;
+
+            foreach (TrackSegment segment in activeSegments)
+            {
+                segment.Move(moveDelta);
+            }
+
             TrackSegment firstSegment = activeSegments.Peek();
-            if (firstSegment.MaxZ < holeZ - config.DespawnOffset)
+            if (firstSegment.MaxZ < -config.DespawnOffset)
             {
                 RecycleFirstSegment();
             }
