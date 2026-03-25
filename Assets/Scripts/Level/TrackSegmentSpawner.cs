@@ -175,27 +175,6 @@ namespace Featurehole.Runner.Level
                 new Vector3(riverWidth * 0.1f, 0.02f, 1f),
                 GetRuntimeRiverFoamMaterial());
             CreateBlock(segmentObject.transform, "UnderwaterSand", new Vector3(0f, -0.18f, 0f), new Vector3(riverWidth * 0.78f, 0.08f, 1f), new Color(0.71f, 0.63f, 0.39f));
-            CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.28f, -0.08f, -3.2f), new Color(0.99f, 0.72f, 0.34f), 0.22f);
-            CreateFish(segmentObject.transform, new Vector3(riverWidth * 0.22f, -0.05f, 0.8f), new Color(0.96f, 0.54f, 0.18f), 0.18f);
-            CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.06f, -0.09f, 3.5f), new Color(0.96f, 0.84f, 0.4f), 0.2f);
-            CreateShell(segmentObject.transform, new Vector3(-riverWidth * 0.18f, -0.12f, 2.4f), new Color(0.95f, 0.86f, 0.68f));
-            CreateShell(segmentObject.transform, new Vector3(riverWidth * 0.24f, -0.12f, -2.6f), new Color(0.84f, 0.8f, 0.69f));
-            CreateCrocodile(segmentObject.transform, new Vector3(0f, -0.03f, 1.8f), new Color(0.34f, 0.47f, 0.26f));
-
-            CreateReeds(segmentObject.transform, new Vector3(-riverWidth * 0.42f, 0.06f, -3.2f), 5, -1f);
-            CreateReeds(segmentObject.transform, new Vector3(riverWidth * 0.4f, 0.06f, 2.2f), 4, 1f);
-
-            float sideOffsetX = riverWidth * 0.5f + 2.35f;
-            CreatePyramid(segmentObject.transform, "PyramidLeft", new Vector3(-sideOffsetX - 1.6f, 1.15f, -2.4f), new Vector3(1.7f, 1.6f, 1.7f), new Color(0.82f, 0.69f, 0.42f));
-            CreatePyramid(segmentObject.transform, "PyramidRight", new Vector3(sideOffsetX + 1.8f, 1.05f, 2.8f), new Vector3(1.45f, 1.35f, 1.45f), new Color(0.76f, 0.63f, 0.36f));
-            CreateRock(segmentObject.transform, "RockLeft", new Vector3(-sideOffsetX - 0.5f, 0.28f, 2.6f), new Vector3(1.8f, 0.7f, 1.4f), new Color(0.58f, 0.49f, 0.39f));
-            CreateRock(segmentObject.transform, "RockRight", new Vector3(sideOffsetX + 0.4f, 0.24f, -2.8f), new Vector3(1.7f, 0.65f, 1.2f), new Color(0.64f, 0.56f, 0.43f));
-            CreateStatue(segmentObject.transform, "AnubisLeft", new Vector3(-sideOffsetX + 0.15f, 0.58f, 1.1f), new Color(0.29f, 0.25f, 0.18f), 0.9f);
-            CreateStatue(segmentObject.transform, "HorusRight", new Vector3(sideOffsetX - 0.12f, 0.58f, -1.3f), new Color(0.23f, 0.2f, 0.17f), 0.9f);
-            CreatePalm(segmentObject.transform, "PalmLeft", new Vector3(-sideOffsetX - 1.1f, 0.45f, 3.2f), -1f);
-            CreatePalm(segmentObject.transform, "PalmRight", new Vector3(sideOffsetX + 1.05f, 0.45f, -3.3f), 1f);
-            CreateObelisk(segmentObject.transform, "ObeliskLeft", new Vector3(-sideOffsetX - 2.2f, 0.9f, -0.8f), 0.75f);
-            CreateObelisk(segmentObject.transform, "ObeliskRight", new Vector3(sideOffsetX + 2.2f, 0.9f, 0.95f), 0.75f);
 
             return segment;
         }
