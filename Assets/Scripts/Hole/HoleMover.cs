@@ -19,16 +19,24 @@ namespace Featurehole.Runner.Hole
         private Vector3 startPosition;
         private Transform visualTransform;
         private Transform splitVisualTransform;
+        private Transform boostAuraTransform;
+        private Transform splitBoostAuraTransform;
         private Transform boostHornsTransform;
         private Transform splitBoostHornsTransform;
         private GameObject boostHornsObject;
         private GameObject splitBoostHornsObject;
+        private GameObject boostAuraObject;
+        private GameObject splitBoostAuraObject;
         private GameObject boostFlameObject;
         private Renderer[] boostFlameVisualRenderers;
         private ParticleSystem[] boostFlames;
         private ParticleSystemRenderer[] boostFlameRenderers;
         private float currentDiameter;
         private float visualHeightScale = 1f;
+        private Vector3 boostAuraBaseScale = Vector3.one;
+        private Vector3 splitBoostAuraBaseScale = Vector3.one;
+        private Material boostAuraMaterial;
+        private Material splitBoostAuraMaterial;
         private float splitTimeRemaining;
         private float splitAnimationElapsed;
         private float mergeAnimationElapsed;
@@ -62,6 +70,30 @@ namespace Featurehole.Runner.Hole
             boostHornsObject = boostHornsTransform != null ? boostHornsTransform.gameObject : null;
             splitBoostHornsTransform = transform.Find("VisualTwin/BoostHorns");
             splitBoostHornsObject = splitBoostHornsTransform != null ? splitBoostHornsTransform.gameObject : null;
+            boostAuraTransform = transform.Find("Visual/BoostAura");
+            boostAuraObject = boostAuraTransform != null ? boostAuraTransform.gameObject : null;
+            splitBoostAuraTransform = transform.Find("VisualTwin/BoostAura");
+            splitBoostAuraObject = splitBoostAuraTransform != null ? splitBoostAuraTransform.gameObject : null;
+
+            if (boostAuraTransform != null)
+            {
+                boostAuraBaseScale = boostAuraTransform.localScale;
+                Renderer boostAuraRenderer = boostAuraTransform.GetComponent<Renderer>();
+                if (boostAuraRenderer != null)
+                {
+                    boostAuraMaterial = boostAuraRenderer.material;
+                }
+            }
+
+            if (splitBoostAuraTransform != null)
+            {
+                splitBoostAuraBaseScale = splitBoostAuraTransform.localScale;
+                Renderer splitBoostAuraRenderer = splitBoostAuraTransform.GetComponent<Renderer>();
+                if (splitBoostAuraRenderer != null)
+                {
+                    splitBoostAuraMaterial = splitBoostAuraRenderer.material;
+                }
+            }
 
             Transform boostFlameTransform = transform.Find("BoostFlame");
             boostFlameObject = boostFlameTransform != null ? boostFlameTransform.gameObject : null;
@@ -169,6 +201,16 @@ namespace Featurehole.Runner.Hole
             if (splitBoostHornsObject != null)
             {
                 splitBoostHornsObject.SetActive(false);
+            }
+
+            if (boostAuraObject != null)
+            {
+                boostAuraObject.SetActive(isActive);
+            }
+
+            if (splitBoostAuraObject != null)
+            {
+                splitBoostAuraObject.SetActive(isActive && (IsSplitActive || isMergeAnimating));
             }
 
             isBoostVisualActive = isActive;
@@ -458,6 +500,33 @@ namespace Featurehole.Runner.Hole
             if (splitBoostHornsTransform != null)
             {
                 splitBoostHornsTransform.localScale = Vector3.one * pulse;
+            }
+
+            if (boostAuraTransform != null)
+            {
+                boostAuraTransform.localScale = boostAuraBaseScale * (pulse * 1.12f);
+            }
+
+            if (splitBoostAuraTransform != null)
+            {
+                splitBoostAuraTransform.localScale = splitBoostAuraBaseScale * (pulse * 1.12f);
+            }
+
+            Color auraColor = isBoostVisualActive
+                ? Color.Lerp(
+                    new Color(1f, 0.15f, 0.1f, 0.78f),
+                    new Color(0.78f, 0.02f, 0.05f, 0.95f),
+                    (Mathf.Sin(boostVisualElapsed * 10f) + 1f) * 0.5f)
+                : new Color(1f, 0.15f, 0.1f, 0f);
+
+            if (boostAuraMaterial != null)
+            {
+                boostAuraMaterial.color = auraColor;
+            }
+
+            if (splitBoostAuraMaterial != null)
+            {
+                splitBoostAuraMaterial.color = auraColor;
             }
         }
 

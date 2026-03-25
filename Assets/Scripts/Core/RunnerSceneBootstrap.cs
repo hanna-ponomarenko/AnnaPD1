@@ -19,6 +19,7 @@ namespace Featurehole.Runner.Core
 
         private Material runtimeBoostFireMaterial;
         private Material runtimeHoleDecalMaterial;
+        private Material runtimeHoleAuraMaterial;
         private Material runtimeSunMaterial;
 
         private void Awake()
@@ -78,6 +79,7 @@ namespace Featurehole.Runner.Core
             }
 
             ConfigureHoleDecal(visual, runtimeConfig);
+            ConfigureBoostAura(visual);
             ConfigureBoostHorns(visual);
 
             Transform boostFlame = holeRoot.Find("BoostFlame");
@@ -159,6 +161,64 @@ namespace Featurehole.Runner.Core
             return runtimeHoleDecalMaterial;
         }
 
+        private void ConfigureBoostAura(Transform visualRoot)
+        {
+            Transform auraTransform = visualRoot.Find("BoostAura");
+            if (auraTransform == null)
+            {
+                GameObject auraObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                auraObject.name = "BoostAura";
+                auraObject.transform.SetParent(visualRoot, false);
+
+                Collider auraCollider = auraObject.GetComponent<Collider>();
+                if (auraCollider != null)
+                {
+                    Destroy(auraCollider);
+                }
+
+                auraTransform = auraObject.transform;
+            }
+
+            auraTransform.localPosition = new Vector3(0f, -0.005f, 0f);
+            auraTransform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            auraTransform.localScale = Vector3.one * 1.8f;
+            auraTransform.gameObject.SetActive(false);
+
+            Renderer auraRenderer = auraTransform.GetComponent<Renderer>();
+            if (auraRenderer != null)
+            {
+                Material auraMaterial = GetRuntimeHoleAuraMaterial();
+                auraMaterial.renderQueue = 3990;
+                auraRenderer.material = auraMaterial;
+                auraRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                auraRenderer.receiveShadows = false;
+                auraRenderer.sortingOrder = 240;
+            }
+        }
+
+        private Material GetRuntimeHoleAuraMaterial()
+        {
+            if (runtimeHoleAuraMaterial != null)
+            {
+                return runtimeHoleAuraMaterial;
+            }
+
+            Shader shader = Shader.Find("Unlit/Transparent");
+            if (shader == null)
+            {
+                shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+            }
+
+            runtimeHoleAuraMaterial = new Material(shader)
+            {
+                name = "RuntimeHoleAuraMaterial",
+                mainTexture = CreateHoleAuraTexture(),
+                color = Color.white
+            };
+
+            return runtimeHoleAuraMaterial;
+        }
+
         private Texture2D CreateHoleDecalTexture()
         {
             const int textureSize = 256;
@@ -203,6 +263,43 @@ namespace Featurehole.Runner.Core
                                 new Color(0.01f, 0.01f, 0.01f, 1f),
                                 t);
                         }
+                    }
+
+                    texture.SetPixel(x, y, color);
+                }
+            }
+
+            texture.Apply();
+            return texture;
+        }
+
+        private Texture2D CreateHoleAuraTexture()
+        {
+            const int textureSize = 256;
+
+            Texture2D texture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false)
+            {
+                name = "HoleAuraTexture",
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp
+            };
+
+            Vector2 center = new Vector2(textureSize * 0.5f, textureSize * 0.5f);
+            float radius = textureSize * 0.48f;
+
+            for (int y = 0; y < textureSize; y++)
+            {
+                for (int x = 0; x < textureSize; x++)
+                {
+                    float distance = Vector2.Distance(new Vector2(x, y), center) / radius;
+                    Color color = Color.clear;
+
+                    if (distance <= 1f)
+                    {
+                        float outerGlow = Mathf.SmoothStep(1f, 0.62f, distance);
+                        float innerCut = Mathf.SmoothStep(0.28f, 0.12f, distance);
+                        float alpha = Mathf.Clamp01(outerGlow - innerCut) * 0.95f;
+                        color = new Color(1f, 1f, 1f, alpha);
                     }
 
                     texture.SetPixel(x, y, color);
