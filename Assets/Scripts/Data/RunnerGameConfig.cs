@@ -65,7 +65,7 @@ namespace Featurehole.Runner.Data
 
         [Header("Apple Split")]
         [Min(0f)]
-        [SerializeField] private float appleSplitDuration = 4f;
+        [SerializeField] private float appleSplitDuration = 2f;
 
         [Min(0.1f)]
         [SerializeField] private float splitHoleSpacingMultiplier = 0.65f;
@@ -110,7 +110,7 @@ namespace Featurehole.Runner.Data
             config.pepperSpawnSpacing = 18f;
             config.boostDuration = 3f;
             config.boostSpeedMultiplier = 1.8f;
-            config.appleSplitDuration = 4f;
+            config.appleSplitDuration = 2f;
             config.splitHoleSpacingMultiplier = 0.65f;
             return config;
         }
