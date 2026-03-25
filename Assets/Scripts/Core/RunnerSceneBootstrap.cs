@@ -345,10 +345,10 @@ namespace Featurehole.Runner.Core
             gradient.SetKeys(
                 new[]
                 {
-                    new GradientColorKey(new Color(1f, 0.98f, 0.75f), 0f),
-                    new GradientColorKey(new Color(1f, 0.8f, 0.24f), 0.18f),
-                    new GradientColorKey(new Color(1f, 0.36f, 0.08f), 0.65f),
-                    new GradientColorKey(new Color(0.25f, 0.18f, 0.18f), 1f)
+                    new GradientColorKey(new Color(1f, 0.82f, 0.82f), 0f),
+                    new GradientColorKey(new Color(1f, 0.22f, 0.18f), 0.18f),
+                    new GradientColorKey(new Color(0.86f, 0.04f, 0.04f), 0.65f),
+                    new GradientColorKey(new Color(0.22f, 0.02f, 0.02f), 1f)
                 },
                 new[]
                 {
@@ -439,9 +439,9 @@ namespace Featurehole.Runner.Core
 
         private void ConfigureBoostFlame(Transform boostFlame)
         {
-            boostFlame.localPosition = new Vector3(0f, 0.08f, 0.72f);
+            boostFlame.localPosition = new Vector3(0f, 0.2f, -1.4f);
             boostFlame.localRotation = Quaternion.Euler(-90f, 0f, 0f);
-            boostFlame.localScale = new Vector3(8f, 8f, 8f);
+            boostFlame.localScale = new Vector3(80f, 80f, 80f);
 
             foreach (ParticleSystemRenderer renderer in boostFlame.GetComponentsInChildren<ParticleSystemRenderer>(true))
             {
