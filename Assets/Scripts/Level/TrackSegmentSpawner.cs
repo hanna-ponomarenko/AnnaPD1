@@ -211,10 +211,19 @@ namespace Featurehole.Runner.Level
 
             if (riverBaseMaterial != null)
             {
-                Vector2 baseOffset = new Vector2(
-                    Mathf.Sin(waterAnimationTime * 0.13f) * 0.03f,
-                    -waterAnimationTime * 0.18f * normalizedSpeed);
-                riverBaseMaterial.mainTextureOffset = baseOffset;
+                if (riverBaseMaterial.HasProperty("_FlowSpeedA"))
+                {
+                    riverBaseMaterial.SetFloat("_FlowSpeedA", 0.05f * normalizedSpeed);
+                    riverBaseMaterial.SetFloat("_FlowSpeedB", 0.11f * normalizedSpeed);
+                    riverBaseMaterial.SetFloat("_WaveHeight", 0.055f + Mathf.Sin(waterAnimationTime * 0.45f) * 0.008f);
+                }
+                else
+                {
+                    Vector2 baseOffset = new Vector2(
+                        Mathf.Sin(waterAnimationTime * 0.13f) * 0.03f,
+                        -waterAnimationTime * 0.18f * normalizedSpeed);
+                    riverBaseMaterial.mainTextureOffset = baseOffset;
+                }
             }
 
             if (riverCurrentMaterial != null)
@@ -282,9 +291,42 @@ namespace Featurehole.Runner.Level
             }
 
             runtimeRiverBaseTexture = CreateRiverBaseTexture();
-            runtimeRiverBaseMaterial = CreateTransparentUnlitMaterial("RuntimeRiverBaseMaterial", runtimeRiverBaseTexture);
-            runtimeRiverBaseMaterial.color = new Color(0.62f, 0.9f, 1f, 0.96f);
-            runtimeRiverBaseMaterial.mainTextureScale = new Vector2(1.45f, chunkLength * 0.16f);
+            runtimeRiverCurrentTexture = runtimeRiverCurrentTexture != null ? runtimeRiverCurrentTexture : CreateRiverCurrentTexture();
+            runtimeRiverFoamTexture = runtimeRiverFoamTexture != null ? runtimeRiverFoamTexture : CreateRiverFoamTexture();
+
+            Shader waterShader = Shader.Find("Featurehole/Runner/Water");
+            if (waterShader != null)
+            {
+                runtimeRiverBaseMaterial = new Material(waterShader)
+                {
+                    name = "RuntimeRiverBaseMaterial"
+                };
+                runtimeRiverBaseMaterial.SetTexture("_WaveTex", runtimeRiverBaseTexture);
+                runtimeRiverBaseMaterial.SetTexture("_DetailTex", runtimeRiverCurrentTexture);
+                runtimeRiverBaseMaterial.SetTexture("_FoamTex", runtimeRiverFoamTexture);
+                runtimeRiverBaseMaterial.SetColor("_ShallowColor", new Color(0.53f, 0.88f, 0.94f, 0.82f));
+                runtimeRiverBaseMaterial.SetColor("_DeepColor", new Color(0.11f, 0.3f, 0.55f, 0.92f));
+                runtimeRiverBaseMaterial.SetColor("_FoamColor", Color.white);
+                runtimeRiverBaseMaterial.SetFloat("_WaveScale", 2.1f);
+                runtimeRiverBaseMaterial.SetFloat("_DetailScale", 4.2f);
+                runtimeRiverBaseMaterial.SetFloat("_FlowSpeedA", 0.05f);
+                runtimeRiverBaseMaterial.SetFloat("_FlowSpeedB", 0.11f);
+                runtimeRiverBaseMaterial.SetFloat("_WaveHeight", 0.06f);
+                runtimeRiverBaseMaterial.SetFloat("_NormalStrength", 1.4f);
+                runtimeRiverBaseMaterial.SetFloat("_FoamStrength", 0.42f);
+                runtimeRiverBaseMaterial.SetFloat("_FresnelStrength", 1.55f);
+                runtimeRiverBaseMaterial.SetFloat("_Smoothness", 0.94f);
+                runtimeRiverBaseMaterial.SetFloat("_Metallic", 0.02f);
+                runtimeRiverBaseMaterial.SetFloat("_Alpha", 0.78f);
+                runtimeRiverBaseMaterial.renderQueue = 3000;
+            }
+            else
+            {
+                runtimeRiverBaseMaterial = CreateTransparentUnlitMaterial("RuntimeRiverBaseMaterial", runtimeRiverBaseTexture);
+                runtimeRiverBaseMaterial.color = new Color(0.62f, 0.9f, 1f, 0.96f);
+                runtimeRiverBaseMaterial.mainTextureScale = new Vector2(1.45f, chunkLength * 0.16f);
+            }
+
             return runtimeRiverBaseMaterial;
         }
 
