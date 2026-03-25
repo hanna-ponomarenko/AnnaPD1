@@ -23,7 +23,7 @@ namespace Featurehole.Runner.Gameplay
             }
 
             const int boxWidth = 240;
-            const int boxHeight = 154;
+            const int boxHeight = 176;
 
             GUI.Box(new Rect(16f, 16f, boxWidth, boxHeight), "Runner");
             GUI.Label(new Rect(28f, 44f, boxWidth - 24, 22f), $"Distance: {runtime.DistanceTravelled:0}");
@@ -37,11 +37,15 @@ namespace Featurehole.Runner.Gameplay
             {
                 GUI.Label(new Rect(28f, 132f, boxWidth - 24, 22f), $"Boost: {runtime.BoostTimeRemaining:0.0}s");
             }
+            if (holeMover != null && holeMover.IsSplitActive)
+            {
+                GUI.Label(new Rect(28f, 154f, boxWidth - 24, 22f), $"Split: {holeMover.SplitTimeRemaining:0.0}s");
+            }
 
             if (runtime.IsGameOver)
             {
-                GUI.Box(new Rect(16f, 176f, 260f, 72f), "Game Over");
-                GUI.Label(new Rect(28f, 204f, 230f, 22f), "Press R to restart");
+                GUI.Box(new Rect(16f, 198f, 260f, 72f), "Game Over");
+                GUI.Label(new Rect(28f, 226f, 230f, 22f), "Press R to restart");
             }
         }
     }

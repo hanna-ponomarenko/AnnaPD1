@@ -61,7 +61,6 @@ namespace Featurehole.Runner.Gameplay
 
             float moveDelta = -forwardSpeed * deltaTime;
             Transform holeTransform = holeMover.transform;
-            float absorbRadius = holeMover.CurrentDiameter * 0.5f + config.PepperSize * 0.3f;
             float passedThreshold = holeTransform.position.z - config.PepperSize;
 
             foreach (PepperPickup pepper in activePeppers)
@@ -74,10 +73,7 @@ namespace Featurehole.Runner.Gameplay
                 pepper.Move(moveDelta);
 
                 Vector3 pepperPosition = pepper.transform.position;
-                float lateralDistance = Mathf.Abs(pepperPosition.x - holeTransform.position.x);
-                float forwardDistance = Mathf.Abs(pepperPosition.z - holeTransform.position.z);
-
-                if (lateralDistance <= absorbRadius && forwardDistance <= config.PepperSize)
+                if (holeMover.CanAbsorb(pepperPosition, config.PepperSize, 0.3f))
                 {
                     pepper.Collect();
                     runtime.RegisterCollected();

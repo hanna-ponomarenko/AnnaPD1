@@ -11,14 +11,18 @@ namespace Featurehole.Runner.Hole
         private RunnerGameConfig config;
         private Vector3 startPosition;
         private Transform visualTransform;
+        private Transform splitVisualTransform;
         private GameObject boostFlameObject;
         private Renderer[] boostFlameVisualRenderers;
         private ParticleSystem[] boostFlames;
         private ParticleSystemRenderer[] boostFlameRenderers;
         private float currentDiameter;
         private float visualHeightScale = 1f;
+        private float splitTimeRemaining;
 
         public float CurrentDiameter => currentDiameter;
+        public bool IsSplitActive { get; private set; }
+        public float SplitTimeRemaining => splitTimeRemaining;
 
         public void Initialize(RunnerGameConfig runnerConfig)
         {
@@ -29,6 +33,15 @@ namespace Featurehole.Runner.Hole
             {
                 visualHeightScale = visualTransform.localScale.y;
             }
+
+            splitVisualTransform = transform.Find("VisualTwin");
+            if (splitVisualTransform == null && visualTransform != null)
+            {
+                GameObject splitVisualObject = Instantiate(visualTransform.gameObject, transform);
+                splitVisualObject.name = "VisualTwin";
+                splitVisualTransform = splitVisualObject.transform;
+            }
+
             Transform boostFlameTransform = transform.Find("BoostFlame");
             boostFlameObject = boostFlameTransform != null ? boostFlameTransform.gameObject : null;
             boostFlameVisualRenderers = boostFlameTransform != null
@@ -58,6 +71,8 @@ namespace Featurehole.Runner.Hole
             }
 
             currentDiameter = config.HoleDiameter;
+            splitTimeRemaining = 0f;
+            IsSplitActive = false;
             ApplyVisualScale();
         }
 
@@ -70,6 +85,47 @@ namespace Featurehole.Runner.Hole
 
             currentDiameter = Mathf.Min(currentDiameter + config.GrowthPerCollectible, config.MaxHoleDiameter);
             ApplyVisualScale();
+        }
+
+        public void ActivateSplit(float duration)
+        {
+            if (config == null || duration <= 0f)
+            {
+                return;
+            }
+
+            splitTimeRemaining = Mathf.Max(splitTimeRemaining, duration);
+            IsSplitActive = true;
+            ApplyVisualScale();
+        }
+
+        public bool CanAbsorb(Vector3 worldPosition, float itemSize, float radiusFactor = 0.35f)
+        {
+            float absorbRadius = currentDiameter * 0.5f + itemSize * radiusFactor;
+            float forwardDistance = Mathf.Abs(worldPosition.z - transform.position.z);
+
+            if (forwardDistance > itemSize)
+            {
+                return false;
+            }
+
+            if (!IsSplitActive && Mathf.Abs(worldPosition.x - transform.position.x) <= absorbRadius)
+            {
+                return true;
+            }
+
+            if (!IsSplitActive)
+            {
+                return false;
+            }
+
+            float splitOffset = GetSplitOffset();
+            if (Mathf.Abs(worldPosition.x - (transform.position.x - splitOffset)) <= absorbRadius)
+            {
+                return true;
+            }
+
+            return Mathf.Abs(worldPosition.x - (transform.position.x + splitOffset)) <= absorbRadius;
         }
 
         public void SetBoostActive(bool isActive)
@@ -149,9 +205,26 @@ namespace Featurehole.Runner.Hole
             }
 
             position.x = Mathf.Clamp(position.x, -config.LateralLimit, config.LateralLimit);
+            if (IsSplitActive)
+            {
+                float splitOffset = GetSplitOffset();
+                float splitLimit = Mathf.Max(0f, config.LateralLimit - splitOffset);
+                position.x = Mathf.Clamp(position.x, -splitLimit, splitLimit);
+            }
+
             position.y = startPosition.y;
 
             transform.position = position;
+
+            if (IsSplitActive && splitTimeRemaining > 0f)
+            {
+                splitTimeRemaining = Mathf.Max(0f, splitTimeRemaining - deltaTime);
+                if (splitTimeRemaining <= 0f)
+                {
+                    IsSplitActive = false;
+                    ApplyVisualScale();
+                }
+            }
         }
 
         private bool TryGetPointerTargetX(out float targetX)
@@ -197,8 +270,24 @@ namespace Featurehole.Runner.Hole
                 return;
             }
 
-            visualTransform.localPosition = Vector3.zero;
+            float splitOffset = IsSplitActive ? GetSplitOffset() : 0f;
+
+            visualTransform.localPosition = new Vector3(-splitOffset, 0f, 0f);
             visualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
+
+            if (splitVisualTransform == null)
+            {
+                return;
+            }
+
+            splitVisualTransform.localScale = new Vector3(currentDiameter, visualHeightScale, currentDiameter);
+            splitVisualTransform.localPosition = new Vector3(splitOffset, 0f, 0f);
+            splitVisualTransform.gameObject.SetActive(IsSplitActive);
+        }
+
+        private float GetSplitOffset()
+        {
+            return currentDiameter * config.SplitHoleSpacingMultiplier;
         }
     }
 }

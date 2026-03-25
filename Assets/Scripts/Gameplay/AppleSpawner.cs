@@ -61,7 +61,6 @@ namespace Featurehole.Runner.Gameplay
 
             float moveDelta = -forwardSpeed * deltaTime;
             Transform holeTransform = holeMover.transform;
-            float absorbRadius = holeMover.CurrentDiameter * 0.5f + config.CollectibleSize * 0.35f;
             float passedThreshold = holeTransform.position.z - config.CollectibleSize;
 
             foreach (ApplePickup apple in activeApples)
@@ -74,14 +73,12 @@ namespace Featurehole.Runner.Gameplay
                 apple.Move(moveDelta);
 
                 Vector3 applePosition = apple.transform.position;
-                float lateralDistance = Mathf.Abs(applePosition.x - holeTransform.position.x);
-                float forwardDistance = Mathf.Abs(applePosition.z - holeTransform.position.z);
-
-                if (lateralDistance <= absorbRadius && forwardDistance <= config.CollectibleSize)
+                if (holeMover.CanAbsorb(applePosition, config.CollectibleSize))
                 {
                     apple.Collect();
                     runtime.RegisterCollected();
                     holeMover.Grow();
+                    holeMover.ActivateSplit(config.AppleSplitDuration);
                     RespawnApple(apple);
                     continue;
                 }

@@ -63,6 +63,13 @@ namespace Featurehole.Runner.Data
         [Min(1f)]
         [SerializeField] private float boostSpeedMultiplier = 1.8f;
 
+        [Header("Apple Split")]
+        [Min(0f)]
+        [SerializeField] private float appleSplitDuration = 4f;
+
+        [Min(0.1f)]
+        [SerializeField] private float splitHoleSpacingMultiplier = 0.65f;
+
         public float ForwardSpeed => forwardSpeed;
         public float LateralSpeed => lateralSpeed;
         public float LateralLimit => lateralLimit;
@@ -80,6 +87,8 @@ namespace Featurehole.Runner.Data
         public float PepperSpawnSpacing => pepperSpawnSpacing;
         public float BoostDuration => boostDuration;
         public float BoostSpeedMultiplier => boostSpeedMultiplier;
+        public float AppleSplitDuration => appleSplitDuration;
+        public float SplitHoleSpacingMultiplier => splitHoleSpacingMultiplier;
 
         public static RunnerGameConfig CreateRuntimeDefault()
         {
@@ -101,6 +110,8 @@ namespace Featurehole.Runner.Data
             config.pepperSpawnSpacing = 18f;
             config.boostDuration = 3f;
             config.boostSpeedMultiplier = 1.8f;
+            config.appleSplitDuration = 4f;
+            config.splitHoleSpacingMultiplier = 0.65f;
             return config;
         }
     }
