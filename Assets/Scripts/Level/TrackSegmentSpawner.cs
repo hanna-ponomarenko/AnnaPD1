@@ -211,7 +211,12 @@ namespace Featurehole.Runner.Level
 
             if (riverBaseMaterial != null)
             {
-                if (riverBaseMaterial.HasProperty("_FlowSpeedA"))
+                if (riverBaseMaterial.HasProperty("_FlowRate"))
+                {
+                    riverBaseMaterial.SetFloat("_FlowRate", -6.5f * normalizedSpeed);
+                    riverBaseMaterial.SetFloat("_NormalFactor", 0.24f + Mathf.Sin(waterAnimationTime * 0.3f) * 0.03f);
+                }
+                else if (riverBaseMaterial.HasProperty("_FlowSpeedA"))
                 {
                     riverBaseMaterial.SetFloat("_FlowSpeedA", 0.05f * normalizedSpeed);
                     riverBaseMaterial.SetFloat("_FlowSpeedB", 0.11f * normalizedSpeed);
@@ -287,6 +292,25 @@ namespace Featurehole.Runner.Level
         {
             if (runtimeRiverBaseMaterial != null)
             {
+                return runtimeRiverBaseMaterial;
+            }
+
+            Material importedWaterMaterial = Resources.Load<Material>("WaterMaterial");
+            if (importedWaterMaterial != null)
+            {
+                runtimeRiverBaseMaterial = new Material(importedWaterMaterial)
+                {
+                    name = "RuntimeRiverBaseMaterial"
+                };
+                runtimeRiverBaseMaterial.SetColor("_Color", new Color(0.16f, 0.72f, 0.82f, 1f));
+                runtimeRiverBaseMaterial.SetColor("_FoamColor", new Color(0.94f, 0.98f, 1f, 1f));
+                runtimeRiverBaseMaterial.SetFloat("_NormalFactor", 0.24f);
+                runtimeRiverBaseMaterial.SetFloat("_Glossiness", 0.72f);
+                runtimeRiverBaseMaterial.SetFloat("_DepthFactor", 2.4f);
+                runtimeRiverBaseMaterial.SetFloat("_FoamDepth", 0.72f);
+                runtimeRiverBaseMaterial.SetFloat("_FoamStrength", 1.2f);
+                runtimeRiverBaseMaterial.SetFloat("_FlowRate", -6.5f);
+                runtimeRiverBaseMaterial.renderQueue = 3000;
                 return runtimeRiverBaseMaterial;
             }
 
