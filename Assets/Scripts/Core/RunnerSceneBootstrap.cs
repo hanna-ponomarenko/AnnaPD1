@@ -441,7 +441,7 @@ namespace Featurehole.Runner.Core
         {
             boostFlame.localPosition = new Vector3(0f, 0.08f, 0.72f);
             boostFlame.localRotation = Quaternion.Euler(-90f, 0f, 0f);
-            boostFlame.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+            boostFlame.localScale = new Vector3(2.4f, 2.4f, 2.4f);
 
             foreach (ParticleSystemRenderer renderer in boostFlame.GetComponentsInChildren<ParticleSystemRenderer>(true))
             {
