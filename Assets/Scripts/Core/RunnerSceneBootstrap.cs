@@ -629,11 +629,11 @@ namespace Featurehole.Runner.Core
             }
 
             Transform cameraTransform = mainCamera.transform;
-            cameraTransform.position = new Vector3(0f, 9.5f, -10.5f);
-            cameraTransform.rotation = Quaternion.Euler(30f, 0f, 0f);
+            cameraTransform.position = new Vector3(0f, 6.8f, -7.2f);
+            cameraTransform.rotation = Quaternion.Euler(38f, 0f, 0f);
 
             mainCamera.orthographic = false;
-            mainCamera.fieldOfView = 56f;
+            mainCamera.fieldOfView = 50f;
             mainCamera.backgroundColor = new Color(0.94f, 0.78f, 0.52f);
         }
 
