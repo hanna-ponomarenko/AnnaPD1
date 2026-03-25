@@ -163,19 +163,16 @@ namespace Featurehole.Runner.Hole
         {
             if (boostHornsObject != null)
             {
-                boostHornsObject.SetActive(isActive);
+                boostHornsObject.SetActive(false);
             }
 
             if (splitBoostHornsObject != null)
             {
-                splitBoostHornsObject.SetActive(isActive && (IsSplitActive || isMergeAnimating));
+                splitBoostHornsObject.SetActive(false);
             }
 
-            isBoostVisualActive = isActive;
-            if (isActive)
-            {
-                boostVisualElapsed = 0f;
-            }
+            isBoostVisualActive = false;
+            boostVisualElapsed = 0f;
 
             UpdateBoostVisualScale();
 
