@@ -101,7 +101,7 @@ namespace Featurehole.Runner.Core
 
         private void ConfigureHoleDecal(Transform visualRoot, RunnerGameConfig runtimeConfig)
         {
-            visualRoot.localPosition = new Vector3(0f, 0.01f, 0f);
+            visualRoot.localPosition = new Vector3(0f, 0.08f, 0f);
             visualRoot.localRotation = Quaternion.identity;
             visualRoot.localScale = new Vector3(runtimeConfig.HoleDiameter, 1f, runtimeConfig.HoleDiameter);
 
@@ -128,9 +128,12 @@ namespace Featurehole.Runner.Core
             Renderer decalRenderer = decalTransform.GetComponent<Renderer>();
             if (decalRenderer != null)
             {
-                decalRenderer.material = GetRuntimeHoleDecalMaterial();
+                Material decalMaterial = GetRuntimeHoleDecalMaterial();
+                decalMaterial.renderQueue = 4000;
+                decalRenderer.material = decalMaterial;
                 decalRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 decalRenderer.receiveShadows = false;
+                decalRenderer.sortingOrder = 250;
             }
         }
 
