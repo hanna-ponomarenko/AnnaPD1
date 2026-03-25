@@ -70,7 +70,14 @@ namespace Featurehole.Runner.Hole
 
         public void SetBoostActive(bool isActive)
         {
-            if (boostFlameObject == null || boostFlames == null || boostFlames.Length == 0)
+            if (boostFlameObject == null)
+            {
+                return;
+            }
+
+            boostFlameObject.SetActive(isActive);
+
+            if (boostFlames == null || boostFlames.Length == 0)
             {
                 return;
             }
