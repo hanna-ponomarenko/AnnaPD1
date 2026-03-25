@@ -6,8 +6,6 @@ namespace Featurehole.Runner.Level
 {
     public sealed class TrackSegmentSpawner : MonoBehaviour
     {
-        private const int ContinuousSegmentCount = 2;
-
         [SerializeField] private TrackSegment segmentPrefab;
         [SerializeField] private Transform segmentsRoot;
         [SerializeField] private bool logSegmentGap = true;
@@ -15,7 +13,7 @@ namespace Featurehole.Runner.Level
         private readonly Queue<TrackSegment> activeSegments = new Queue<TrackSegment>();
 
         private RunnerGameConfig config;
-        private float continuousTrackLength;
+        private float chunkLength;
         private float nextSpawnZ;
         private Material runtimeRiverBaseMaterial;
         private Material runtimeRiverCurrentMaterial;
@@ -73,10 +71,10 @@ namespace Featurehole.Runner.Level
         private void BuildInitialTrack()
         {
             ClearSpawnedSegments();
-            continuousTrackLength = config.InitialSegmentCount * config.SegmentLength;
+            chunkLength = config.SegmentLength;
             nextSpawnZ = 0f;
 
-            for (int index = 0; index < ContinuousSegmentCount; index++)
+            for (int index = 0; index < config.InitialSegmentCount; index++)
             {
                 SpawnSegment();
             }
@@ -89,7 +87,7 @@ namespace Featurehole.Runner.Level
                 : CreateRuntimeSegment(activeSegments.Count);
 
             segment.gameObject.name = $"{segment.gameObject.name}_{activeSegments.Count}";
-            segment.Configure(continuousTrackLength);
+            segment.Configure(chunkLength);
             float previousEndZ = nextSpawnZ;
             segment.SetMinZ(nextSpawnZ);
             LogSegmentGap("spawn", segment, previousEndZ);
@@ -130,6 +128,21 @@ namespace Featurehole.Runner.Level
             TrackSegment segment = segmentObject.AddComponent<TrackSegment>();
 
             float riverWidth = config.TrackWidth;
+            float bankWidth = 7.5f;
+            float bankOffset = riverWidth * 0.5f + bankWidth * 0.5f;
+
+            CreateBlock(
+                segmentObject.transform,
+                "BankLeft",
+                new Vector3(-bankOffset, -0.06f, 0f),
+                new Vector3(bankWidth, 0.7f, 1f),
+                new Color(0.84f, 0.71f, 0.45f));
+            CreateBlock(
+                segmentObject.transform,
+                "BankRight",
+                new Vector3(bankOffset, -0.06f, 0f),
+                new Vector3(bankWidth, 0.7f, 1f),
+                new Color(0.84f, 0.71f, 0.45f));
 
             CreateRiverLayer(
                 segmentObject.transform,
@@ -162,24 +175,27 @@ namespace Featurehole.Runner.Level
                 new Vector3(riverWidth * 0.1f, 0.02f, 1f),
                 GetRuntimeRiverFoamMaterial());
             CreateBlock(segmentObject.transform, "UnderwaterSand", new Vector3(0f, -0.18f, 0f), new Vector3(riverWidth * 0.78f, 0.08f, 1f), new Color(0.71f, 0.63f, 0.39f));
-            CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.28f, -0.08f, -2.2f), new Color(0.99f, 0.72f, 0.34f), 0.22f);
-            CreateFish(segmentObject.transform, new Vector3(riverWidth * 0.22f, -0.05f, 1.4f), new Color(0.96f, 0.54f, 0.18f), 0.18f);
-            CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.06f, -0.09f, 5.1f), new Color(0.96f, 0.84f, 0.4f), 0.2f);
-            CreateShell(segmentObject.transform, new Vector3(-riverWidth * 0.18f, -0.12f, 3.6f), new Color(0.95f, 0.86f, 0.68f));
-            CreateShell(segmentObject.transform, new Vector3(riverWidth * 0.24f, -0.12f, -4.1f), new Color(0.84f, 0.8f, 0.69f));
-            CreateCrocodile(segmentObject.transform, new Vector3(0f, -0.03f, 5.2f), new Color(0.34f, 0.47f, 0.26f));
+            CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.28f, -0.08f, -3.2f), new Color(0.99f, 0.72f, 0.34f), 0.22f);
+            CreateFish(segmentObject.transform, new Vector3(riverWidth * 0.22f, -0.05f, 0.8f), new Color(0.96f, 0.54f, 0.18f), 0.18f);
+            CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.06f, -0.09f, 3.5f), new Color(0.96f, 0.84f, 0.4f), 0.2f);
+            CreateShell(segmentObject.transform, new Vector3(-riverWidth * 0.18f, -0.12f, 2.4f), new Color(0.95f, 0.86f, 0.68f));
+            CreateShell(segmentObject.transform, new Vector3(riverWidth * 0.24f, -0.12f, -2.6f), new Color(0.84f, 0.8f, 0.69f));
+            CreateCrocodile(segmentObject.transform, new Vector3(0f, -0.03f, 1.8f), new Color(0.34f, 0.47f, 0.26f));
 
-            CreateReeds(segmentObject.transform, new Vector3(-riverWidth * 0.38f, 0.06f, -3.5f), 5, -1f);
-            CreateReeds(segmentObject.transform, new Vector3(riverWidth * 0.34f, 0.06f, 2.8f), 4, 1f);
-            CreateReeds(segmentObject.transform, new Vector3(-riverWidth * 0.12f, 0.05f, 6.2f), 3, 1f);
+            CreateReeds(segmentObject.transform, new Vector3(-riverWidth * 0.42f, 0.06f, -3.2f), 5, -1f);
+            CreateReeds(segmentObject.transform, new Vector3(riverWidth * 0.4f, 0.06f, 2.2f), 4, 1f);
 
-            float sideOffsetX = config.TrackWidth * 0.5f + 3.2f;
-            CreatePyramid(segmentObject.transform, "PyramidLeft", new Vector3(-sideOffsetX, 1.7f, -6f), new Vector3(4.8f, 4.2f, 4.8f), new Color(0.82f, 0.69f, 0.42f));
-            CreatePyramid(segmentObject.transform, "PyramidRight", new Vector3(sideOffsetX + 1.4f, 1.45f, 12f), new Vector3(3.6f, 3.4f, 3.6f), new Color(0.76f, 0.63f, 0.36f));
-            CreateRock(segmentObject.transform, "RockLeft", new Vector3(-sideOffsetX - 4.8f, 2.8f, 14f), new Vector3(16f, 9f, 12f), new Color(0.58f, 0.49f, 0.39f));
-            CreateRock(segmentObject.transform, "RockRight", new Vector3(sideOffsetX + 6.2f, 2.6f, -14f), new Vector3(14f, 8f, 10f), new Color(0.64f, 0.56f, 0.43f));
-            CreateStatue(segmentObject.transform, "AnubisLeft", new Vector3(-sideOffsetX + 0.5f, 1.12f, 18f), new Color(0.29f, 0.25f, 0.18f), 2f);
-            CreateStatue(segmentObject.transform, "HorusRight", new Vector3(sideOffsetX - 0.45f, 1.12f, -18f), new Color(0.23f, 0.2f, 0.17f), 2f);
+            float sideOffsetX = riverWidth * 0.5f + 2.35f;
+            CreatePyramid(segmentObject.transform, "PyramidLeft", new Vector3(-sideOffsetX - 1.6f, 1.15f, -2.4f), new Vector3(1.7f, 1.6f, 1.7f), new Color(0.82f, 0.69f, 0.42f));
+            CreatePyramid(segmentObject.transform, "PyramidRight", new Vector3(sideOffsetX + 1.8f, 1.05f, 2.8f), new Vector3(1.45f, 1.35f, 1.45f), new Color(0.76f, 0.63f, 0.36f));
+            CreateRock(segmentObject.transform, "RockLeft", new Vector3(-sideOffsetX - 0.5f, 0.28f, 2.6f), new Vector3(1.8f, 0.7f, 1.4f), new Color(0.58f, 0.49f, 0.39f));
+            CreateRock(segmentObject.transform, "RockRight", new Vector3(sideOffsetX + 0.4f, 0.24f, -2.8f), new Vector3(1.7f, 0.65f, 1.2f), new Color(0.64f, 0.56f, 0.43f));
+            CreateStatue(segmentObject.transform, "AnubisLeft", new Vector3(-sideOffsetX + 0.15f, 0.58f, 1.1f), new Color(0.29f, 0.25f, 0.18f), 0.9f);
+            CreateStatue(segmentObject.transform, "HorusRight", new Vector3(sideOffsetX - 0.12f, 0.58f, -1.3f), new Color(0.23f, 0.2f, 0.17f), 0.9f);
+            CreatePalm(segmentObject.transform, "PalmLeft", new Vector3(-sideOffsetX - 1.1f, 0.45f, 3.2f), -1f);
+            CreatePalm(segmentObject.transform, "PalmRight", new Vector3(sideOffsetX + 1.05f, 0.45f, -3.3f), 1f);
+            CreateObelisk(segmentObject.transform, "ObeliskLeft", new Vector3(-sideOffsetX - 2.2f, 0.9f, -0.8f), 0.75f);
+            CreateObelisk(segmentObject.transform, "ObeliskRight", new Vector3(sideOffsetX + 2.2f, 0.9f, 0.95f), 0.75f);
 
             return segment;
         }
@@ -268,7 +284,7 @@ namespace Featurehole.Runner.Level
             runtimeRiverBaseTexture = CreateRiverBaseTexture();
             runtimeRiverBaseMaterial = CreateTransparentUnlitMaterial("RuntimeRiverBaseMaterial", runtimeRiverBaseTexture);
             runtimeRiverBaseMaterial.color = new Color(0.62f, 0.9f, 1f, 0.96f);
-            runtimeRiverBaseMaterial.mainTextureScale = new Vector2(1.45f, continuousTrackLength * 0.16f);
+            runtimeRiverBaseMaterial.mainTextureScale = new Vector2(1.45f, chunkLength * 0.16f);
             return runtimeRiverBaseMaterial;
         }
 
@@ -282,7 +298,7 @@ namespace Featurehole.Runner.Level
             runtimeRiverCurrentTexture = CreateRiverCurrentTexture();
             runtimeRiverCurrentMaterial = CreateTransparentUnlitMaterial("RuntimeRiverCurrentMaterial", runtimeRiverCurrentTexture);
             runtimeRiverCurrentMaterial.color = new Color(0.4f, 0.88f, 1f, 0.42f);
-            runtimeRiverCurrentMaterial.mainTextureScale = new Vector2(1.8f, continuousTrackLength * 0.28f);
+            runtimeRiverCurrentMaterial.mainTextureScale = new Vector2(1.8f, chunkLength * 0.28f);
             return runtimeRiverCurrentMaterial;
         }
 
@@ -296,7 +312,7 @@ namespace Featurehole.Runner.Level
             runtimeRiverFoamTexture = CreateRiverFoamTexture();
             runtimeRiverFoamMaterial = CreateTransparentUnlitMaterial("RuntimeRiverFoamMaterial", runtimeRiverFoamTexture);
             runtimeRiverFoamMaterial.color = new Color(0.96f, 0.99f, 1f, 0.58f);
-            runtimeRiverFoamMaterial.mainTextureScale = new Vector2(1f, continuousTrackLength * 0.42f);
+            runtimeRiverFoamMaterial.mainTextureScale = new Vector2(1f, chunkLength * 0.42f);
             return runtimeRiverFoamMaterial;
         }
 
@@ -497,6 +513,41 @@ namespace Featurehole.Runner.Level
             {
                 renderer.material.color = color;
             }
+        }
+
+        private void CreatePalm(Transform parent, string name, Vector3 localPosition, float direction)
+        {
+            GameObject palm = new GameObject(name);
+            palm.transform.SetParent(parent, false);
+            palm.transform.localPosition = localPosition;
+
+            CreateBlock(palm.transform, "Trunk", new Vector3(0f, 0.55f, 0f), new Vector3(0.16f, 1.15f, 0.16f), new Color(0.52f, 0.34f, 0.16f));
+
+            for (int index = 0; index < 4; index++)
+            {
+                GameObject leaf = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                leaf.name = $"Leaf_{index}";
+                leaf.transform.SetParent(palm.transform, false);
+                leaf.transform.localPosition = new Vector3(0.08f * direction, 1.1f, 0f);
+                leaf.transform.localRotation = Quaternion.Euler(22f, index * 90f, -28f * direction);
+                leaf.transform.localScale = new Vector3(0.12f, 0.04f, 0.82f);
+
+                Renderer leafRenderer = leaf.GetComponent<Renderer>();
+                if (leafRenderer != null)
+                {
+                    leafRenderer.material.color = new Color(0.22f, 0.49f, 0.18f);
+                }
+            }
+        }
+
+        private void CreateObelisk(Transform parent, string name, Vector3 localPosition, float height)
+        {
+            GameObject obelisk = new GameObject(name);
+            obelisk.transform.SetParent(parent, false);
+            obelisk.transform.localPosition = localPosition;
+
+            CreateBlock(obelisk.transform, "Body", new Vector3(0f, height * 0.5f, 0f), new Vector3(0.28f, height, 0.28f), new Color(0.78f, 0.67f, 0.45f));
+            CreatePyramid(obelisk.transform, "Tip", new Vector3(0f, height + 0.06f, 0f), new Vector3(0.24f, 0.18f, 0.24f), new Color(0.9f, 0.78f, 0.48f));
         }
 
         private void CreateStatue(Transform parent, string name, Vector3 localPosition, Color color, float scaleMultiplier)

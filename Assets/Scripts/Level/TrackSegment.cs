@@ -20,7 +20,10 @@ namespace Featurehole.Runner.Level
             length = segmentLength;
 
             ConfigureScaledChild("Visual");
+            ConfigureScaledChild("RiverCurrent");
             ConfigureScaledChild("RiverGlow");
+            ConfigureScaledChild("RiverFoamLeft");
+            ConfigureScaledChild("RiverFoamRight");
             ConfigureScaledChild("BankLeft");
             ConfigureScaledChild("BankRight");
             ConfigureScaledChild("UnderwaterSand");
