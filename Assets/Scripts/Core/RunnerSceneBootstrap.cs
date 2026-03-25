@@ -2,6 +2,7 @@ using Featurehole.Runner.Data;
 using Featurehole.Runner.Gameplay;
 using Featurehole.Runner.Hole;
 using Featurehole.Runner.Level;
+using System.IO;
 using UnityEngine;
 
 namespace Featurehole.Runner.Core
@@ -18,6 +19,7 @@ namespace Featurehole.Runner.Core
 
         private Material runtimeBoostFireMaterial;
         private Material runtimeHoleDecalMaterial;
+        private Material runtimeSunMaterial;
 
         private void Awake()
         {
@@ -602,11 +604,12 @@ namespace Featurehole.Runner.Core
         private void CreateSun(Vector3 localPosition, float size)
         {
             Transform sunTransform = transform.Find("Sun");
-            GameObject sunObject = sunTransform != null ? sunTransform.gameObject : GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            GameObject sunObject = sunTransform != null ? sunTransform.gameObject : GameObject.CreatePrimitive(PrimitiveType.Quad);
             sunObject.name = "Sun";
             sunObject.transform.SetParent(transform, false);
             sunObject.transform.localPosition = localPosition;
-            sunObject.transform.localScale = Vector3.one * size;
+            sunObject.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            sunObject.transform.localScale = new Vector3(size, size, 1f);
 
             Collider sunCollider = sunObject.GetComponent<Collider>();
             if (sunCollider != null)
@@ -619,7 +622,7 @@ namespace Featurehole.Runner.Core
             {
                 sunRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 sunRenderer.receiveShadows = false;
-                sunRenderer.material.color = new Color(1f, 0.87f, 0.44f);
+                sunRenderer.material = GetRuntimeSunMaterial();
             }
 
             CreateSunRay(sunObject.transform, "RayVertical", Vector3.zero, Vector3.zero, new Vector3(0.45f, 6.5f, 0.08f));
@@ -651,6 +654,66 @@ namespace Featurehole.Runner.Core
                 rayRenderer.receiveShadows = false;
                 rayRenderer.material.color = new Color(1f, 0.82f, 0.36f, 1f);
             }
+        }
+
+        private Material GetRuntimeSunMaterial()
+        {
+            if (runtimeSunMaterial != null)
+            {
+                return runtimeSunMaterial;
+            }
+
+            Shader shader = Shader.Find("Unlit/Transparent");
+            if (shader == null)
+            {
+                shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+            }
+
+            runtimeSunMaterial = new Material(shader)
+            {
+                name = "RuntimeSunMaterial",
+                color = Color.white
+            };
+
+            Texture2D texture = LoadSunTextureFromProject();
+            if (texture != null)
+            {
+                runtimeSunMaterial.mainTexture = texture;
+            }
+            else
+            {
+                runtimeSunMaterial.color = new Color(1f, 0.87f, 0.44f);
+            }
+
+            return runtimeSunMaterial;
+        }
+
+        private Texture2D LoadSunTextureFromProject()
+        {
+            string sunTexturePath = Path.Combine(
+                Application.dataPath,
+                "Sun_v2_L3.123cbc92ee65-5f03-4298-b1e6-b236b6b8b4aa",
+                "13913_Sun_diff.jpg");
+
+            if (!File.Exists(sunTexturePath))
+            {
+                return null;
+            }
+
+            byte[] imageBytes = File.ReadAllBytes(sunTexturePath);
+            if (imageBytes == null || imageBytes.Length == 0)
+            {
+                return null;
+            }
+
+            Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false)
+            {
+                name = "RuntimeSunTexture",
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp
+            };
+
+            return texture.LoadImage(imageBytes) ? texture : null;
         }
     }
 }
