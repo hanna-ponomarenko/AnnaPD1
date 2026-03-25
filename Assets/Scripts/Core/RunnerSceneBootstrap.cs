@@ -17,7 +17,6 @@ namespace Featurehole.Runner.Core
 
         private Material runtimeBoostFireMaterial;
         private Material runtimeHoleDecalMaterial;
-        private Material runtimeBoostFireCoreMaterial;
 
         private void Awake()
         {
@@ -212,48 +211,99 @@ namespace Featurehole.Runner.Core
         {
             GameObject flameObject = new GameObject("BoostFlame");
             flameObject.transform.SetParent(parent, false);
-            CreateTrailQuad(
-                flameObject.transform,
-                "TailGlow",
-                new Vector3(0f, 0f, 0f),
-                new Vector3(1.45f, 1f, 2.9f),
-                GetRuntimeBoostFireMaterial());
-            CreateTrailQuad(
-                flameObject.transform,
-                "TailCore",
-                new Vector3(0f, 0.01f, 0.24f),
-                new Vector3(0.7f, 1f, 1.7f),
-                GetRuntimeBoostFireCoreMaterial());
+            CreateBoostFireLayer(flameObject.transform, "Core", 64f, 0.45f, 0.72f, 0.25f, 0.42f);
+            CreateBoostFireLayer(flameObject.transform, "Outer", 42f, 0.72f, 1.1f, 0.3f, 0.52f);
             return flameObject;
         }
 
-        private void CreateTrailQuad(
+        private void CreateBoostFireLayer(
             Transform parent,
             string layerName,
-            Vector3 localPosition,
-            Vector3 localScale,
-            Material material)
+            float emissionRate,
+            float minSize,
+            float maxSize,
+            float minLifetime,
+            float maxLifetime)
         {
-            GameObject layerObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            layerObject.name = layerName;
+            GameObject layerObject = new GameObject(layerName);
             layerObject.transform.SetParent(parent, false);
-            layerObject.transform.localPosition = localPosition;
-            layerObject.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            layerObject.transform.localScale = localScale;
 
-            Collider quadCollider = layerObject.GetComponent<Collider>();
-            if (quadCollider != null)
-            {
-                Destroy(quadCollider);
-            }
+            ParticleSystem particleSystem = layerObject.AddComponent<ParticleSystem>();
+            particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
-            Renderer renderer = layerObject.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                renderer.material = material;
-                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                renderer.receiveShadows = false;
-            }
+            ParticleSystemRenderer renderer = layerObject.GetComponent<ParticleSystemRenderer>();
+            renderer.material = GetRuntimeBoostFireMaterial();
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+            renderer.sortingOrder = 75;
+
+            var main = particleSystem.main;
+            main.duration = 0.45f;
+            main.loop = true;
+            main.playOnAwake = false;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(minLifetime, maxLifetime);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.45f, 1.15f);
+            main.startSize = new ParticleSystem.MinMaxCurve(minSize, maxSize);
+            main.startColor = Color.white;
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            main.maxParticles = 96;
+
+            var emission = particleSystem.emission;
+            emission.enabled = true;
+            emission.rateOverTime = emissionRate;
+
+            var shape = particleSystem.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.Cone;
+            shape.angle = 14f;
+            shape.radius = 0.09f;
+
+            var velocityOverLifetime = particleSystem.velocityOverLifetime;
+            velocityOverLifetime.enabled = true;
+            velocityOverLifetime.space = ParticleSystemSimulationSpace.Local;
+            velocityOverLifetime.x = new ParticleSystem.MinMaxCurve(-0.08f, 0.08f);
+            velocityOverLifetime.y = new ParticleSystem.MinMaxCurve(0.3f, 0.9f);
+            velocityOverLifetime.z = new ParticleSystem.MinMaxCurve(0.6f, 1.8f);
+
+            var limitVelocity = particleSystem.limitVelocityOverLifetime;
+            limitVelocity.enabled = true;
+            limitVelocity.limit = 2f;
+            limitVelocity.dampen = 0.25f;
+
+            var sizeOverLifetime = particleSystem.sizeOverLifetime;
+            sizeOverLifetime.enabled = true;
+            AnimationCurve sizeCurve = new AnimationCurve();
+            sizeCurve.AddKey(0f, 0.15f);
+            sizeCurve.AddKey(0.2f, 0.85f);
+            sizeCurve.AddKey(0.7f, 1f);
+            sizeCurve.AddKey(1f, 0.05f);
+            sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1f, sizeCurve);
+
+            var colorOverLifetime = particleSystem.colorOverLifetime;
+            colorOverLifetime.enabled = true;
+            Gradient gradient = new Gradient();
+            gradient.SetKeys(
+                new[]
+                {
+                    new GradientColorKey(new Color(1f, 0.98f, 0.75f), 0f),
+                    new GradientColorKey(new Color(1f, 0.8f, 0.24f), 0.18f),
+                    new GradientColorKey(new Color(1f, 0.36f, 0.08f), 0.65f),
+                    new GradientColorKey(new Color(0.25f, 0.18f, 0.18f), 1f)
+                },
+                new[]
+                {
+                    new GradientAlphaKey(0f, 0f),
+                    new GradientAlphaKey(0.95f, 0.08f),
+                    new GradientAlphaKey(0.9f, 0.45f),
+                    new GradientAlphaKey(0f, 1f)
+                });
+            colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
+
+            var noise = particleSystem.noise;
+            noise.enabled = true;
+            noise.strength = 0.12f;
+            noise.frequency = 0.6f;
+
+            particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 
         private Material GetRuntimeBoostFireMaterial()
@@ -283,22 +333,6 @@ namespace Featurehole.Runner.Core
 
             runtimeBoostFireMaterial.color = new Color(1f, 0.92f, 0.8f, 0.95f);
             return runtimeBoostFireMaterial;
-        }
-
-        private Material GetRuntimeBoostFireCoreMaterial()
-        {
-            if (runtimeBoostFireCoreMaterial != null)
-            {
-                return runtimeBoostFireCoreMaterial;
-            }
-
-            runtimeBoostFireCoreMaterial = new Material(GetRuntimeBoostFireMaterial())
-            {
-                name = "RuntimeBoostFireCoreMaterial",
-                color = new Color(1f, 0.96f, 0.72f, 0.98f)
-            };
-
-            return runtimeBoostFireCoreMaterial;
         }
 
         private Texture2D CreateRuntimeFireTexture()
@@ -344,18 +378,20 @@ namespace Featurehole.Runner.Core
 
         private void ConfigureBoostFlame(Transform boostFlame)
         {
-            boostFlame.localPosition = new Vector3(0f, 0.05f, 0.8f);
-            boostFlame.localRotation = Quaternion.identity;
-            boostFlame.localScale = Vector3.one;
+            boostFlame.localPosition = new Vector3(0f, 0.08f, 0.72f);
+            boostFlame.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+            boostFlame.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
-            foreach (Renderer renderer in boostFlame.GetComponentsInChildren<Renderer>(true))
+            foreach (ParticleSystemRenderer renderer in boostFlame.GetComponentsInChildren<ParticleSystemRenderer>(true))
             {
-                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                renderer.receiveShadows = false;
+                renderer.sortingOrder = 75;
                 renderer.enabled = false;
             }
 
-            boostFlame.gameObject.SetActive(false);
+            foreach (ParticleSystem particleSystem in boostFlame.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
 
         private TrackSegmentSpawner CreateTrackSpawner()
