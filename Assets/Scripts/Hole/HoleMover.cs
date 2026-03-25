@@ -19,6 +19,8 @@ namespace Featurehole.Runner.Hole
         private Vector3 startPosition;
         private Transform visualTransform;
         private Transform splitVisualTransform;
+        private Transform decalTransform;
+        private Transform splitDecalTransform;
         private Transform boostHornsTransform;
         private Transform splitBoostHornsTransform;
         private GameObject boostHornsObject;
@@ -29,6 +31,10 @@ namespace Featurehole.Runner.Hole
         private ParticleSystemRenderer[] boostFlameRenderers;
         private float currentDiameter;
         private float visualHeightScale = 1f;
+        private Vector3 decalBaseScale = Vector3.one;
+        private Vector3 splitDecalBaseScale = Vector3.one;
+        private Material decalMaterialInstance;
+        private Material splitDecalMaterialInstance;
         private float splitTimeRemaining;
         private float splitAnimationElapsed;
         private float mergeAnimationElapsed;
@@ -56,6 +62,28 @@ namespace Featurehole.Runner.Hole
                 GameObject splitVisualObject = Instantiate(visualTransform.gameObject, transform);
                 splitVisualObject.name = "VisualTwin";
                 splitVisualTransform = splitVisualObject.transform;
+            }
+
+            decalTransform = transform.Find("Visual/Decal");
+            if (decalTransform != null)
+            {
+                decalBaseScale = decalTransform.localScale;
+                Renderer decalRenderer = decalTransform.GetComponent<Renderer>();
+                if (decalRenderer != null)
+                {
+                    decalMaterialInstance = decalRenderer.material;
+                }
+            }
+
+            splitDecalTransform = transform.Find("VisualTwin/Decal");
+            if (splitDecalTransform != null)
+            {
+                splitDecalBaseScale = splitDecalTransform.localScale;
+                Renderer splitDecalRenderer = splitDecalTransform.GetComponent<Renderer>();
+                if (splitDecalRenderer != null)
+                {
+                    splitDecalMaterialInstance = splitDecalRenderer.material;
+                }
             }
 
             boostHornsTransform = transform.Find("Visual/BoostHorns");
@@ -171,8 +199,11 @@ namespace Featurehole.Runner.Hole
                 splitBoostHornsObject.SetActive(false);
             }
 
-            isBoostVisualActive = false;
-            boostVisualElapsed = 0f;
+            isBoostVisualActive = isActive;
+            if (isActive)
+            {
+                boostVisualElapsed = 0f;
+            }
 
             UpdateBoostVisualScale();
 
@@ -442,9 +473,14 @@ namespace Featurehole.Runner.Hole
         private void UpdateBoostVisualScale()
         {
             float pulse = 1f;
+            Color decalTint = Color.white;
             if (isBoostVisualActive)
             {
-                pulse = 1.22f + Mathf.Sin(boostVisualElapsed * 14f) * 0.18f;
+                pulse = 5f + Mathf.Sin(boostVisualElapsed * 10f) * 0.35f;
+                decalTint = Color.Lerp(
+                    new Color(1f, 0.16f, 0.1f, 1f),
+                    new Color(0.78f, 0.02f, 0.02f, 1f),
+                    (Mathf.Sin(boostVisualElapsed * 12f) + 1f) * 0.5f);
             }
 
             if (boostHornsTransform != null)
@@ -455,6 +491,26 @@ namespace Featurehole.Runner.Hole
             if (splitBoostHornsTransform != null)
             {
                 splitBoostHornsTransform.localScale = Vector3.one * pulse;
+            }
+
+            if (decalTransform != null)
+            {
+                decalTransform.localScale = decalBaseScale * pulse;
+            }
+
+            if (splitDecalTransform != null)
+            {
+                splitDecalTransform.localScale = splitDecalBaseScale * pulse;
+            }
+
+            if (decalMaterialInstance != null)
+            {
+                decalMaterialInstance.color = decalTint;
+            }
+
+            if (splitDecalMaterialInstance != null)
+            {
+                splitDecalMaterialInstance.color = decalTint;
             }
         }
 
