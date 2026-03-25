@@ -4,7 +4,7 @@ namespace Featurehole.Runner.Level
 {
     public sealed class TrackSegment : MonoBehaviour
     {
-        private const float SeamOverlap = 0.05f;
+        private const float SeamOverlap = 0.45f;
 
         private Transform visualTransform;
         private float length;
@@ -78,9 +78,9 @@ namespace Featurehole.Runner.Level
                 return;
             }
 
-            float halfVisualLength = visualTransform.localScale.z * 0.5f;
-            localMinZ = visualTransform.localPosition.z - halfVisualLength;
-            localMaxZ = visualTransform.localPosition.z + halfVisualLength;
+            float halfLogicalLength = length * 0.5f;
+            localMinZ = visualTransform.localPosition.z - halfLogicalLength;
+            localMaxZ = visualTransform.localPosition.z + halfLogicalLength;
         }
     }
 }
