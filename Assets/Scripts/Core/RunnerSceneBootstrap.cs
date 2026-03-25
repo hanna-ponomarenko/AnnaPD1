@@ -550,6 +550,27 @@ namespace Featurehole.Runner.Core
                 new Vector3(100f, 10f, 1f),
                 new Color(0.82f, 0.62f, 0.34f));
 
+            CreateBackdropPlane(
+                "DesertSideLeft",
+                new Vector3(-18f, 2.5f, 18f),
+                Quaternion.Euler(0f, 90f, 0f),
+                new Vector3(90f, 18f, 1f),
+                new Color(0.8f, 0.61f, 0.34f));
+
+            CreateBackdropPlane(
+                "DesertSideRight",
+                new Vector3(18f, 2.5f, 18f),
+                Quaternion.Euler(0f, -90f, 0f),
+                new Vector3(90f, 18f, 1f),
+                new Color(0.8f, 0.61f, 0.34f));
+
+            CreateBackdropPlane(
+                "DesertFloor",
+                new Vector3(0f, -2f, 24f),
+                Quaternion.Euler(90f, 0f, 0f),
+                new Vector3(110f, 80f, 1f),
+                new Color(0.77f, 0.58f, 0.31f));
+
             CreateSun(new Vector3(0f, 20f, 58f), 8.5f);
         }
 
