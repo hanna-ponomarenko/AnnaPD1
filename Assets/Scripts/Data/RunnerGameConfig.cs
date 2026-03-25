@@ -58,7 +58,7 @@ namespace Featurehole.Runner.Data
         [SerializeField] private float pepperSpawnSpacing = 18f;
 
         [Min(0f)]
-        [SerializeField] private float boostDuration = 3f;
+        [SerializeField] private float boostDuration = 2f;
 
         [Min(1f)]
         [SerializeField] private float boostSpeedMultiplier = 1.8f;
@@ -108,7 +108,7 @@ namespace Featurehole.Runner.Data
             config.maxHoleDiameter = 4.5f;
             config.pepperSize = 1f;
             config.pepperSpawnSpacing = 18f;
-            config.boostDuration = 3f;
+            config.boostDuration = 2f;
             config.boostSpeedMultiplier = 1.8f;
             config.appleSplitDuration = 2f;
             config.splitHoleSpacingMultiplier = 0.65f;

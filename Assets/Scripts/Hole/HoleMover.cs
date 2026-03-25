@@ -19,6 +19,8 @@ namespace Featurehole.Runner.Hole
         private Vector3 startPosition;
         private Transform visualTransform;
         private Transform splitVisualTransform;
+        private GameObject boostHornsObject;
+        private GameObject splitBoostHornsObject;
         private GameObject boostFlameObject;
         private Renderer[] boostFlameVisualRenderers;
         private ParticleSystem[] boostFlames;
@@ -51,6 +53,11 @@ namespace Featurehole.Runner.Hole
                 splitVisualObject.name = "VisualTwin";
                 splitVisualTransform = splitVisualObject.transform;
             }
+
+            Transform boostHornsTransform = transform.Find("Visual/BoostHorns");
+            boostHornsObject = boostHornsTransform != null ? boostHornsTransform.gameObject : null;
+            Transform splitBoostHornsTransform = transform.Find("VisualTwin/BoostHorns");
+            splitBoostHornsObject = splitBoostHornsTransform != null ? splitBoostHornsTransform.gameObject : null;
 
             Transform boostFlameTransform = transform.Find("BoostFlame");
             boostFlameObject = boostFlameTransform != null ? boostFlameTransform.gameObject : null;
@@ -150,6 +157,16 @@ namespace Featurehole.Runner.Hole
 
         public void SetBoostActive(bool isActive)
         {
+            if (boostHornsObject != null)
+            {
+                boostHornsObject.SetActive(isActive);
+            }
+
+            if (splitBoostHornsObject != null)
+            {
+                splitBoostHornsObject.SetActive(isActive && (IsSplitActive || isMergeAnimating));
+            }
+
             if (boostFlameObject == null)
             {
                 return;

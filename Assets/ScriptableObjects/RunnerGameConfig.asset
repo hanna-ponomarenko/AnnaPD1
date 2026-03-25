@@ -27,7 +27,7 @@ MonoBehaviour:
   maxHoleDiameter: 4.5
   pepperSize: 1
   pepperSpawnSpacing: 18
-  boostDuration: 3
+  boostDuration: 2
   boostSpeedMultiplier: 1.8
   appleSplitDuration: 2
   splitHoleSpacingMultiplier: 0.65
