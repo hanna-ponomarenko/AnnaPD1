@@ -8,15 +8,18 @@ namespace Featurehole.Runner.Gameplay
 {
     public sealed class PepperBoostSpawner : MonoBehaviour
     {
+        private const float SpawnCycleDurationSeconds = 15f;
+        private const int PeppersPerCycle = 3;
+
         [SerializeField] private PepperPickup pepperPrefab;
         [SerializeField] private Transform peppersRoot;
 
         private readonly List<PepperPickup> activePeppers = new List<PepperPickup>();
+        private readonly Dictionary<PepperPickup, float> nextSpawnZByPepper = new Dictionary<PepperPickup, float>();
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
         private Sprite pepperSprite;
-        private float nextSpawnZ;
 
         public void SetPepperSprite(Sprite sprite)
         {
@@ -44,11 +47,11 @@ namespace Featurehole.Runner.Gameplay
             }
 
             ClearPeppers();
-            nextSpawnZ = config.SegmentLength * 1.5f;
+            float slotDistance = GetSlotDistance();
 
             for (int index = 0; index < 3; index++)
             {
-                SpawnPepper(index);
+                SpawnPepper(index, config.SegmentLength + slotDistance * (index + 1));
             }
         }
 
@@ -90,7 +93,7 @@ namespace Featurehole.Runner.Gameplay
             }
         }
 
-        private void SpawnPepper(int index)
+        private void SpawnPepper(int index, float initialSpawnZ)
         {
             PepperPickup pepper = pepperPrefab != null
                 ? Instantiate(pepperPrefab, peppersRoot)
@@ -98,6 +101,7 @@ namespace Featurehole.Runner.Gameplay
 
             pepper.gameObject.name = $"Pepper_{index}";
             activePeppers.Add(pepper);
+            nextSpawnZByPepper[pepper] = initialSpawnZ;
             RespawnPepper(pepper);
         }
 
@@ -105,9 +109,10 @@ namespace Featurehole.Runner.Gameplay
         {
             float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - config.PepperSize);
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
-            Vector3 spawnPosition = new Vector3(laneX, 0.65f, nextSpawnZ);
+            float spawnZ = nextSpawnZByPepper[pepper];
+            Vector3 spawnPosition = new Vector3(laneX, 0.65f, spawnZ);
             pepper.SetPosition(spawnPosition);
-            nextSpawnZ += config.PepperSpawnSpacing;
+            nextSpawnZByPepper[pepper] = spawnZ + GetCycleDistance();
         }
 
         private void ClearPeppers()
@@ -121,6 +126,7 @@ namespace Featurehole.Runner.Gameplay
             }
 
             activePeppers.Clear();
+            nextSpawnZByPepper.Clear();
         }
 
         private PepperPickup CreateRuntimePepper(int index)
@@ -150,6 +156,16 @@ namespace Featurehole.Runner.Gameplay
             }
 
             return pepper;
+        }
+
+        private float GetCycleDistance()
+        {
+            return Mathf.Max(config.PepperSpawnSpacing * PeppersPerCycle, config.ForwardSpeed * SpawnCycleDurationSeconds);
+        }
+
+        private float GetSlotDistance()
+        {
+            return GetCycleDistance() / (PeppersPerCycle + 1f);
         }
     }
 }
