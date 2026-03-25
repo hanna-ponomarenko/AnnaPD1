@@ -514,10 +514,10 @@ namespace Featurehole.Runner.Hole
 
             Color auraColor = isBoostVisualActive
                 ? Color.Lerp(
-                    new Color(1f, 0.15f, 0.1f, 0.78f),
-                    new Color(0.78f, 0.02f, 0.05f, 0.95f),
+                    new Color(1f, 0.42f, 0.08f, 0.82f),
+                    new Color(0.88f, 0.06f, 0.02f, 0.96f),
                     (Mathf.Sin(boostVisualElapsed * 10f) + 1f) * 0.5f)
-                : new Color(1f, 0.15f, 0.1f, 0f);
+                : new Color(1f, 0.28f, 0.08f, 0f);
 
             if (boostAuraMaterial != null)
             {
