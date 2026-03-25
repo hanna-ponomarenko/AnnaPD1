@@ -15,17 +15,11 @@ namespace Featurehole.Runner.Level
         {
             length = segmentLength;
 
-            if (visualTransform == null)
-            {
-                visualTransform = transform.Find("Visual");
-            }
-
-            if (visualTransform != null)
-            {
-                Vector3 scale = visualTransform.localScale;
-                scale.z = length + SeamOverlap;
-                visualTransform.localScale = scale;
-            }
+            ConfigureScaledChild("Visual");
+            ConfigureScaledChild("RiverGlow");
+            ConfigureScaledChild("BankLeft");
+            ConfigureScaledChild("BankRight");
+            ConfigureScaledChild("UnderwaterSand");
         }
 
         public void Move(float deltaZ)
@@ -38,6 +32,27 @@ namespace Featurehole.Runner.Level
             Vector3 position = transform.position;
             position.z = worldZ;
             transform.position = position;
+        }
+
+        private void ConfigureScaledChild(string childName)
+        {
+            Transform childTransform = childName == "Visual" && visualTransform != null
+                ? visualTransform
+                : transform.Find(childName);
+
+            if (childTransform == null)
+            {
+                return;
+            }
+
+            if (childName == "Visual")
+            {
+                visualTransform = childTransform;
+            }
+
+            Vector3 scale = childTransform.localScale;
+            scale.z = length + SeamOverlap;
+            childTransform.localScale = scale;
         }
     }
 }
