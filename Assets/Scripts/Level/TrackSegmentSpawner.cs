@@ -17,6 +17,13 @@ namespace Featurehole.Runner.Level
         private RunnerGameConfig config;
         private float continuousTrackLength;
         private float nextSpawnZ;
+        private Material runtimeRiverBaseMaterial;
+        private Material runtimeRiverCurrentMaterial;
+        private Material runtimeRiverFoamMaterial;
+        private Texture2D runtimeRiverBaseTexture;
+        private Texture2D runtimeRiverCurrentTexture;
+        private Texture2D runtimeRiverFoamTexture;
+        private float waterAnimationTime;
 
         public void Initialize(RunnerGameConfig runnerConfig)
         {
@@ -46,6 +53,8 @@ namespace Featurehole.Runner.Level
             {
                 return;
             }
+
+            AnimateRiver(deltaTime, forwardSpeed);
 
             float moveDelta = -forwardSpeed * deltaTime;
 
@@ -122,8 +131,36 @@ namespace Featurehole.Runner.Level
 
             float riverWidth = config.TrackWidth;
 
-            CreateBlock(segmentObject.transform, "Visual", Vector3.zero, new Vector3(riverWidth, 0.8f, 1f), new Color(0.09f, 0.46f, 0.76f));
-            CreateBlock(segmentObject.transform, "RiverGlow", new Vector3(0f, 0.18f, 0f), new Vector3(riverWidth * 0.92f, 0.06f, 1f), new Color(0.3f, 0.73f, 0.95f));
+            CreateRiverLayer(
+                segmentObject.transform,
+                "Visual",
+                Vector3.zero,
+                new Vector3(riverWidth, 0.8f, 1f),
+                GetRuntimeRiverBaseMaterial());
+            CreateRiverLayer(
+                segmentObject.transform,
+                "RiverCurrent",
+                new Vector3(0f, 0.21f, 0f),
+                new Vector3(riverWidth * 0.96f, 0.025f, 1f),
+                GetRuntimeRiverCurrentMaterial());
+            CreateRiverLayer(
+                segmentObject.transform,
+                "RiverGlow",
+                new Vector3(0f, 0.18f, 0f),
+                new Vector3(riverWidth * 0.92f, 0.06f, 1f),
+                GetRuntimeRiverBaseMaterial());
+            CreateRiverLayer(
+                segmentObject.transform,
+                "RiverFoamLeft",
+                new Vector3(-riverWidth * 0.38f, 0.22f, 0f),
+                new Vector3(riverWidth * 0.1f, 0.02f, 1f),
+                GetRuntimeRiverFoamMaterial());
+            CreateRiverLayer(
+                segmentObject.transform,
+                "RiverFoamRight",
+                new Vector3(riverWidth * 0.38f, 0.22f, 0f),
+                new Vector3(riverWidth * 0.1f, 0.02f, 1f),
+                GetRuntimeRiverFoamMaterial());
             CreateBlock(segmentObject.transform, "UnderwaterSand", new Vector3(0f, -0.18f, 0f), new Vector3(riverWidth * 0.78f, 0.08f, 1f), new Color(0.71f, 0.63f, 0.39f));
             CreateFish(segmentObject.transform, new Vector3(-riverWidth * 0.28f, -0.08f, -2.2f), new Color(0.99f, 0.72f, 0.34f), 0.22f);
             CreateFish(segmentObject.transform, new Vector3(riverWidth * 0.22f, -0.05f, 1.4f), new Color(0.96f, 0.54f, 0.18f), 0.18f);
@@ -147,6 +184,48 @@ namespace Featurehole.Runner.Level
             return segment;
         }
 
+        private void AnimateRiver(float deltaTime, float forwardSpeed)
+        {
+            waterAnimationTime += deltaTime;
+            float normalizedSpeed = Mathf.Max(0.2f, forwardSpeed / 6f);
+
+            Material riverBaseMaterial = GetRuntimeRiverBaseMaterial();
+            Material riverCurrentMaterial = GetRuntimeRiverCurrentMaterial();
+            Material riverFoamMaterial = GetRuntimeRiverFoamMaterial();
+
+            if (riverBaseMaterial != null)
+            {
+                Vector2 baseOffset = new Vector2(
+                    Mathf.Sin(waterAnimationTime * 0.13f) * 0.03f,
+                    -waterAnimationTime * 0.18f * normalizedSpeed);
+                riverBaseMaterial.mainTextureOffset = baseOffset;
+            }
+
+            if (riverCurrentMaterial != null)
+            {
+                Vector2 currentOffset = new Vector2(
+                    Mathf.Sin(waterAnimationTime * 0.65f) * 0.06f,
+                    -waterAnimationTime * 0.62f * normalizedSpeed);
+                riverCurrentMaterial.mainTextureOffset = currentOffset;
+                riverCurrentMaterial.color = Color.Lerp(
+                    new Color(0.34f, 0.84f, 0.98f, 0.36f),
+                    new Color(0.52f, 0.94f, 1f, 0.48f),
+                    (Mathf.Sin(waterAnimationTime * 1.7f) + 1f) * 0.5f);
+            }
+
+            if (riverFoamMaterial != null)
+            {
+                Vector2 foamOffset = new Vector2(
+                    Mathf.Sin(waterAnimationTime * 0.9f) * 0.05f,
+                    -waterAnimationTime * 1.1f * normalizedSpeed);
+                riverFoamMaterial.mainTextureOffset = foamOffset;
+                riverFoamMaterial.color = Color.Lerp(
+                    new Color(0.88f, 0.97f, 1f, 0.42f),
+                    new Color(1f, 1f, 1f, 0.7f),
+                    (Mathf.Sin(waterAnimationTime * 2.4f) + 1f) * 0.5f);
+            }
+        }
+
         private void CreateBlock(Transform parent, string name, Vector3 localPosition, Vector3 localScale, Color color)
         {
             GameObject block = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -160,6 +239,171 @@ namespace Featurehole.Runner.Level
             {
                 renderer.material.color = color;
             }
+        }
+
+        private void CreateRiverLayer(Transform parent, string name, Vector3 localPosition, Vector3 localScale, Material material)
+        {
+            GameObject layer = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            layer.name = name;
+            layer.transform.SetParent(parent, false);
+            layer.transform.localPosition = localPosition;
+            layer.transform.localScale = localScale;
+
+            Renderer renderer = layer.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.sharedMaterial = material;
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                renderer.receiveShadows = false;
+            }
+        }
+
+        private Material GetRuntimeRiverBaseMaterial()
+        {
+            if (runtimeRiverBaseMaterial != null)
+            {
+                return runtimeRiverBaseMaterial;
+            }
+
+            runtimeRiverBaseTexture = CreateRiverBaseTexture();
+            runtimeRiverBaseMaterial = CreateTransparentUnlitMaterial("RuntimeRiverBaseMaterial", runtimeRiverBaseTexture);
+            runtimeRiverBaseMaterial.color = new Color(0.62f, 0.9f, 1f, 0.96f);
+            runtimeRiverBaseMaterial.mainTextureScale = new Vector2(1.45f, continuousTrackLength * 0.16f);
+            return runtimeRiverBaseMaterial;
+        }
+
+        private Material GetRuntimeRiverCurrentMaterial()
+        {
+            if (runtimeRiverCurrentMaterial != null)
+            {
+                return runtimeRiverCurrentMaterial;
+            }
+
+            runtimeRiverCurrentTexture = CreateRiverCurrentTexture();
+            runtimeRiverCurrentMaterial = CreateTransparentUnlitMaterial("RuntimeRiverCurrentMaterial", runtimeRiverCurrentTexture);
+            runtimeRiverCurrentMaterial.color = new Color(0.4f, 0.88f, 1f, 0.42f);
+            runtimeRiverCurrentMaterial.mainTextureScale = new Vector2(1.8f, continuousTrackLength * 0.28f);
+            return runtimeRiverCurrentMaterial;
+        }
+
+        private Material GetRuntimeRiverFoamMaterial()
+        {
+            if (runtimeRiverFoamMaterial != null)
+            {
+                return runtimeRiverFoamMaterial;
+            }
+
+            runtimeRiverFoamTexture = CreateRiverFoamTexture();
+            runtimeRiverFoamMaterial = CreateTransparentUnlitMaterial("RuntimeRiverFoamMaterial", runtimeRiverFoamTexture);
+            runtimeRiverFoamMaterial.color = new Color(0.96f, 0.99f, 1f, 0.58f);
+            runtimeRiverFoamMaterial.mainTextureScale = new Vector2(1f, continuousTrackLength * 0.42f);
+            return runtimeRiverFoamMaterial;
+        }
+
+        private Material CreateTransparentUnlitMaterial(string materialName, Texture2D texture)
+        {
+            Shader shader = Shader.Find("Unlit/Transparent");
+            if (shader == null)
+            {
+                shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+            }
+
+            Material material = new Material(shader)
+            {
+                name = materialName,
+                mainTexture = texture
+            };
+
+            return material;
+        }
+
+        private Texture2D CreateRiverBaseTexture()
+        {
+            const int width = 128;
+            const int height = 128;
+
+            Texture2D texture = CreateRuntimeTexture("RiverBaseTexture", width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                float v = y / (float)(height - 1);
+                for (int x = 0; x < width; x++)
+                {
+                    float u = x / (float)(width - 1);
+                    float band = Mathf.Sin((u * 3.5f + v * 7.2f) * Mathf.PI) * 0.5f + 0.5f;
+                    float ripple = Mathf.Sin((u * 11f - v * 4.5f) * Mathf.PI) * 0.5f + 0.5f;
+                    Color deep = new Color(0.06f, 0.34f, 0.65f, 1f);
+                    Color shallow = new Color(0.16f, 0.58f, 0.84f, 1f);
+                    Color highlight = new Color(0.34f, 0.82f, 0.97f, 1f);
+                    Color color = Color.Lerp(deep, shallow, band * 0.65f);
+                    color = Color.Lerp(color, highlight, ripple * 0.2f);
+                    texture.SetPixel(x, y, color);
+                }
+            }
+
+            texture.Apply();
+            return texture;
+        }
+
+        private Texture2D CreateRiverCurrentTexture()
+        {
+            const int width = 128;
+            const int height = 256;
+
+            Texture2D texture = CreateRuntimeTexture("RiverCurrentTexture", width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                float v = y / (float)(height - 1);
+                for (int x = 0; x < width; x++)
+                {
+                    float u = x / (float)(width - 1);
+                    float veinA = Mathf.Abs(Mathf.Sin((u * 7f + v * 10f) * Mathf.PI));
+                    float veinB = Mathf.Abs(Mathf.Sin((u * 13f - v * 16f) * Mathf.PI));
+                    float streak = Mathf.SmoothStep(0.68f, 1f, Mathf.Max(veinA, veinB));
+                    float alpha = streak * 0.85f;
+                    texture.SetPixel(x, y, new Color(0.9f, 0.99f, 1f, alpha));
+                }
+            }
+
+            texture.Apply();
+            return texture;
+        }
+
+        private Texture2D CreateRiverFoamTexture()
+        {
+            const int width = 64;
+            const int height = 256;
+
+            Texture2D texture = CreateRuntimeTexture("RiverFoamTexture", width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                float v = y / (float)(height - 1);
+                for (int x = 0; x < width; x++)
+                {
+                    float u = x / (float)(width - 1);
+                    float edgeNoise = Mathf.Sin((v * 18f + u * 5f) * Mathf.PI) * 0.5f + 0.5f;
+                    float bubbles = Mathf.Sin((v * 33f - u * 3f) * Mathf.PI) * 0.5f + 0.5f;
+                    float alpha = Mathf.SmoothStep(0.62f, 1f, edgeNoise * 0.7f + bubbles * 0.3f);
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            texture.Apply();
+            return texture;
+        }
+
+        private Texture2D CreateRuntimeTexture(string textureName, int width, int height)
+        {
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false)
+            {
+                name = textureName,
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Repeat
+            };
+
+            return texture;
         }
 
         private void CreateFish(Transform parent, Vector3 localPosition, Color color, float size)
