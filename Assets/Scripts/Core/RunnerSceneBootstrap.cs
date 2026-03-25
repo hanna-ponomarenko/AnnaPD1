@@ -526,11 +526,11 @@ namespace Featurehole.Runner.Core
             }
 
             Transform cameraTransform = mainCamera.transform;
-            cameraTransform.position = new Vector3(0f, 8f, -8f);
-            cameraTransform.rotation = Quaternion.Euler(35f, 0f, 0f);
+            cameraTransform.position = new Vector3(0f, 9.5f, -10.5f);
+            cameraTransform.rotation = Quaternion.Euler(30f, 0f, 0f);
 
             mainCamera.orthographic = false;
-            mainCamera.fieldOfView = 50f;
+            mainCamera.fieldOfView = 56f;
             mainCamera.backgroundColor = new Color(0.94f, 0.78f, 0.52f);
         }
 
@@ -571,7 +571,7 @@ namespace Featurehole.Runner.Core
                 new Vector3(110f, 80f, 1f),
                 new Color(0.77f, 0.58f, 0.31f));
 
-            CreateSun(new Vector3(0f, 20f, 58f), 8.5f);
+            CreateSun(new Vector3(0f, 24f, 40f), 9.5f);
         }
 
         private void CreateBackdropPlane(string name, Vector3 localPosition, Quaternion localRotation, Vector3 localScale, Color color)

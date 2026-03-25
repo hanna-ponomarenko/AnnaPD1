@@ -131,13 +131,13 @@ namespace Featurehole.Runner.Level
             CreateReeds(segmentObject.transform, new Vector3(riverWidth * 0.34f, 0.06f, 2.8f), 4, 1f);
             CreateReeds(segmentObject.transform, new Vector3(-riverWidth * 0.12f, 0.05f, 6.2f), 3, 1f);
 
-            float sideOffsetX = config.TrackWidth * 0.5f + 6.5f;
-            CreatePyramid(segmentObject.transform, "PyramidLeft", new Vector3(-sideOffsetX, 8.5f, -6f), new Vector3(24f, 21f, 24f), new Color(0.82f, 0.69f, 0.42f));
-            CreatePyramid(segmentObject.transform, "PyramidRight", new Vector3(sideOffsetX + 2.8f, 7.2f, 12f), new Vector3(18f, 17f, 18f), new Color(0.76f, 0.63f, 0.36f));
+            float sideOffsetX = config.TrackWidth * 0.5f + 3.2f;
+            CreatePyramid(segmentObject.transform, "PyramidLeft", new Vector3(-sideOffsetX, 1.7f, -6f), new Vector3(4.8f, 4.2f, 4.8f), new Color(0.82f, 0.69f, 0.42f));
+            CreatePyramid(segmentObject.transform, "PyramidRight", new Vector3(sideOffsetX + 1.4f, 1.45f, 12f), new Vector3(3.6f, 3.4f, 3.6f), new Color(0.76f, 0.63f, 0.36f));
             CreateRock(segmentObject.transform, "RockLeft", new Vector3(-sideOffsetX - 4.8f, 2.8f, 14f), new Vector3(16f, 9f, 12f), new Color(0.58f, 0.49f, 0.39f));
             CreateRock(segmentObject.transform, "RockRight", new Vector3(sideOffsetX + 6.2f, 2.6f, -14f), new Vector3(14f, 8f, 10f), new Color(0.64f, 0.56f, 0.43f));
-            CreateStatue(segmentObject.transform, "AnubisLeft", new Vector3(-sideOffsetX + 1.1f, 5.6f, 18f), new Color(0.29f, 0.25f, 0.18f), 10f);
-            CreateStatue(segmentObject.transform, "HorusRight", new Vector3(sideOffsetX - 0.9f, 5.6f, -18f), new Color(0.23f, 0.2f, 0.17f), 10f);
+            CreateStatue(segmentObject.transform, "AnubisLeft", new Vector3(-sideOffsetX + 0.5f, 1.12f, 18f), new Color(0.29f, 0.25f, 0.18f), 2f);
+            CreateStatue(segmentObject.transform, "HorusRight", new Vector3(sideOffsetX - 0.45f, 1.12f, -18f), new Color(0.23f, 0.2f, 0.17f), 2f);
 
             return segment;
         }
