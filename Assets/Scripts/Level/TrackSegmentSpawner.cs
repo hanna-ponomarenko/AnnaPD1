@@ -259,18 +259,11 @@ namespace Featurehole.Runner.Level
 
         private void CreateRiverLayer(Transform parent, string name, Vector3 localPosition, Vector3 localScale, Material material)
         {
-            GameObject layer = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            GameObject layer = GameObject.CreatePrimitive(PrimitiveType.Cube);
             layer.name = name;
             layer.transform.SetParent(parent, false);
             layer.transform.localPosition = localPosition;
-            layer.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            layer.transform.localScale = new Vector3(localScale.x, localScale.z, 1f);
-
-            Collider layerCollider = layer.GetComponent<Collider>();
-            if (layerCollider != null)
-            {
-                Destroy(layerCollider);
-            }
+            layer.transform.localScale = localScale;
 
             Renderer renderer = layer.GetComponent<Renderer>();
             if (renderer != null)
