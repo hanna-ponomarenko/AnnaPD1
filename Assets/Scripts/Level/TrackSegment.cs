@@ -9,7 +9,9 @@ namespace Featurehole.Runner.Level
         private Transform visualTransform;
         private float length;
 
+        public float MinZ => transform.position.z - length * 0.5f;
         public float MaxZ => transform.position.z + length * 0.5f;
+        public float Length => length;
 
         public void Configure(float segmentLength)
         {
@@ -32,6 +34,11 @@ namespace Featurehole.Runner.Level
             Vector3 position = transform.position;
             position.z = worldZ;
             transform.position = position;
+        }
+
+        public void SetMinZ(float worldMinZ)
+        {
+            SetZ(worldMinZ + length * 0.5f);
         }
 
         private void ConfigureScaledChild(string childName)

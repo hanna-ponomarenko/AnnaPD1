@@ -80,18 +80,18 @@ namespace Featurehole.Runner.Level
 
             segment.gameObject.name = $"{segment.gameObject.name}_{activeSegments.Count}";
             segment.Configure(continuousTrackLength);
-            segment.SetZ(nextSpawnZ);
+            segment.SetMinZ(nextSpawnZ);
 
             activeSegments.Enqueue(segment);
-            nextSpawnZ += continuousTrackLength;
+            nextSpawnZ = segment.MaxZ;
         }
 
         private void RecycleFirstSegment()
         {
             TrackSegment segment = activeSegments.Dequeue();
-            segment.SetZ(nextSpawnZ);
+            segment.SetMinZ(nextSpawnZ);
             activeSegments.Enqueue(segment);
-            nextSpawnZ += continuousTrackLength;
+            nextSpawnZ = segment.MaxZ;
         }
 
         private void ClearSpawnedSegments()
