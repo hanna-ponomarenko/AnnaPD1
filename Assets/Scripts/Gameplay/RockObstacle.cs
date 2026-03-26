@@ -6,6 +6,7 @@ namespace Featurehole.Runner.Gameplay
     {
         private Transform visualTransform;
         private float baseCollisionRadius = 0.6f;
+        private BoxCollider obstacleCollider;
 
         public float CollisionRadius { get; private set; } = 0.6f;
 
@@ -19,6 +20,7 @@ namespace Featurehole.Runner.Gameplay
             transform.position = worldPosition;
             transform.localScale = Vector3.one * sizeScale;
             CollisionRadius = baseCollisionRadius * sizeScale;
+            UpdateCollider();
             gameObject.SetActive(true);
         }
 
@@ -27,6 +29,8 @@ namespace Featurehole.Runner.Gameplay
             visualTransform = visual;
             FitVisualToGround();
             RecalculateCollisionRadius();
+            EnsureCollider();
+            UpdateCollider();
         }
 
         public void Hide()
@@ -79,6 +83,33 @@ namespace Featurehole.Runner.Gameplay
 
             baseCollisionRadius = Mathf.Max(bounds.extents.x, bounds.extents.z);
             CollisionRadius = baseCollisionRadius;
+        }
+
+        private void EnsureCollider()
+        {
+            if (obstacleCollider != null)
+            {
+                return;
+            }
+
+            obstacleCollider = GetComponent<BoxCollider>();
+            if (obstacleCollider == null)
+            {
+                obstacleCollider = gameObject.AddComponent<BoxCollider>();
+            }
+
+            obstacleCollider.isTrigger = true;
+        }
+
+        private void UpdateCollider()
+        {
+            if (obstacleCollider == null)
+            {
+                return;
+            }
+
+            obstacleCollider.center = new Vector3(0f, baseCollisionRadius * 0.55f, 0f);
+            obstacleCollider.size = new Vector3(baseCollisionRadius * 2f, baseCollisionRadius * 1.15f, baseCollisionRadius * 2f);
         }
     }
 }

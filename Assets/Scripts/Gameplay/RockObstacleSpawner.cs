@@ -3,6 +3,7 @@ using Featurehole.Runner.Core;
 using Featurehole.Runner.Data;
 using Featurehole.Runner.Hole;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Featurehole.Runner.Gameplay
 {
@@ -20,6 +21,7 @@ namespace Featurehole.Runner.Gameplay
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
+        private Material runtimeRockMaterial;
 
         public void SetRockPrefab(GameObject prefab)
         {
@@ -193,31 +195,72 @@ namespace Featurehole.Runner.Gameplay
             visual.name = "Visual";
             visual.transform.localPosition = Vector3.zero;
             visual.transform.localRotation = Quaternion.identity;
-            visual.transform.localScale *= 0.0035f;
+            visual.transform.localScale = Vector3.one * 0.0032f;
 
-            Collider prefabCollider = visual.GetComponent<Collider>();
-            if (prefabCollider == null)
+            foreach (Collider collider in visual.GetComponentsInChildren<Collider>(true))
             {
-                Renderer[] renderers = visual.GetComponentsInChildren<Renderer>(true);
-                if (renderers.Length > 0)
-                {
-                    Bounds bounds = renderers[0].bounds;
-                    for (int indexRenderer = 1; indexRenderer < renderers.Length; indexRenderer++)
-                    {
-                        bounds.Encapsulate(renderers[indexRenderer].bounds);
-                    }
-
-                    BoxCollider collider = visual.AddComponent<BoxCollider>();
-                    collider.center = visual.transform.InverseTransformPoint(bounds.center);
-                    collider.size = new Vector3(
-                        bounds.size.x / visual.transform.lossyScale.x,
-                        bounds.size.y / visual.transform.lossyScale.y,
-                        bounds.size.z / visual.transform.lossyScale.z);
-                }
+                Destroy(collider);
             }
+
+            ApplyOpaqueRockLook(visual);
 
             rock.SetVisual(visual.transform);
             return rock;
+        }
+
+        private void ApplyOpaqueRockLook(GameObject visual)
+        {
+            Renderer[] renderers = visual.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0)
+            {
+                return;
+            }
+
+            Material rockMaterial = GetRuntimeRockMaterial();
+            foreach (Renderer renderer in renderers)
+            {
+                renderer.sharedMaterial = rockMaterial;
+                renderer.shadowCastingMode = ShadowCastingMode.On;
+                renderer.receiveShadows = true;
+            }
+        }
+
+        private Material GetRuntimeRockMaterial()
+        {
+            if (runtimeRockMaterial != null)
+            {
+                return runtimeRockMaterial;
+            }
+
+            Shader shader = Shader.Find("Standard");
+            if (shader == null)
+            {
+                shader = Shader.Find("Diffuse");
+            }
+
+            runtimeRockMaterial = new Material(shader)
+            {
+                name = "RuntimeRockOpaqueMaterial",
+                color = new Color(0.43f, 0.39f, 0.35f, 1f)
+            };
+
+            if (runtimeRockMaterial.HasProperty("_Mode"))
+            {
+                runtimeRockMaterial.SetFloat("_Mode", 0f);
+            }
+
+            if (runtimeRockMaterial.HasProperty("_Metallic"))
+            {
+                runtimeRockMaterial.SetFloat("_Metallic", 0.02f);
+            }
+
+            if (runtimeRockMaterial.HasProperty("_Glossiness"))
+            {
+                runtimeRockMaterial.SetFloat("_Glossiness", 0.18f);
+            }
+
+            runtimeRockMaterial.renderQueue = (int)RenderQueue.Geometry;
+            return runtimeRockMaterial;
         }
 
         private float GetRandomSizeScale()
