@@ -20,6 +20,7 @@ namespace Featurehole.Runner.Core
         [SerializeField] private AudioClip rockImpactSfx;
         [SerializeField] private AudioClip loseSfx;
         [SerializeField] private GameObject rockObstaclePrefab;
+        [SerializeField] private GameObject[] rockObstaclePrefabs;
         [SerializeField] private Material boostFireMaterial;
         [SerializeField] private UnityEngine.Object boostFirePrefab;
         [SerializeField] private bool autoStart = true;
@@ -699,25 +700,53 @@ namespace Featurehole.Runner.Core
                 createdSpawner = true;
             }
 
-            GameObject rockPrefab = GetRockObstaclePrefab();
-            rockSpawner.SetRockPrefab(rockPrefab);
+            GameObject[] rockPrefabs = GetRockObstaclePrefabs();
+            rockSpawner.SetRockPrefabs(rockPrefabs);
             Debug.Log(
-                $"[RunnerSceneBootstrap] created rock spawner={createdSpawner} activeSceneObject='RunnerBootstrap' component='RunnerSceneBootstrap' field='rockObstaclePrefab' assigned='{(rockObstaclePrefab != null ? rockObstaclePrefab.name : "null")}' resolvedPrefab='{(rockPrefab != null ? rockPrefab.name : "null")}' path='CreateRockSpawner->SetRockPrefab'",
+                $"[RunnerSceneBootstrap] created rock spawner={createdSpawner} activeSceneObject='RunnerBootstrap' component='RunnerSceneBootstrap' field='rockObstaclePrefabs' assignedCount={GetAssignedRockPrefabCount()} resolvedCount={(rockPrefabs != null ? rockPrefabs.Length : 0)} path='CreateRockSpawner->SetRockPrefabs'",
                 this);
             return rockSpawner;
         }
 
-        private GameObject GetRockObstaclePrefab()
+        private GameObject[] GetRockObstaclePrefabs()
         {
+            if (rockObstaclePrefabs != null && rockObstaclePrefabs.Length > 0)
+            {
+                return rockObstaclePrefabs;
+            }
+
             if (rockObstaclePrefab != null)
             {
-                return rockObstaclePrefab;
+                return new[] { rockObstaclePrefab };
             }
 
 #if UNITY_EDITOR
-            rockObstaclePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Audio/Prefabs/rock.013.prefab");
+            rockObstaclePrefabs = new[]
+            {
+                AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Audio/Prefabs/rock.013.prefab"),
+                AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Audio/Prefabs/rock.009.prefab")
+            };
 #endif
-            return rockObstaclePrefab;
+            return rockObstaclePrefabs;
+        }
+
+        private int GetAssignedRockPrefabCount()
+        {
+            if (rockObstaclePrefabs == null || rockObstaclePrefabs.Length == 0)
+            {
+                return rockObstaclePrefab != null ? 1 : 0;
+            }
+
+            int count = 0;
+            foreach (GameObject prefab in rockObstaclePrefabs)
+            {
+                if (prefab != null)
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
 
         private RunnerHud CreateHud()

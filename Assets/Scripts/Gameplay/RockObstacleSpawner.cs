@@ -12,8 +12,10 @@ namespace Featurehole.Runner.Gameplay
         private const int RocksPerCycle = 3;
         private const float RockPadding = 0.7f;
         private const float TargetRockHeight = 0.95f;
+        private const float VisualScaleMin = 0.9f;
+        private const float VisualScaleMax = 1.1f;
 
-        [SerializeField] private GameObject rockPrefab;
+        [SerializeField] private GameObject[] rockPrefabs;
         [SerializeField] private Transform rocksRoot;
 
         private readonly List<RockObstacle> activeRocks = new List<RockObstacle>();
@@ -24,9 +26,9 @@ namespace Featurehole.Runner.Gameplay
         private HoleMover holeMover;
         private Material runtimeRockMaterial;
 
-        public void SetRockPrefab(GameObject prefab)
+        public void SetRockPrefabs(GameObject[] prefabs)
         {
-            rockPrefab = prefab;
+            rockPrefabs = prefabs;
         }
 
         public void Initialize(RunnerGameConfig runnerConfig, HoleMover runnerHoleMover)
@@ -94,15 +96,15 @@ namespace Featurehole.Runner.Gameplay
         private void SpawnRock(int intervalIndex, float cycleStart)
         {
             Debug.Log(
-                $"[RockObstacleSpawner] spawn attempt intervalIndex={intervalIndex} cycleStart={cycleStart:F2} prefab='{(rockPrefab != null ? rockPrefab.name : "null")}'",
+                $"[RockObstacleSpawner] spawn attempt intervalIndex={intervalIndex} cycleStart={cycleStart:F2} prefabCount={GetAvailablePrefabCount()}",
                 this);
 
-            RockObstacle rock = rockPrefab != null
+            RockObstacle rock = HasRockPrefabs()
                 ? CreateRockFromPrefab(intervalIndex)
                 : CreateRuntimeRock(intervalIndex);
 
             Debug.Log(
-                $"[RockObstacleSpawner] spawn success activeSpawner='{name}' prefab='{(rockPrefab != null ? rockPrefab.name : "null")}' createdObstacle='{rock.gameObject.name}' visualMode='{(rockPrefab != null ? "prefab" : "runtime")}' activeObstacleCount={activeRocks.Count + 1}",
+                $"[RockObstacleSpawner] spawn success activeSpawner='{name}' prefabCount={GetAvailablePrefabCount()} createdObstacle='{rock.gameObject.name}' visualMode='{(HasRockPrefabs() ? "prefab" : "runtime")}' activeObstacleCount={activeRocks.Count + 1}",
                 this);
 
             rock.gameObject.name = $"Rock_{intervalIndex}";
@@ -198,16 +200,18 @@ namespace Featurehole.Runner.Gameplay
 
         private RockObstacle CreateRockFromPrefab(int index)
         {
+            GameObject selectedPrefab = GetRandomRockPrefab();
             GameObject root = new GameObject($"Rock_{index}");
             root.transform.SetParent(rocksRoot, false);
 
             RockObstacle rock = root.AddComponent<RockObstacle>();
 
-            GameObject visual = Instantiate(rockPrefab, root.transform);
+            GameObject visual = Instantiate(selectedPrefab, root.transform);
             visual.name = "Visual";
             visual.transform.localPosition = Vector3.zero;
-            visual.transform.localRotation = Quaternion.identity;
+            visual.transform.localRotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
             NormalizeVisualScale(visual.transform);
+            visual.transform.localScale *= Random.Range(VisualScaleMin, VisualScaleMax);
 
             foreach (Collider collider in visual.GetComponentsInChildren<Collider>(true))
             {
@@ -218,9 +222,55 @@ namespace Featurehole.Runner.Gameplay
 
             rock.SetVisual(visual.transform);
             Debug.Log(
-                $"[RockObstacleSpawner] instantiated prefabVisual='{visual.name}' sourcePrefab='{rockPrefab.name}' root='{root.name}'",
+                $"[RockObstacleSpawner] instantiated prefabVisual='{visual.name}' sourcePrefab='{selectedPrefab.name}' root='{root.name}' randomY={visual.transform.localEulerAngles.y:F1} visualScale={visual.transform.localScale}",
                 this);
             return rock;
+        }
+
+        private bool HasRockPrefabs()
+        {
+            return GetAvailablePrefabCount() > 0;
+        }
+
+        private int GetAvailablePrefabCount()
+        {
+            if (rockPrefabs == null)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            foreach (GameObject prefab in rockPrefabs)
+            {
+                if (prefab != null)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private GameObject GetRandomRockPrefab()
+        {
+            List<GameObject> availablePrefabs = new List<GameObject>();
+            if (rockPrefabs != null)
+            {
+                foreach (GameObject prefab in rockPrefabs)
+                {
+                    if (prefab != null)
+                    {
+                        availablePrefabs.Add(prefab);
+                    }
+                }
+            }
+
+            if (availablePrefabs.Count == 0)
+            {
+                return null;
+            }
+
+            return availablePrefabs[Random.Range(0, availablePrefabs.Count)];
         }
 
         private void NormalizeVisualScale(Transform visualTransform)
