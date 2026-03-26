@@ -32,6 +32,12 @@ namespace Featurehole.Runner.Gameplay
             basePosition += new Vector3(0f, 0f, deltaZ);
         }
 
+        public void AttractTowards(Vector3 targetPosition, float attractionStrength, float deltaTime)
+        {
+            basePosition = Vector3.Lerp(basePosition, targetPosition, 1f - Mathf.Exp(-attractionStrength * deltaTime));
+            transform.position = basePosition;
+        }
+
         public void SetPosition(Vector3 worldPosition)
         {
             basePosition = worldPosition;

@@ -14,6 +14,7 @@ namespace Featurehole.Runner.Core
         [SerializeField] private TrackSegmentSpawner trackSpawner;
         [SerializeField] private AppleSpawner appleSpawner;
         [SerializeField] private PepperBoostSpawner pepperSpawner;
+        [SerializeField] private MagnetSpawner magnetSpawner;
         [SerializeField] private CoinSpawner coinSpawner;
         [SerializeField] private RockObstacleSpawner rockSpawner;
         [SerializeField] private MusicManager musicManager;
@@ -32,6 +33,7 @@ namespace Featurehole.Runner.Core
             TrackSegmentSpawner runnerTrackSpawner,
             AppleSpawner runnerAppleSpawner,
             PepperBoostSpawner runnerPepperSpawner,
+            MagnetSpawner runnerMagnetSpawner,
             CoinSpawner runnerCoinSpawner,
             RockObstacleSpawner runnerRockSpawner,
             MusicManager runnerMusicManager,
@@ -44,6 +46,7 @@ namespace Featurehole.Runner.Core
             trackSpawner = runnerTrackSpawner;
             appleSpawner = runnerAppleSpawner;
             pepperSpawner = runnerPepperSpawner;
+            magnetSpawner = runnerMagnetSpawner;
             coinSpawner = runnerCoinSpawner;
             rockSpawner = runnerRockSpawner;
             musicManager = runnerMusicManager;
@@ -64,6 +67,7 @@ namespace Featurehole.Runner.Core
             trackSpawner.Initialize(config);
             appleSpawner.Initialize(config, holeMover);
             pepperSpawner.Initialize(config, holeMover);
+            magnetSpawner.Initialize(config, holeMover);
             coinSpawner.Initialize(config, holeMover);
             rockSpawner.Initialize(config, holeMover);
             hud.Initialize(runtime, holeMover);
@@ -103,6 +107,7 @@ namespace Featurehole.Runner.Core
             trackSpawner.Tick(deltaTime, currentForwardSpeed);
             appleSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             pepperSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
+            magnetSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             coinSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             if (rockSpawner.Tick(deltaTime, currentForwardSpeed))
             {
@@ -135,6 +140,7 @@ namespace Featurehole.Runner.Core
             holeMover.SetBoostActive(false);
             appleSpawner.ResetField();
             pepperSpawner.ResetField();
+            magnetSpawner.ResetField();
             coinSpawner.ResetField();
             rockSpawner.ResetField();
             restartDelayRemaining = -1f;
@@ -159,6 +165,7 @@ namespace Featurehole.Runner.Core
             holeMover.SetBoostActive(false);
             appleSpawner.ResetField();
             pepperSpawner.ResetField();
+            magnetSpawner.ResetField();
             coinSpawner.ResetField();
             rockSpawner.ResetField();
             restartDelayRemaining = -1f;
@@ -186,6 +193,7 @@ namespace Featurehole.Runner.Core
                 && trackSpawner != null
                 && appleSpawner != null
                 && pepperSpawner != null
+                && magnetSpawner != null
                 && coinSpawner != null
                 && rockSpawner != null
                 && musicManager != null

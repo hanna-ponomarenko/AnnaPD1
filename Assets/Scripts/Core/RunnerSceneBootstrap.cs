@@ -16,6 +16,7 @@ namespace Featurehole.Runner.Core
         [SerializeField] private RunnerGameConfig config;
         [SerializeField] private Sprite pepperSprite;
         [SerializeField] private Sprite appleSprite;
+        [SerializeField] private Sprite magnetSprite;
         [SerializeField] private AudioClip backgroundMusic;
         [SerializeField] private AudioClip rockImpactSfx;
         [SerializeField] private AudioClip loseSfx;
@@ -49,13 +50,15 @@ namespace Featurehole.Runner.Core
             appleSpawner.SetAppleSprite(appleSprite);
             PepperBoostSpawner pepperSpawner = CreatePepperSpawner();
             pepperSpawner.SetPepperSprite(pepperSprite);
+            MagnetSpawner magnetSpawner = CreateMagnetSpawner();
+            magnetSpawner.SetMagnetSprite(GetMagnetSprite());
             CoinSpawner coinSpawner = CreateCoinSpawner();
             RockObstacleSpawner rockSpawner = CreateRockSpawner();
             MusicManager musicManager = CreateMusicManager();
             GameSfxManager sfxManager = CreateSfxManager();
             RunnerHud hud = CreateHud();
 
-            controller.Configure(runtimeConfig, holeMover, trackSpawner, appleSpawner, pepperSpawner, coinSpawner, rockSpawner, musicManager, sfxManager, hud, autoStart);
+            controller.Configure(runtimeConfig, holeMover, trackSpawner, appleSpawner, pepperSpawner, magnetSpawner, coinSpawner, rockSpawner, musicManager, sfxManager, hud, autoStart);
 
             if (configureMainCamera)
             {
@@ -681,6 +684,25 @@ namespace Featurehole.Runner.Core
             return coinSpawner;
         }
 
+        private MagnetSpawner CreateMagnetSpawner()
+        {
+            Transform spawnerRoot = transform.Find("MagnetSpawner");
+            if (spawnerRoot == null)
+            {
+                GameObject spawnerObject = new GameObject("MagnetSpawner");
+                spawnerObject.transform.SetParent(transform, false);
+                spawnerRoot = spawnerObject.transform;
+            }
+
+            MagnetSpawner magnetSpawner = spawnerRoot.GetComponent<MagnetSpawner>();
+            if (magnetSpawner == null)
+            {
+                magnetSpawner = spawnerRoot.gameObject.AddComponent<MagnetSpawner>();
+            }
+
+            return magnetSpawner;
+        }
+
         private RockObstacleSpawner CreateRockSpawner()
         {
             Transform spawnerRoot = transform.Find("RockSpawner");
@@ -747,6 +769,19 @@ namespace Featurehole.Runner.Core
             }
 
             return count;
+        }
+
+        private Sprite GetMagnetSprite()
+        {
+            if (magnetSprite != null)
+            {
+                return magnetSprite;
+            }
+
+#if UNITY_EDITOR
+            magnetSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Icon/magnet.png");
+#endif
+            return magnetSprite;
         }
 
         private RunnerHud CreateHud()

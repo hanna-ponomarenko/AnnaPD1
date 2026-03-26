@@ -11,6 +11,7 @@ namespace Featurehole.Runner.Gameplay
         private const int CoinsPerCycle = 4;
         private const float CoinSize = 0.65f;
         private const float CoinSpacingPadding = 1.2f;
+        private const float MagnetAttractionStrength = 8f;
 
         [SerializeField] private CoinPickup coinPrefab;
         [SerializeField] private Transform coinsRoot;
@@ -21,6 +22,7 @@ namespace Featurehole.Runner.Gameplay
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
+        private int lastAttractedCoinCount = -1;
 
         public void Initialize(RunnerGameConfig runnerConfig, HoleMover runnerHoleMover)
         {
@@ -60,6 +62,7 @@ namespace Featurehole.Runner.Gameplay
 
             float moveDelta = -forwardSpeed * deltaTime;
             float passedThreshold = holeMover.transform.position.z - CoinSize;
+            int attractedCoinCount = 0;
 
             foreach (CoinPickup coin in activeCoins)
             {
@@ -71,6 +74,17 @@ namespace Featurehole.Runner.Gameplay
                 coin.Move(moveDelta);
 
                 Vector3 coinPosition = coin.transform.position;
+                if (runtime.IsMagnetActive)
+                {
+                    float distanceToHole = Vector3.Distance(coinPosition, holeMover.transform.position);
+                    if (distanceToHole <= runtime.MagnetRadius)
+                    {
+                        attractedCoinCount++;
+                        coin.AttractTowards(holeMover.transform.position, MagnetAttractionStrength, deltaTime);
+                        coinPosition = coin.transform.position;
+                    }
+                }
+
                 if (holeMover.CanAbsorb(coinPosition, CoinSize, 0.28f))
                 {
                     coin.Collect();
@@ -84,6 +98,13 @@ namespace Featurehole.Runner.Gameplay
                     RespawnCoin(coin);
                 }
             }
+
+            if (runtime.IsMagnetActive && attractedCoinCount != lastAttractedCoinCount)
+            {
+                Debug.Log($"[Magnet] coins attracted count={attractedCoinCount}", this);
+            }
+
+            lastAttractedCoinCount = runtime.IsMagnetActive ? attractedCoinCount : -1;
         }
 
         private void SpawnCoin(int slotIndex, float cycleStart)

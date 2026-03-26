@@ -8,17 +8,19 @@ namespace Featurehole.Runner.Gameplay
 {
     public sealed class AppleSpawner : MonoBehaviour
     {
-        private const float SpawnCycleDurationSeconds = 15f;
+        private const float SpawnPadding = 0.9f;
+        private const int CyclesAhead = 2;
 
         [SerializeField] private ApplePickup applePrefab;
         [SerializeField] private Transform applesRoot;
 
         private readonly List<ApplePickup> activeApples = new List<ApplePickup>();
+        private readonly Dictionary<ApplePickup, int> cycleByApple = new Dictionary<ApplePickup, int>();
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
         private Sprite appleSprite;
-        private float nextSpawnZ;
+        private int nextCycleIndexToSpawn;
 
         public void SetAppleSprite(Sprite sprite)
         {
@@ -46,9 +48,8 @@ namespace Featurehole.Runner.Gameplay
             }
 
             ClearApples();
-            nextSpawnZ = config.SegmentLength;
-
-            SpawnApple(0);
+            nextCycleIndexToSpawn = 0;
+            EnsureUpcomingCycles(0);
         }
 
         public void Tick(float deltaTime, RunnerRuntime runtime, float forwardSpeed)
@@ -62,8 +63,9 @@ namespace Featurehole.Runner.Gameplay
             Transform holeTransform = holeMover.transform;
             float passedThreshold = holeTransform.position.z - config.CollectibleSize;
 
-            foreach (ApplePickup apple in activeApples)
+            for (int index = activeApples.Count - 1; index >= 0; index--)
             {
+                ApplePickup apple = activeApples[index];
                 if (!apple.gameObject.activeSelf)
                 {
                     continue;
@@ -78,36 +80,61 @@ namespace Featurehole.Runner.Gameplay
                     runtime.RegisterCollected();
                     holeMover.Grow();
                     holeMover.ActivateSplit(config.AppleSplitDuration);
-                    RespawnApple(apple);
+                    RemoveApple(apple, index);
                     continue;
                 }
 
                 if (applePosition.z < passedThreshold)
                 {
                     runtime.RegisterMissed();
-                    RespawnApple(apple);
+                    RemoveApple(apple, index);
                 }
+            }
+
+            EnsureUpcomingCycles(CollectibleProgressionLayout.GetCycleIndex(config, runtime.DistanceTravelled));
+        }
+
+        private void EnsureUpcomingCycles(int currentCycleIndex)
+        {
+            int targetCycleIndex = currentCycleIndex + CyclesAhead;
+            while (nextCycleIndexToSpawn <= targetCycleIndex)
+            {
+                SpawnCycle(nextCycleIndexToSpawn);
+                nextCycleIndexToSpawn++;
             }
         }
 
-        private void SpawnApple(int index)
+        private void SpawnCycle(int cycleIndex)
+        {
+            int appleCount = CollectibleProgressionLayout.GetAppleCount(cycleIndex);
+            for (int slotIndex = 0; slotIndex < appleCount; slotIndex++)
+            {
+                SpawnApple(cycleIndex, slotIndex, appleCount);
+            }
+        }
+
+        private void SpawnApple(int cycleIndex, int slotIndex, int appleCount)
         {
             ApplePickup apple = applePrefab != null
                 ? Instantiate(applePrefab, applesRoot)
-                : CreateRuntimeApple(index);
+                : CreateRuntimeApple(activeApples.Count);
 
-            apple.gameObject.name = $"Apple_{index}";
+            apple.gameObject.name = $"Apple_{cycleIndex}_{slotIndex}";
             activeApples.Add(apple);
-            RespawnApple(apple);
-        }
+            cycleByApple[apple] = cycleIndex;
 
-        private void RespawnApple(ApplePickup apple)
-        {
+            Vector2 spawnWindow = CollectibleProgressionLayout.GetAppleWindow(config, cycleIndex, slotIndex, SpawnPadding);
             float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - config.CollectibleSize);
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
-            Vector3 spawnPosition = new Vector3(laneX, 0.58f, nextSpawnZ);
-            apple.SetPosition(spawnPosition);
-            nextSpawnZ += GetCycleDistance();
+            float laneZ = Random.Range(spawnWindow.x, spawnWindow.y);
+            apple.SetPosition(new Vector3(laneX, 0.58f, laneZ));
+        }
+
+        private void RemoveApple(ApplePickup apple, int index)
+        {
+            cycleByApple.Remove(apple);
+            activeApples.RemoveAt(index);
+            Destroy(apple.gameObject);
         }
 
         private void ClearApples()
@@ -121,6 +148,7 @@ namespace Featurehole.Runner.Gameplay
             }
 
             activeApples.Clear();
+            cycleByApple.Clear();
         }
 
         private ApplePickup CreateRuntimeApple(int index)
@@ -150,11 +178,6 @@ namespace Featurehole.Runner.Gameplay
             }
 
             return apple;
-        }
-
-        private float GetCycleDistance()
-        {
-            return Mathf.Max(config.CollectibleSpawnSpacing * 4f, config.ForwardSpeed * SpawnCycleDurationSeconds);
         }
     }
 }

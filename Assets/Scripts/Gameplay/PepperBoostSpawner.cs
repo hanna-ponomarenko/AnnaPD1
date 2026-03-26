@@ -8,18 +8,19 @@ namespace Featurehole.Runner.Gameplay
 {
     public sealed class PepperBoostSpawner : MonoBehaviour
     {
-        private const float SpawnCycleDurationSeconds = 15f;
-        private const int PeppersPerCycle = 3;
+        private const float SpawnPadding = 0.85f;
+        private const int CyclesAhead = 2;
 
         [SerializeField] private PepperPickup pepperPrefab;
         [SerializeField] private Transform peppersRoot;
 
         private readonly List<PepperPickup> activePeppers = new List<PepperPickup>();
-        private readonly Dictionary<PepperPickup, float> nextSpawnZByPepper = new Dictionary<PepperPickup, float>();
+        private readonly Dictionary<PepperPickup, int> cycleByPepper = new Dictionary<PepperPickup, int>();
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
         private Sprite pepperSprite;
+        private int nextCycleIndexToSpawn;
 
         public void SetPepperSprite(Sprite sprite)
         {
@@ -47,12 +48,8 @@ namespace Featurehole.Runner.Gameplay
             }
 
             ClearPeppers();
-            float slotDistance = GetSlotDistance();
-
-            for (int index = 0; index < 3; index++)
-            {
-                SpawnPepper(index, config.SegmentLength + slotDistance * (index + 1));
-            }
+            nextCycleIndexToSpawn = 0;
+            EnsureUpcomingCycles(0);
         }
 
         public void Tick(float deltaTime, RunnerRuntime runtime, float forwardSpeed)
@@ -66,8 +63,9 @@ namespace Featurehole.Runner.Gameplay
             Transform holeTransform = holeMover.transform;
             float passedThreshold = holeTransform.position.z - config.PepperSize;
 
-            foreach (PepperPickup pepper in activePeppers)
+            for (int index = activePeppers.Count - 1; index >= 0; index--)
             {
+                PepperPickup pepper = activePeppers[index];
                 if (!pepper.gameObject.activeSelf)
                 {
                     continue;
@@ -82,37 +80,60 @@ namespace Featurehole.Runner.Gameplay
                     runtime.RegisterCollected();
                     runtime.ActivateBoost(config.BoostDuration, config.BoostSpeedMultiplier);
                     holeMover.Grow();
-                    RespawnPepper(pepper);
+                    RemovePepper(pepper, index);
                     continue;
                 }
 
                 if (pepperPosition.z < passedThreshold)
                 {
-                    RespawnPepper(pepper);
+                    RemovePepper(pepper, index);
                 }
+            }
+
+            EnsureUpcomingCycles(CollectibleProgressionLayout.GetCycleIndex(config, runtime.DistanceTravelled));
+        }
+
+        private void EnsureUpcomingCycles(int currentCycleIndex)
+        {
+            int targetCycleIndex = currentCycleIndex + CyclesAhead;
+            while (nextCycleIndexToSpawn <= targetCycleIndex)
+            {
+                SpawnCycle(nextCycleIndexToSpawn);
+                nextCycleIndexToSpawn++;
             }
         }
 
-        private void SpawnPepper(int index, float initialSpawnZ)
+        private void SpawnCycle(int cycleIndex)
+        {
+            int pepperCount = CollectibleProgressionLayout.GetPepperCount(cycleIndex);
+            for (int slotIndex = 0; slotIndex < pepperCount; slotIndex++)
+            {
+                SpawnPepper(cycleIndex, slotIndex);
+            }
+        }
+
+        private void SpawnPepper(int cycleIndex, int slotIndex)
         {
             PepperPickup pepper = pepperPrefab != null
                 ? Instantiate(pepperPrefab, peppersRoot)
-                : CreateRuntimePepper(index);
+                : CreateRuntimePepper(activePeppers.Count);
 
-            pepper.gameObject.name = $"Pepper_{index}";
+            pepper.gameObject.name = $"Pepper_{cycleIndex}_{slotIndex}";
             activePeppers.Add(pepper);
-            nextSpawnZByPepper[pepper] = initialSpawnZ;
-            RespawnPepper(pepper);
-        }
+            cycleByPepper[pepper] = cycleIndex;
 
-        private void RespawnPepper(PepperPickup pepper)
-        {
+            Vector2 spawnWindow = CollectibleProgressionLayout.GetPepperWindow(config, cycleIndex, slotIndex, SpawnPadding);
             float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - config.PepperSize);
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
-            float spawnZ = nextSpawnZByPepper[pepper];
-            Vector3 spawnPosition = new Vector3(laneX, 0.65f, spawnZ);
-            pepper.SetPosition(spawnPosition);
-            nextSpawnZByPepper[pepper] = spawnZ + GetCycleDistance();
+            float laneZ = Random.Range(spawnWindow.x, spawnWindow.y);
+            pepper.SetPosition(new Vector3(laneX, 0.65f, laneZ));
+        }
+
+        private void RemovePepper(PepperPickup pepper, int index)
+        {
+            cycleByPepper.Remove(pepper);
+            activePeppers.RemoveAt(index);
+            Destroy(pepper.gameObject);
         }
 
         private void ClearPeppers()
@@ -126,7 +147,7 @@ namespace Featurehole.Runner.Gameplay
             }
 
             activePeppers.Clear();
-            nextSpawnZByPepper.Clear();
+            cycleByPepper.Clear();
         }
 
         private PepperPickup CreateRuntimePepper(int index)
@@ -156,16 +177,6 @@ namespace Featurehole.Runner.Gameplay
             }
 
             return pepper;
-        }
-
-        private float GetCycleDistance()
-        {
-            return Mathf.Max(config.PepperSpawnSpacing * PeppersPerCycle, config.ForwardSpeed * SpawnCycleDurationSeconds);
-        }
-
-        private float GetSlotDistance()
-        {
-            return GetCycleDistance() / (PeppersPerCycle + 1f);
         }
     }
 }

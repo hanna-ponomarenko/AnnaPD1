@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Featurehole.Runner.Core
 {
     public sealed class RunnerRuntime
@@ -9,10 +11,13 @@ namespace Featurehole.Runner.Core
         public int MaxMissedCount { get; private set; }
         public float SpeedMultiplier { get; private set; } = 1f;
         public float BoostTimeRemaining { get; private set; }
+        public float MagnetTimeRemaining { get; private set; }
+        public float MagnetRadius { get; private set; }
         public string GameOverMessage { get; private set; }
         private bool forcedGameOver;
 
         public bool IsBoostActive => BoostTimeRemaining > 0f;
+        public bool IsMagnetActive => MagnetTimeRemaining > 0f;
 
         public bool IsGameOver => forcedGameOver || (MissedCount >= MaxMissedCount && MaxMissedCount > 0);
 
@@ -24,6 +29,8 @@ namespace Featurehole.Runner.Core
             MaxMissedCount = maxMissedCount;
             SpeedMultiplier = 1f;
             BoostTimeRemaining = 0f;
+            MagnetTimeRemaining = 0f;
+            MagnetRadius = 0f;
             GameOverMessage = string.Empty;
             forcedGameOver = false;
             IsRunning = true;
@@ -50,11 +57,20 @@ namespace Featurehole.Runner.Core
             SpeedMultiplier = speedMultiplier;
         }
 
+        public void ActivateMagnet(float duration, float radius)
+        {
+            MagnetTimeRemaining = duration;
+            MagnetRadius = radius;
+            Debug.Log($"[Magnet] magnet active duration={duration:F1} radius={radius:F1}");
+        }
+
         public void TriggerGameOver(string message)
         {
             forcedGameOver = true;
             GameOverMessage = message;
             BoostTimeRemaining = 0f;
+            MagnetTimeRemaining = 0f;
+            MagnetRadius = 0f;
             SpeedMultiplier = 1f;
             IsRunning = false;
         }
@@ -73,6 +89,16 @@ namespace Featurehole.Runner.Core
                 if (BoostTimeRemaining <= 0f)
                 {
                     SpeedMultiplier = 1f;
+                }
+            }
+
+            if (MagnetTimeRemaining > 0f)
+            {
+                MagnetTimeRemaining = System.Math.Max(0f, MagnetTimeRemaining - deltaTime);
+                if (MagnetTimeRemaining <= 0f)
+                {
+                    MagnetRadius = 0f;
+                    Debug.Log("[Magnet] magnet expired");
                 }
             }
 
