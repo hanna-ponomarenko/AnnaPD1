@@ -51,6 +51,31 @@ namespace Featurehole.Runner.Audio
             audioSource.Play();
         }
 
+        public void PlayFromStart()
+        {
+            EnsureAudioSource();
+            ApplySettings();
+
+            if (backgroundMusic == null)
+            {
+                return;
+            }
+
+            audioSource.Stop();
+            audioSource.time = 0f;
+            audioSource.Play();
+        }
+
+        public void Stop()
+        {
+            EnsureAudioSource();
+
+            if (audioSource.isPlaying)
+            {
+                audioSource.Stop();
+            }
+        }
+
         private void EnsureAudioSource()
         {
             if (audioSource != null)

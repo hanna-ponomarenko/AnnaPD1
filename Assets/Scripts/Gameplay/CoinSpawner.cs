@@ -8,8 +8,6 @@ namespace Featurehole.Runner.Gameplay
 {
     public sealed class CoinSpawner : MonoBehaviour
     {
-        private const float SpawnCycleDurationSeconds = 15f;
-        private const int PepperSlotsPerCycle = 3;
         private const int CoinsPerCycle = 4;
         private const float CoinSize = 0.65f;
         private const float CoinSpacingPadding = 1.2f;
@@ -117,30 +115,8 @@ namespace Featurehole.Runner.Gameplay
 
         private Vector2 GetCoinWindow(int slotIndex, float cycleStart)
         {
-            float cycleDistance = GetCycleDistance();
-            float slotDistance = cycleDistance / (PepperSlotsPerCycle + 1f);
-            float padding = Mathf.Max(CoinSize * 1.5f, CoinSpacingPadding);
-
-            float[] anchors =
-            {
-                cycleStart,
-                cycleStart + slotDistance,
-                cycleStart + slotDistance * 2f,
-                cycleStart + slotDistance * 3f,
-                cycleStart + cycleDistance
-            };
-
-            float start = anchors[slotIndex] + padding;
-            float end = anchors[slotIndex + 1] - padding;
-
-            if (end <= start)
-            {
-                float center = (anchors[slotIndex] + anchors[slotIndex + 1]) * 0.5f;
-                start = center - 0.5f;
-                end = center + 0.5f;
-            }
-
-            return new Vector2(start, end);
+            float padding = Mathf.Max(CoinSize * 1.2f, CoinSpacingPadding);
+            return SpawnCycleLayout.GetSubWindow(config, cycleStart, slotIndex, 0, 2, padding);
         }
 
         private void ClearCoins()
@@ -211,7 +187,7 @@ namespace Featurehole.Runner.Gameplay
 
         private float GetCycleDistance()
         {
-            return Mathf.Max(config.PepperSpawnSpacing * PepperSlotsPerCycle, config.ForwardSpeed * SpawnCycleDurationSeconds);
+            return SpawnCycleLayout.GetCycleDistance(config);
         }
     }
 }

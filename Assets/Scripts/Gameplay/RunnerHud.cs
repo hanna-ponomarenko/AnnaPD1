@@ -44,8 +44,8 @@ namespace Featurehole.Runner.Gameplay
 
             if (runtime.IsGameOver)
             {
-                GUI.Box(new Rect(16f, 198f, 260f, 72f), "Game Over");
-                GUI.Label(new Rect(28f, 226f, 230f, 22f), "Press R to restart");
+                GUI.Box(new Rect(16f, 198f, 260f, 72f), string.IsNullOrEmpty(runtime.GameOverMessage) ? "Game Over" : runtime.GameOverMessage);
+                GUI.Label(new Rect(28f, 226f, 230f, 22f), "Новый старт...");
             }
         }
     }

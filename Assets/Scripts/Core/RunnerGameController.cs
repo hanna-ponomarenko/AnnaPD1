@@ -2,6 +2,7 @@ using Featurehole.Runner.Data;
 using Featurehole.Runner.Gameplay;
 using Featurehole.Runner.Hole;
 using Featurehole.Runner.Level;
+using Featurehole.Runner.Audio;
 using UnityEngine;
 
 namespace Featurehole.Runner.Core
@@ -14,10 +15,14 @@ namespace Featurehole.Runner.Core
         [SerializeField] private AppleSpawner appleSpawner;
         [SerializeField] private PepperBoostSpawner pepperSpawner;
         [SerializeField] private CoinSpawner coinSpawner;
+        [SerializeField] private RockObstacleSpawner rockSpawner;
+        [SerializeField] private MusicManager musicManager;
+        [SerializeField] private GameSfxManager sfxManager;
         [SerializeField] private RunnerHud hud;
         [SerializeField] private bool autoStart = true;
 
         private readonly RunnerRuntime runtime = new RunnerRuntime();
+        private float restartDelayRemaining = -1f;
 
         public RunnerRuntime Runtime => runtime;
 
@@ -28,6 +33,9 @@ namespace Featurehole.Runner.Core
             AppleSpawner runnerAppleSpawner,
             PepperBoostSpawner runnerPepperSpawner,
             CoinSpawner runnerCoinSpawner,
+            RockObstacleSpawner runnerRockSpawner,
+            MusicManager runnerMusicManager,
+            GameSfxManager runnerSfxManager,
             RunnerHud runnerHud,
             bool shouldAutoStart = true)
         {
@@ -37,6 +45,9 @@ namespace Featurehole.Runner.Core
             appleSpawner = runnerAppleSpawner;
             pepperSpawner = runnerPepperSpawner;
             coinSpawner = runnerCoinSpawner;
+            rockSpawner = runnerRockSpawner;
+            musicManager = runnerMusicManager;
+            sfxManager = runnerSfxManager;
             hud = runnerHud;
             autoStart = shouldAutoStart;
         }
@@ -54,6 +65,7 @@ namespace Featurehole.Runner.Core
             appleSpawner.Initialize(config, holeMover);
             pepperSpawner.Initialize(config, holeMover);
             coinSpawner.Initialize(config, holeMover);
+            rockSpawner.Initialize(config, holeMover);
             hud.Initialize(runtime, holeMover);
 
             if (autoStart)
@@ -66,7 +78,16 @@ namespace Featurehole.Runner.Core
         {
             if (!runtime.IsRunning)
             {
-                if (runtime.IsGameOver && Input.GetKeyDown(KeyCode.R))
+                if (runtime.IsGameOver && restartDelayRemaining > 0f)
+                {
+                    restartDelayRemaining -= Time.deltaTime;
+                    if (restartDelayRemaining <= 0f)
+                    {
+                        ResetRun();
+                        StartRun();
+                    }
+                }
+                else if (runtime.IsGameOver && Input.GetKeyDown(KeyCode.R))
                 {
                     ResetRun();
                     StartRun();
@@ -83,12 +104,26 @@ namespace Featurehole.Runner.Core
             appleSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             pepperSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             coinSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
+            if (rockSpawner.Tick(deltaTime, currentForwardSpeed))
+            {
+                if (musicManager != null)
+                {
+                    musicManager.Stop();
+                }
+                if (sfxManager != null)
+                {
+                    sfxManager.PlayRockImpact();
+                    sfxManager.PlayLose();
+                }
+                TriggerGameOver();
+                return;
+            }
             runtime.Tick(deltaTime, config.ForwardSpeed);
             holeMover.SetBoostActive(runtime.IsBoostActive);
 
             if (runtime.IsGameOver)
             {
-                StopRun();
+                TriggerGameOver();
             }
         }
 
@@ -101,7 +136,13 @@ namespace Featurehole.Runner.Core
             appleSpawner.ResetField();
             pepperSpawner.ResetField();
             coinSpawner.ResetField();
+            rockSpawner.ResetField();
+            restartDelayRemaining = -1f;
             runtime.StartRun(config.MaxMissedCollectibles);
+            if (musicManager != null)
+            {
+                musicManager.PlayFromStart();
+            }
         }
 
         public void StopRun()
@@ -119,6 +160,23 @@ namespace Featurehole.Runner.Core
             appleSpawner.ResetField();
             pepperSpawner.ResetField();
             coinSpawner.ResetField();
+            rockSpawner.ResetField();
+            restartDelayRemaining = -1f;
+        }
+
+        private void TriggerGameOver()
+        {
+            if (!runtime.IsGameOver)
+            {
+                runtime.TriggerGameOver("Проигрыш");
+            }
+            else if (string.IsNullOrEmpty(runtime.GameOverMessage))
+            {
+                runtime.TriggerGameOver("Проигрыш");
+            }
+
+            restartDelayRemaining = 1.2f;
+            StopRun();
         }
 
         private bool ValidateScene()
@@ -129,6 +187,9 @@ namespace Featurehole.Runner.Core
                 && appleSpawner != null
                 && pepperSpawner != null
                 && coinSpawner != null
+                && rockSpawner != null
+                && musicManager != null
+                && sfxManager != null
                 && hud != null)
             {
                 return true;

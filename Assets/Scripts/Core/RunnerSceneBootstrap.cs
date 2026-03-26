@@ -14,6 +14,8 @@ namespace Featurehole.Runner.Core
         [SerializeField] private Sprite pepperSprite;
         [SerializeField] private Sprite appleSprite;
         [SerializeField] private AudioClip backgroundMusic;
+        [SerializeField] private AudioClip rockImpactSfx;
+        [SerializeField] private AudioClip loseSfx;
         [SerializeField] private Material boostFireMaterial;
         [SerializeField] private UnityEngine.Object boostFirePrefab;
         [SerializeField] private bool autoStart = true;
@@ -43,10 +45,12 @@ namespace Featurehole.Runner.Core
             PepperBoostSpawner pepperSpawner = CreatePepperSpawner();
             pepperSpawner.SetPepperSprite(pepperSprite);
             CoinSpawner coinSpawner = CreateCoinSpawner();
-            CreateMusicManager();
+            RockObstacleSpawner rockSpawner = CreateRockSpawner();
+            MusicManager musicManager = CreateMusicManager();
+            GameSfxManager sfxManager = CreateSfxManager();
             RunnerHud hud = CreateHud();
 
-            controller.Configure(runtimeConfig, holeMover, trackSpawner, appleSpawner, pepperSpawner, coinSpawner, hud, autoStart);
+            controller.Configure(runtimeConfig, holeMover, trackSpawner, appleSpawner, pepperSpawner, coinSpawner, rockSpawner, musicManager, sfxManager, hud, autoStart);
 
             if (configureMainCamera)
             {
@@ -74,6 +78,26 @@ namespace Featurehole.Runner.Core
 
             musicManager.Configure(backgroundMusic);
             return musicManager;
+        }
+
+        private GameSfxManager CreateSfxManager()
+        {
+            Transform sfxRoot = transform.Find("SfxManager");
+            if (sfxRoot == null)
+            {
+                GameObject sfxObject = new GameObject("SfxManager");
+                sfxObject.transform.SetParent(transform, false);
+                sfxRoot = sfxObject.transform;
+            }
+
+            GameSfxManager sfxManager = sfxRoot.GetComponent<GameSfxManager>();
+            if (sfxManager == null)
+            {
+                sfxManager = sfxRoot.gameObject.AddComponent<GameSfxManager>();
+            }
+
+            sfxManager.Configure(rockImpactSfx, loseSfx);
+            return sfxManager;
         }
 
         private HoleMover CreateHole(RunnerGameConfig runtimeConfig)
@@ -650,6 +674,25 @@ namespace Featurehole.Runner.Core
             }
 
             return coinSpawner;
+        }
+
+        private RockObstacleSpawner CreateRockSpawner()
+        {
+            Transform spawnerRoot = transform.Find("RockSpawner");
+            if (spawnerRoot == null)
+            {
+                GameObject spawnerObject = new GameObject("RockSpawner");
+                spawnerObject.transform.SetParent(transform, false);
+                spawnerRoot = spawnerObject.transform;
+            }
+
+            RockObstacleSpawner rockSpawner = spawnerRoot.GetComponent<RockObstacleSpawner>();
+            if (rockSpawner == null)
+            {
+                rockSpawner = spawnerRoot.gameObject.AddComponent<RockObstacleSpawner>();
+            }
+
+            return rockSpawner;
         }
 
         private RunnerHud CreateHud()

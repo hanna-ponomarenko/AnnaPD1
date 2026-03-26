@@ -191,6 +191,35 @@ namespace Featurehole.Runner.Hole
             return Mathf.Abs(worldPosition.x - (transform.position.x + splitOffset)) <= absorbRadius;
         }
 
+        public bool IntersectsObstacle(Vector3 worldPosition, float obstacleRadius)
+        {
+            float overlapRadius = currentDiameter * 0.5f + obstacleRadius;
+            float forwardDistance = Mathf.Abs(worldPosition.z - transform.position.z);
+
+            if (forwardDistance > obstacleRadius)
+            {
+                return false;
+            }
+
+            if (!IsSplitActive && Mathf.Abs(worldPosition.x - transform.position.x) <= overlapRadius)
+            {
+                return true;
+            }
+
+            if (!IsSplitActive)
+            {
+                return false;
+            }
+
+            float splitOffset = GetCurrentSplitOffset();
+            if (Mathf.Abs(worldPosition.x - (transform.position.x - splitOffset)) <= overlapRadius)
+            {
+                return true;
+            }
+
+            return Mathf.Abs(worldPosition.x - (transform.position.x + splitOffset)) <= overlapRadius;
+        }
+
         public void SetBoostActive(bool isActive)
         {
             if (boostHornsObject != null)

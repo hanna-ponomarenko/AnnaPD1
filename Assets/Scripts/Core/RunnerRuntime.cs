@@ -9,10 +9,12 @@ namespace Featurehole.Runner.Core
         public int MaxMissedCount { get; private set; }
         public float SpeedMultiplier { get; private set; } = 1f;
         public float BoostTimeRemaining { get; private set; }
+        public string GameOverMessage { get; private set; }
+        private bool forcedGameOver;
 
         public bool IsBoostActive => BoostTimeRemaining > 0f;
 
-        public bool IsGameOver => MissedCount >= MaxMissedCount && MaxMissedCount > 0;
+        public bool IsGameOver => forcedGameOver || (MissedCount >= MaxMissedCount && MaxMissedCount > 0);
 
         public void StartRun(int maxMissedCount)
         {
@@ -22,6 +24,8 @@ namespace Featurehole.Runner.Core
             MaxMissedCount = maxMissedCount;
             SpeedMultiplier = 1f;
             BoostTimeRemaining = 0f;
+            GameOverMessage = string.Empty;
+            forcedGameOver = false;
             IsRunning = true;
         }
 
@@ -44,6 +48,15 @@ namespace Featurehole.Runner.Core
         {
             BoostTimeRemaining = duration;
             SpeedMultiplier = speedMultiplier;
+        }
+
+        public void TriggerGameOver(string message)
+        {
+            forcedGameOver = true;
+            GameOverMessage = message;
+            BoostTimeRemaining = 0f;
+            SpeedMultiplier = 1f;
+            IsRunning = false;
         }
 
         public void Tick(float deltaTime, float speed)
