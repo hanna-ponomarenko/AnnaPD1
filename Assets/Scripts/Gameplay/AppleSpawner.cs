@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Featurehole.Runner.Audio;
 using Featurehole.Runner.Core;
 using Featurehole.Runner.Data;
 using Featurehole.Runner.Hole;
@@ -10,6 +11,7 @@ namespace Featurehole.Runner.Gameplay
     {
         private const float SpawnPadding = 0.9f;
         private const int CyclesAhead = 2;
+        private const float EdgeMargin = 0.55f;
 
         [SerializeField] private ApplePickup applePrefab;
         [SerializeField] private Transform applesRoot;
@@ -19,12 +21,18 @@ namespace Featurehole.Runner.Gameplay
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
+        private GameSfxManager sfxManager;
         private Sprite appleSprite;
         private int nextCycleIndexToSpawn;
 
         public void SetAppleSprite(Sprite sprite)
         {
             appleSprite = sprite;
+        }
+
+        public void SetSfxManager(GameSfxManager manager)
+        {
+            sfxManager = manager;
         }
 
         public void Initialize(RunnerGameConfig runnerConfig, HoleMover runnerHoleMover)
@@ -77,7 +85,8 @@ namespace Featurehole.Runner.Gameplay
                 if (holeMover.CanAbsorb(applePosition, config.CollectibleSize))
                 {
                     apple.Collect();
-                    runtime.RegisterCollected();
+                    sfxManager?.PlayApplePickup();
+                    runtime.RegisterAppleCollected();
                     holeMover.Grow();
                     holeMover.ActivateSplit(config.AppleSplitDuration);
                     RemoveApple(apple, index);
@@ -124,7 +133,7 @@ namespace Featurehole.Runner.Gameplay
             cycleByApple[apple] = cycleIndex;
 
             Vector2 spawnWindow = CollectibleProgressionLayout.GetAppleWindow(config, cycleIndex, slotIndex, SpawnPadding);
-            float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - config.CollectibleSize);
+            float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - config.CollectibleSize - EdgeMargin);
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
             float laneZ = Random.Range(spawnWindow.x, spawnWindow.y);
             apple.SetPosition(new Vector3(laneX, 0.58f, laneZ));

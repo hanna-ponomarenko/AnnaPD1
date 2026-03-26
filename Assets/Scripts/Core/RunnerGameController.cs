@@ -67,8 +67,8 @@ namespace Featurehole.Runner.Core
             trackSpawner.Initialize(config);
             appleSpawner.Initialize(config, holeMover);
             pepperSpawner.Initialize(config, holeMover);
-            magnetSpawner.Initialize(config, holeMover);
             coinSpawner.Initialize(config, holeMover);
+            magnetSpawner.Initialize(config, holeMover);
             rockSpawner.Initialize(config, holeMover);
             hud.Initialize(runtime, holeMover);
 
@@ -80,11 +80,15 @@ namespace Featurehole.Runner.Core
 
         private void Update()
         {
+            float deltaTime = Time.deltaTime;
+            runtime.Tick(deltaTime, config.ForwardSpeed);
+            holeMover.SetBoostActive(runtime.IsBoostActive);
+
             if (!runtime.IsRunning)
             {
                 if (runtime.IsGameOver && restartDelayRemaining > 0f)
                 {
-                    restartDelayRemaining -= Time.deltaTime;
+                    restartDelayRemaining -= deltaTime;
                     if (restartDelayRemaining <= 0f)
                     {
                         ResetRun();
@@ -100,7 +104,6 @@ namespace Featurehole.Runner.Core
                 return;
             }
 
-            float deltaTime = Time.deltaTime;
             float currentForwardSpeed = config.ForwardSpeed * runtime.SpeedMultiplier;
 
             holeMover.Tick(deltaTime);
@@ -123,8 +126,6 @@ namespace Featurehole.Runner.Core
                 TriggerGameOver();
                 return;
             }
-            runtime.Tick(deltaTime, config.ForwardSpeed);
-            holeMover.SetBoostActive(runtime.IsBoostActive);
 
             if (runtime.IsGameOver)
             {
@@ -140,11 +141,11 @@ namespace Featurehole.Runner.Core
             holeMover.SetBoostActive(false);
             appleSpawner.ResetField();
             pepperSpawner.ResetField();
-            magnetSpawner.ResetField();
             coinSpawner.ResetField();
+            magnetSpawner.ResetField();
             rockSpawner.ResetField();
             restartDelayRemaining = -1f;
-            runtime.StartRun(config.MaxMissedCollectibles);
+            runtime.StartRun(config.MaxMissedCollectibles, true);
             if (musicManager != null)
             {
                 musicManager.PlayFromStart();
@@ -165,8 +166,8 @@ namespace Featurehole.Runner.Core
             holeMover.SetBoostActive(false);
             appleSpawner.ResetField();
             pepperSpawner.ResetField();
-            magnetSpawner.ResetField();
             coinSpawner.ResetField();
+            magnetSpawner.ResetField();
             rockSpawner.ResetField();
             restartDelayRemaining = -1f;
         }

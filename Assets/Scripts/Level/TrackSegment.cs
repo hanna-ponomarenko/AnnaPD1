@@ -22,6 +22,7 @@ namespace Featurehole.Runner.Level
             ConfigureScaledChild("Visual");
             ConfigureScaledChild("RiverCurrent");
             ConfigureScaledChild("RiverGlow");
+            ConfigureScaledChild("RiverSheen");
             ConfigureScaledChild("RiverFoamLeft");
             ConfigureScaledChild("RiverFoamRight");
             ConfigureScaledChild("BankLeft");

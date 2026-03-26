@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Featurehole.Runner.Audio;
 using Featurehole.Runner.Core;
 using Featurehole.Runner.Data;
 using Featurehole.Runner.Hole;
@@ -10,6 +11,7 @@ namespace Featurehole.Runner.Gameplay
     {
         private const float SpawnPadding = 0.85f;
         private const int CyclesAhead = 2;
+        private const float EdgeMargin = 0.55f;
 
         [SerializeField] private PepperPickup pepperPrefab;
         [SerializeField] private Transform peppersRoot;
@@ -19,12 +21,18 @@ namespace Featurehole.Runner.Gameplay
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
+        private GameSfxManager sfxManager;
         private Sprite pepperSprite;
         private int nextCycleIndexToSpawn;
 
         public void SetPepperSprite(Sprite sprite)
         {
             pepperSprite = sprite;
+        }
+
+        public void SetSfxManager(GameSfxManager manager)
+        {
+            sfxManager = manager;
         }
 
         public void Initialize(RunnerGameConfig runnerConfig, HoleMover runnerHoleMover)
@@ -77,7 +85,8 @@ namespace Featurehole.Runner.Gameplay
                 if (holeMover.CanAbsorb(pepperPosition, config.PepperSize, 0.3f))
                 {
                     pepper.Collect();
-                    runtime.RegisterCollected();
+                    sfxManager?.PlayPepperPickup();
+                    runtime.RegisterPepperCollected();
                     runtime.ActivateBoost(config.BoostDuration, config.BoostSpeedMultiplier);
                     holeMover.Grow();
                     RemovePepper(pepper, index);
@@ -123,7 +132,7 @@ namespace Featurehole.Runner.Gameplay
             cycleByPepper[pepper] = cycleIndex;
 
             Vector2 spawnWindow = CollectibleProgressionLayout.GetPepperWindow(config, cycleIndex, slotIndex, SpawnPadding);
-            float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - config.PepperSize);
+            float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - config.PepperSize - EdgeMargin);
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
             float laneZ = Random.Range(spawnWindow.x, spawnWindow.y);
             pepper.SetPosition(new Vector3(laneX, 0.65f, laneZ));

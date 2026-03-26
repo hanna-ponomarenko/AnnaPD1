@@ -17,8 +17,9 @@ namespace Featurehole.Runner.Gameplay
 
         public void SetPosition(Vector3 worldPosition, float sizeScale)
         {
-            transform.position = worldPosition;
             transform.localScale = Vector3.one * sizeScale;
+            transform.position = worldPosition;
+            SnapToSurface(worldPosition.y);
             CollisionRadius = baseCollisionRadius * sizeScale;
             UpdateCollider();
             gameObject.SetActive(true);
@@ -58,6 +59,28 @@ namespace Featurehole.Runner.Gameplay
             }
 
             visualTransform.position += Vector3.up * -minY;
+        }
+
+        private void SnapToSurface(float surfaceY)
+        {
+            if (visualTransform == null)
+            {
+                return;
+            }
+
+            Renderer[] renderers = visualTransform.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0)
+            {
+                return;
+            }
+
+            float minY = float.MaxValue;
+            foreach (Renderer renderer in renderers)
+            {
+                minY = Mathf.Min(minY, renderer.bounds.min.y);
+            }
+
+            transform.position += Vector3.up * (surfaceY - minY);
         }
 
         private void RecalculateCollisionRadius()

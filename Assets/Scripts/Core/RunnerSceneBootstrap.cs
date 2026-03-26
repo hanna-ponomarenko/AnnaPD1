@@ -20,8 +20,13 @@ namespace Featurehole.Runner.Core
         [SerializeField] private AudioClip backgroundMusic;
         [SerializeField] private AudioClip rockImpactSfx;
         [SerializeField] private AudioClip loseSfx;
+        [SerializeField] private AudioClip coinPickupSfx;
+        [SerializeField] private AudioClip magnetPickupSfx;
+        [SerializeField] private AudioClip applePickupSfx;
+        [SerializeField] private AudioClip pepperPickupSfx;
         [SerializeField] private GameObject rockObstaclePrefab;
         [SerializeField] private GameObject[] rockObstaclePrefabs;
+        [SerializeField] private Material boostAuraMaterial;
         [SerializeField] private Material boostFireMaterial;
         [SerializeField] private UnityEngine.Object boostFirePrefab;
         [SerializeField] private bool autoStart = true;
@@ -53,10 +58,16 @@ namespace Featurehole.Runner.Core
             MagnetSpawner magnetSpawner = CreateMagnetSpawner();
             magnetSpawner.SetMagnetSprite(GetMagnetSprite());
             CoinSpawner coinSpawner = CreateCoinSpawner();
+            magnetSpawner.SetCoinSpawner(coinSpawner);
             RockObstacleSpawner rockSpawner = CreateRockSpawner();
             MusicManager musicManager = CreateMusicManager();
             GameSfxManager sfxManager = CreateSfxManager();
+            appleSpawner.SetSfxManager(sfxManager);
+            pepperSpawner.SetSfxManager(sfxManager);
+            coinSpawner.SetSfxManager(sfxManager);
+            magnetSpawner.SetSfxManager(sfxManager);
             RunnerHud hud = CreateHud();
+            hud.SetIcons(appleSprite, pepperSprite);
 
             controller.Configure(runtimeConfig, holeMover, trackSpawner, appleSpawner, pepperSpawner, magnetSpawner, coinSpawner, rockSpawner, musicManager, sfxManager, hud, autoStart);
 
@@ -104,7 +115,13 @@ namespace Featurehole.Runner.Core
                 sfxManager = sfxRoot.gameObject.AddComponent<GameSfxManager>();
             }
 
-            sfxManager.Configure(rockImpactSfx, loseSfx);
+            sfxManager.Configure(
+                rockImpactSfx,
+                loseSfx,
+                GetCoinPickupSfx(),
+                GetMagnetPickupSfx(),
+                GetApplePickupSfx(),
+                GetPepperPickupSfx());
             return sfxManager;
         }
 
@@ -118,7 +135,7 @@ namespace Featurehole.Runner.Core
                 holeRoot = holeObject.transform;
             }
 
-            holeRoot.position = new Vector3(0f, 0.2f, 0f);
+            holeRoot.position = new Vector3(0f, 0.2f, 0.15f);
 
             HoleMover holeMover = holeRoot.GetComponent<HoleMover>();
             if (holeMover == null)
@@ -259,20 +276,51 @@ namespace Featurehole.Runner.Core
                 return runtimeHoleAuraMaterial;
             }
 
-            Shader shader = Shader.Find("Unlit/Transparent");
-            if (shader == null)
+            Material sourceMaterial = GetBoostAuraMaterialAsset();
+            if (sourceMaterial != null)
             {
-                shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+                runtimeHoleAuraMaterial = new Material(sourceMaterial)
+                {
+                    name = "RuntimeHoleAuraMaterial"
+                };
+            }
+            else
+            {
+                Shader shader = Shader.Find("Unlit/Transparent");
+                if (shader == null)
+                {
+                    shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+                }
+
+                runtimeHoleAuraMaterial = new Material(shader)
+                {
+                    name = "RuntimeHoleAuraMaterial"
+                };
             }
 
-            runtimeHoleAuraMaterial = new Material(shader)
+            runtimeHoleAuraMaterial.mainTexture = CreateHoleAuraTexture();
+            runtimeHoleAuraMaterial.color = new Color(1f, 0.18f, 0.1f, 0.65f);
+            runtimeHoleAuraMaterial.renderQueue = 3000;
+
+            if (runtimeHoleAuraMaterial.HasProperty("_EmissionColor"))
             {
-                name = "RuntimeHoleAuraMaterial",
-                mainTexture = CreateHoleAuraTexture(),
-                color = Color.white
-            };
+                runtimeHoleAuraMaterial.SetColor("_EmissionColor", new Color(0.2f, 0.01f, 0.01f, 1f));
+            }
 
             return runtimeHoleAuraMaterial;
+        }
+
+        private Material GetBoostAuraMaterialAsset()
+        {
+            if (boostAuraMaterial != null)
+            {
+                return boostAuraMaterial;
+            }
+
+#if UNITY_EDITOR
+            boostAuraMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/BoostAura.mat");
+#endif
+            return boostAuraMaterial;
         }
 
         private Texture2D CreateHoleDecalTexture()
@@ -771,6 +819,66 @@ namespace Featurehole.Runner.Core
             return count;
         }
 
+        private AudioClip GetCoinPickupSfx()
+        {
+            if (coinPickupSfx != null)
+            {
+                return coinPickupSfx;
+            }
+
+#if UNITY_EDITOR
+            coinPickupSfx = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/SFX/coin_pickup.mp3");
+#endif
+            return coinPickupSfx;
+        }
+
+        private AudioClip GetMagnetPickupSfx()
+        {
+            if (magnetPickupSfx != null)
+            {
+                return magnetPickupSfx;
+            }
+
+#if UNITY_EDITOR
+            magnetPickupSfx = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/SFX/magnet_pickup.mp3");
+#endif
+            return magnetPickupSfx;
+        }
+
+        private AudioClip GetApplePickupSfx()
+        {
+            if (applePickupSfx != null)
+            {
+                return applePickupSfx;
+            }
+
+#if UNITY_EDITOR
+            applePickupSfx = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/SFX/apple_pickup.mp3");
+            if (applePickupSfx == null)
+            {
+                applePickupSfx = GetCoinPickupSfx();
+            }
+#endif
+            return applePickupSfx;
+        }
+
+        private AudioClip GetPepperPickupSfx()
+        {
+            if (pepperPickupSfx != null)
+            {
+                return pepperPickupSfx;
+            }
+
+#if UNITY_EDITOR
+            pepperPickupSfx = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/SFX/pepper_pickup.mp3");
+            if (pepperPickupSfx == null)
+            {
+                pepperPickupSfx = GetCoinPickupSfx();
+            }
+#endif
+            return pepperPickupSfx;
+        }
+
         private Sprite GetMagnetSprite()
         {
             if (magnetSprite != null)
@@ -804,11 +912,11 @@ namespace Featurehole.Runner.Core
             }
 
             Transform cameraTransform = mainCamera.transform;
-            cameraTransform.position = new Vector3(0f, 6.8f, -7.2f);
-            cameraTransform.rotation = Quaternion.Euler(38f, 0f, 0f);
+            cameraTransform.position = new Vector3(0f, 5.8f, -6.2f);
+            cameraTransform.rotation = Quaternion.Euler(49f, 0f, 0f);
 
             mainCamera.orthographic = false;
-            mainCamera.fieldOfView = 50f;
+            mainCamera.fieldOfView = 62f;
             mainCamera.backgroundColor = new Color(0.94f, 0.78f, 0.52f);
         }
 

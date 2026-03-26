@@ -29,5 +29,5 @@ MonoBehaviour:
   pepperSpawnSpacing: 18
   boostDuration: 2
   boostSpeedMultiplier: 1.8
-  appleSplitDuration: 2
+  appleSplitDuration: 10
   splitHoleSpacingMultiplier: 0.65

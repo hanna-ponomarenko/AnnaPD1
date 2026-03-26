@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Featurehole.Runner.Audio;
 using Featurehole.Runner.Core;
 using Featurehole.Runner.Data;
 using Featurehole.Runner.Hole;
@@ -8,10 +9,24 @@ namespace Featurehole.Runner.Gameplay
 {
     public sealed class CoinSpawner : MonoBehaviour
     {
+        private enum CoinFormationType
+        {
+            CenterLine,
+            RightEdgeLine,
+            LeftEdgeLine,
+            CenterDiamond,
+            CenterCircle
+        }
+
         private const int CoinsPerCycle = 4;
+        private const int PostMagnetCoinCount = 10;
         private const float CoinSize = 0.65f;
         private const float CoinSpacingPadding = 1.2f;
-        private const float MagnetAttractionStrength = 8f;
+        private const float MagnetAttractionStrength = 24f;
+        private const float PostMagnetSpawnLeadSeconds = 2f;
+        private const float PostMagnetRowSpacingZ = 0.55f;
+        private const float PostMagnetLateralSpacing = 0.75f;
+        private const float EdgeMargin = 0.55f;
 
         [SerializeField] private CoinPickup coinPrefab;
         [SerializeField] private Transform coinsRoot;
@@ -19,10 +34,17 @@ namespace Featurehole.Runner.Gameplay
         private readonly List<CoinPickup> activeCoins = new List<CoinPickup>();
         private readonly Dictionary<CoinPickup, int> slotIndexByCoin = new Dictionary<CoinPickup, int>();
         private readonly Dictionary<CoinPickup, float> nextCycleStartByCoin = new Dictionary<CoinPickup, float>();
+        private readonly HashSet<CoinPickup> postMagnetCoins = new HashSet<CoinPickup>();
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
+        private GameSfxManager sfxManager;
         private int lastAttractedCoinCount = -1;
+
+        public void SetSfxManager(GameSfxManager manager)
+        {
+            sfxManager = manager;
+        }
 
         public void Initialize(RunnerGameConfig runnerConfig, HoleMover runnerHoleMover)
         {
@@ -64,8 +86,9 @@ namespace Featurehole.Runner.Gameplay
             float passedThreshold = holeMover.transform.position.z - CoinSize;
             int attractedCoinCount = 0;
 
-            foreach (CoinPickup coin in activeCoins)
+            for (int index = activeCoins.Count - 1; index >= 0; index--)
             {
+                CoinPickup coin = activeCoins[index];
                 if (!coin.gameObject.activeSelf)
                 {
                     continue;
@@ -88,14 +111,29 @@ namespace Featurehole.Runner.Gameplay
                 if (holeMover.CanAbsorb(coinPosition, CoinSize, 0.28f))
                 {
                     coin.Collect();
-                    runtime.RegisterCollected();
-                    RespawnCoin(coin);
+                    runtime.RegisterCoinCollected();
+                    sfxManager?.PlayCoinPickup();
+                    if (postMagnetCoins.Contains(coin))
+                    {
+                        RemovePatternCoin(coin, index);
+                    }
+                    else
+                    {
+                        RespawnCoin(coin);
+                    }
                     continue;
                 }
 
                 if (coinPosition.z < passedThreshold)
                 {
-                    RespawnCoin(coin);
+                    if (postMagnetCoins.Contains(coin))
+                    {
+                        RemovePatternCoin(coin, index);
+                    }
+                    else
+                    {
+                        RespawnCoin(coin);
+                    }
                 }
             }
 
@@ -105,6 +143,43 @@ namespace Featurehole.Runner.Gameplay
             }
 
             lastAttractedCoinCount = runtime.IsMagnetActive ? attractedCoinCount : -1;
+        }
+
+        public float GetPostMagnetPatternReservedDistance()
+        {
+            return GetPostMagnetPatternLeadDistance() + GetPostMagnetPatternLength();
+        }
+
+        public void SpawnMagnetCoinPattern(int cycleIndex, Vector3 magnetPosition)
+        {
+            CoinFormationType formationType = (CoinFormationType)Random.Range(0, 5);
+            Debug.Log($"[Magnet] selected formation type={formationType} cycle={cycleIndex}", this);
+
+            Vector2[] formationOffsets = GetFormationOffsets(formationType);
+            float laneHalfWidth = GetSafeLaneHalfWidth();
+            float leadDistance = GetPostMagnetPatternLeadDistance();
+            Vector3 formationOrigin = new Vector3(magnetPosition.x, 0.62f, magnetPosition.z + leadDistance);
+
+            for (int index = 0; index < formationOffsets.Length; index++)
+            {
+                CoinPickup coin = coinPrefab != null
+                    ? Instantiate(coinPrefab, coinsRoot)
+                    : CreateRuntimeCoin(activeCoins.Count);
+
+                coin.gameObject.name = $"Coin_Magnet_{cycleIndex}_{index}";
+                activeCoins.Add(coin);
+                postMagnetCoins.Add(coin);
+
+                Vector2 offset = formationOffsets[index];
+                Vector3 worldPosition = new Vector3(
+                    Mathf.Clamp(formationOrigin.x + offset.x, -laneHalfWidth, laneHalfWidth),
+                    formationOrigin.y,
+                    formationOrigin.z + offset.y);
+
+                coin.SetPosition(worldPosition);
+            }
+
+            Debug.Log($"[Magnet] spawned 10 coins cycle={cycleIndex} formation={formationType} origin={formationOrigin}", this);
         }
 
         private void SpawnCoin(int slotIndex, float cycleStart)
@@ -126,7 +201,7 @@ namespace Featurehole.Runner.Gameplay
             float cycleStart = nextCycleStartByCoin[coin];
 
             Vector2 spawnWindow = GetCoinWindow(slotIndex, cycleStart);
-            float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - CoinSize * 0.65f);
+            float laneHalfWidth = GetSafeLaneHalfWidth();
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
             float laneZ = Random.Range(spawnWindow.x, spawnWindow.y);
 
@@ -153,6 +228,89 @@ namespace Featurehole.Runner.Gameplay
             activeCoins.Clear();
             slotIndexByCoin.Clear();
             nextCycleStartByCoin.Clear();
+            postMagnetCoins.Clear();
+        }
+
+        private void RemovePatternCoin(CoinPickup coin, int index)
+        {
+            postMagnetCoins.Remove(coin);
+            slotIndexByCoin.Remove(coin);
+            nextCycleStartByCoin.Remove(coin);
+            activeCoins.RemoveAt(index);
+            Destroy(coin.gameObject);
+        }
+
+        private Vector2[] GetFormationOffsets(CoinFormationType formationType)
+        {
+            switch (formationType)
+            {
+                case CoinFormationType.CenterLine:
+                    return BuildLineFormation(0f);
+                case CoinFormationType.RightEdgeLine:
+                    return BuildLineFormation(GetSafeLaneHalfWidth());
+                case CoinFormationType.LeftEdgeLine:
+                    return BuildLineFormation(-GetSafeLaneHalfWidth());
+                case CoinFormationType.CenterDiamond:
+                    return new[]
+                    {
+                        new Vector2(0f, 0f),
+                        new Vector2(-PostMagnetLateralSpacing, PostMagnetRowSpacingZ),
+                        new Vector2(0f, PostMagnetRowSpacingZ),
+                        new Vector2(PostMagnetLateralSpacing, PostMagnetRowSpacingZ),
+                        new Vector2(-PostMagnetLateralSpacing * 1.5f, PostMagnetRowSpacingZ * 2f),
+                        new Vector2(-PostMagnetLateralSpacing * 0.5f, PostMagnetRowSpacingZ * 2f),
+                        new Vector2(PostMagnetLateralSpacing * 0.5f, PostMagnetRowSpacingZ * 2f),
+                        new Vector2(PostMagnetLateralSpacing * 1.5f, PostMagnetRowSpacingZ * 2f),
+                        new Vector2(-PostMagnetLateralSpacing, PostMagnetRowSpacingZ * 3f),
+                        new Vector2(PostMagnetLateralSpacing, PostMagnetRowSpacingZ * 3f)
+                    };
+                default:
+                    return new[]
+                    {
+                        new Vector2(0f, 0f),
+                        new Vector2(0.95f, 0.45f),
+                        new Vector2(1.45f, 1.35f),
+                        new Vector2(1.2f, 2.35f),
+                        new Vector2(0.4f, 3.05f),
+                        new Vector2(-0.4f, 3.05f),
+                        new Vector2(-1.2f, 2.35f),
+                        new Vector2(-1.45f, 1.35f),
+                        new Vector2(-0.95f, 0.45f),
+                        new Vector2(0f, 1.55f)
+                    };
+            }
+        }
+
+        private Vector2[] BuildLineFormation(float xPosition)
+        {
+            Vector2[] positions = new Vector2[PostMagnetCoinCount];
+            for (int index = 0; index < PostMagnetCoinCount; index++)
+            {
+                positions[index] = new Vector2(xPosition, PostMagnetRowSpacingZ * index);
+            }
+
+            return positions;
+        }
+
+        private float GetSafeLaneHalfWidth()
+        {
+            return Mathf.Max(0f, config.TrackWidth * 0.5f - CoinSize * 0.65f - EdgeMargin);
+        }
+
+        private float GetPostMagnetPatternLeadDistance()
+        {
+            if (config == null)
+            {
+                Debug.LogError("CoinSpawner.GetPostMagnetPatternLeadDistance was called before CoinSpawner.Initialize assigned config.", this);
+                return 4.5f;
+            }
+
+            return Mathf.Max(config.ForwardSpeed * PostMagnetSpawnLeadSeconds, 4.5f);
+        }
+
+        private float GetPostMagnetPatternLength()
+        {
+            return (PostMagnetCoinCount - 1) * PostMagnetRowSpacingZ;
         }
 
         private CoinPickup CreateRuntimeCoin(int index)

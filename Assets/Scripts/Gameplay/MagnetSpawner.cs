@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Featurehole.Runner.Audio;
 using Featurehole.Runner.Core;
 using Featurehole.Runner.Data;
 using Featurehole.Runner.Hole;
@@ -11,6 +12,7 @@ namespace Featurehole.Runner.Gameplay
         private const float MagnetSize = 0.95f;
         private const float SpawnPadding = 1f;
         private const int CyclesAhead = 2;
+        private const float EdgeMargin = 0.55f;
 
         [SerializeField] private MagnetPickup magnetPrefab;
         [SerializeField] private Transform magnetsRoot;
@@ -20,12 +22,24 @@ namespace Featurehole.Runner.Gameplay
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
+        private CoinSpawner coinSpawner;
+        private GameSfxManager sfxManager;
         private Sprite magnetSprite;
         private int nextCycleIndexToSpawn;
 
         public void SetMagnetSprite(Sprite sprite)
         {
             magnetSprite = sprite;
+        }
+
+        public void SetCoinSpawner(CoinSpawner spawner)
+        {
+            coinSpawner = spawner;
+        }
+
+        public void SetSfxManager(GameSfxManager manager)
+        {
+            sfxManager = manager;
         }
 
         public void Initialize(RunnerGameConfig runnerConfig, HoleMover runnerHoleMover)
@@ -82,6 +96,7 @@ namespace Featurehole.Runner.Gameplay
                 if (holeMover.CanAbsorb(magnetPosition, MagnetSize, 0.32f))
                 {
                     magnet.Collect();
+                    sfxManager?.PlayMagnetPickup();
                     runtime.ActivateMagnet(5f, 3.6f);
                     Debug.Log($"[Magnet] magnet picked position={magnetPosition}", this);
                     RemoveMagnet(magnet, index);
@@ -118,10 +133,17 @@ namespace Featurehole.Runner.Gameplay
             cycleByMagnet[magnet] = cycleIndex;
 
             Vector2 window = CollectibleProgressionLayout.GetMagnetWindow(config, cycleIndex, SpawnPadding);
-            float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - MagnetSize);
+            float reservedDistance = coinSpawner != null ? coinSpawner.GetPostMagnetPatternReservedDistance() : 0f;
+            float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - MagnetSize - EdgeMargin);
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
-            float laneZ = Random.Range(window.x, window.y);
-            magnet.SetPosition(new Vector3(laneX, 0.62f, laneZ));
+            float maxMagnetZ = Mathf.Max(window.x, window.y - reservedDistance);
+            float laneZ = Random.Range(window.x, maxMagnetZ);
+            Vector3 magnetSpawnPosition = new Vector3(laneX, 0.62f, laneZ);
+            magnet.SetPosition(magnetSpawnPosition);
+            if (coinSpawner != null)
+            {
+                coinSpawner.SpawnMagnetCoinPattern(cycleIndex, magnetSpawnPosition);
+            }
             Debug.Log($"[Magnet] magnet spawn cycle={cycleIndex} position={magnet.transform.position}", this);
         }
 

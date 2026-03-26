@@ -14,6 +14,8 @@ namespace Featurehole.Runner.Gameplay
         private const float TargetRockHeight = 0.95f;
         private const float VisualScaleMin = 0.9f;
         private const float VisualScaleMax = 1.1f;
+        private const float EdgeMargin = 0.55f;
+        private const float TrackSurfaceY = -0.1f;
 
         [SerializeField] private GameObject[] rockPrefabs;
         [SerializeField] private Transform rocksRoot;
@@ -120,12 +122,12 @@ namespace Featurehole.Runner.Gameplay
             float cycleStart = cycleStartByRock[rock];
             Vector2 zWindow = SpawnCycleLayout.GetSubWindow(config, cycleStart, intervalIndex, 1, 2, RockPadding);
 
-            float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - 0.8f);
+            float laneHalfWidth = Mathf.Max(0f, config.TrackWidth * 0.5f - 0.8f - EdgeMargin);
             float laneX = Random.Range(-laneHalfWidth, laneHalfWidth);
             float laneZ = Random.Range(zWindow.x, zWindow.y);
             float sizeScale = GetRandomSizeScale();
 
-            rock.SetPosition(new Vector3(laneX, 0.55f, laneZ), sizeScale);
+            rock.SetPosition(new Vector3(laneX, TrackSurfaceY, laneZ), sizeScale);
             cycleStartByRock[rock] = cycleStart + SpawnCycleLayout.GetCycleDistance(config);
             Debug.Log(
                 $"[RockObstacleSpawner] spawned position name='{rock.gameObject.name}' position={rock.transform.position} sizeScale={sizeScale:F2} zWindow=({zWindow.x:F2},{zWindow.y:F2}) activeObstacleCount={activeRocks.Count}",

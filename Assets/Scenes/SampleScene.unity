@@ -355,76 +355,23 @@ MonoBehaviour:
   config: {fileID: 11400000, guid: 71e323cf1e754240969da0d8eca5444b, type: 2}
   pepperSprite: {fileID: 7897533479186361835, guid: a4c1b8ddbe7307940a81952086769171, type: 3}
   appleSprite: {fileID: -3946612055665836118, guid: 2bef337dee8cb9045a5b1da12cb5d5ab, type: 3}
+  magnetSprite: {fileID: 21300000, guid: a65679dd4bb8346289a6add1f28af171, type: 3}
   backgroundMusic: {fileID: 8300000, guid: 7615802bfc9df41c882b6aeea6272f09, type: 3}
   rockImpactSfx: {fileID: 8300000, guid: 712f96e531abd42e68ce354f16f19b3e, type: 3}
   loseSfx: {fileID: 8300000, guid: a5b646321337043818983eb162fb5cb3, type: 3}
-  rockObstaclePrefab: {fileID: 2475308419244244514}
+  coinPickupSfx: {fileID: 0}
+  magnetPickupSfx: {fileID: 0}
+  applePickupSfx: {fileID: 0}
+  pepperPickupSfx: {fileID: 0}
+  rockObstaclePrefab: {fileID: 8558811325918522312, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
+  rockObstaclePrefabs:
+  - {fileID: 8558811325918522312, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
+  - {fileID: 4949323335622774933, guid: 5891e980f10dd46079cdff737ce30e7a, type: 3}
+  boostAuraMaterial: {fileID: 0}
   boostFireMaterial: {fileID: 2100000, guid: 8cd6616d47f486b46a2b22765ef7bdac, type: 2}
   boostFirePrefab: {fileID: 2800000, guid: 88358e9315b194247ac7c236251bb021, type: 3}
   autoStart: 1
   configureMainCamera: 1
---- !u!1 &2475308419244244514 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8558811325918522312, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-  m_PrefabInstance: {fileID: 5979144114971849721}
-  m_PrefabAsset: {fileID: 0}
---- !u!1001 &5979144114971849721
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0.000000081460335
-      objectReference: {fileID: 0}
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8066013718212253377, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8558811325918522312, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
-      propertyPath: m_Name
-      value: rock.013
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: cabd854068bed4aaea5fbfe01ea003bd, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -432,4 +379,3 @@ SceneRoots:
   - {fileID: 1723456001}
   - {fileID: 963194228}
   - {fileID: 705507995}
-  - {fileID: 5979144114971849721}
