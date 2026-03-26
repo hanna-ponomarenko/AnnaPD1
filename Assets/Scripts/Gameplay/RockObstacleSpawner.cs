@@ -11,6 +11,7 @@ namespace Featurehole.Runner.Gameplay
     {
         private const int RocksPerCycle = 3;
         private const float RockPadding = 0.7f;
+        private const float TargetRockHeight = 0.95f;
 
         [SerializeField] private GameObject rockPrefab;
         [SerializeField] private Transform rocksRoot;
@@ -92,9 +93,17 @@ namespace Featurehole.Runner.Gameplay
 
         private void SpawnRock(int intervalIndex, float cycleStart)
         {
+            Debug.Log(
+                $"[RockObstacleSpawner] spawn attempt intervalIndex={intervalIndex} cycleStart={cycleStart:F2} prefab='{(rockPrefab != null ? rockPrefab.name : "null")}'",
+                this);
+
             RockObstacle rock = rockPrefab != null
                 ? CreateRockFromPrefab(intervalIndex)
                 : CreateRuntimeRock(intervalIndex);
+
+            Debug.Log(
+                $"[RockObstacleSpawner] spawn success activeSpawner='{name}' prefab='{(rockPrefab != null ? rockPrefab.name : "null")}' createdObstacle='{rock.gameObject.name}' visualMode='{(rockPrefab != null ? "prefab" : "runtime")}' activeObstacleCount={activeRocks.Count + 1}",
+                this);
 
             rock.gameObject.name = $"Rock_{intervalIndex}";
             activeRocks.Add(rock);
@@ -116,6 +125,9 @@ namespace Featurehole.Runner.Gameplay
 
             rock.SetPosition(new Vector3(laneX, 0.55f, laneZ), sizeScale);
             cycleStartByRock[rock] = cycleStart + SpawnCycleLayout.GetCycleDistance(config);
+            Debug.Log(
+                $"[RockObstacleSpawner] spawned position name='{rock.gameObject.name}' position={rock.transform.position} sizeScale={sizeScale:F2} zWindow=({zWindow.x:F2},{zWindow.y:F2}) activeObstacleCount={activeRocks.Count}",
+                this);
         }
 
         private void ClearRocks()
@@ -195,7 +207,7 @@ namespace Featurehole.Runner.Gameplay
             visual.name = "Visual";
             visual.transform.localPosition = Vector3.zero;
             visual.transform.localRotation = Quaternion.identity;
-            visual.transform.localScale = Vector3.one * 0.0032f;
+            NormalizeVisualScale(visual.transform);
 
             foreach (Collider collider in visual.GetComponentsInChildren<Collider>(true))
             {
@@ -205,7 +217,29 @@ namespace Featurehole.Runner.Gameplay
             ApplyOpaqueRockLook(visual);
 
             rock.SetVisual(visual.transform);
+            Debug.Log(
+                $"[RockObstacleSpawner] instantiated prefabVisual='{visual.name}' sourcePrefab='{rockPrefab.name}' root='{root.name}'",
+                this);
             return rock;
+        }
+
+        private void NormalizeVisualScale(Transform visualTransform)
+        {
+            Renderer[] renderers = visualTransform.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0)
+            {
+                return;
+            }
+
+            Bounds bounds = renderers[0].bounds;
+            for (int index = 1; index < renderers.Length; index++)
+            {
+                bounds.Encapsulate(renderers[index].bounds);
+            }
+
+            float currentHeight = Mathf.Max(0.001f, bounds.size.y);
+            float scaleFactor = TargetRockHeight / currentHeight;
+            visualTransform.localScale *= scaleFactor;
         }
 
         private void ApplyOpaqueRockLook(GameObject visual)

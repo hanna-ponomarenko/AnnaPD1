@@ -683,20 +683,27 @@ namespace Featurehole.Runner.Core
         private RockObstacleSpawner CreateRockSpawner()
         {
             Transform spawnerRoot = transform.Find("RockSpawner");
+            bool createdSpawner = false;
             if (spawnerRoot == null)
             {
                 GameObject spawnerObject = new GameObject("RockSpawner");
                 spawnerObject.transform.SetParent(transform, false);
                 spawnerRoot = spawnerObject.transform;
+                createdSpawner = true;
             }
 
             RockObstacleSpawner rockSpawner = spawnerRoot.GetComponent<RockObstacleSpawner>();
             if (rockSpawner == null)
             {
                 rockSpawner = spawnerRoot.gameObject.AddComponent<RockObstacleSpawner>();
+                createdSpawner = true;
             }
 
-            rockSpawner.SetRockPrefab(GetRockObstaclePrefab());
+            GameObject rockPrefab = GetRockObstaclePrefab();
+            rockSpawner.SetRockPrefab(rockPrefab);
+            Debug.Log(
+                $"[RunnerSceneBootstrap] created rock spawner={createdSpawner} activeSceneObject='RunnerBootstrap' component='RunnerSceneBootstrap' field='rockObstaclePrefab' assigned='{(rockObstaclePrefab != null ? rockObstaclePrefab.name : "null")}' resolvedPrefab='{(rockPrefab != null ? rockPrefab.name : "null")}' path='CreateRockSpawner->SetRockPrefab'",
+                this);
             return rockSpawner;
         }
 
