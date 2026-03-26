@@ -11,7 +11,7 @@ namespace Featurehole.Runner.Gameplay
         private const int RocksPerCycle = 3;
         private const float RockPadding = 0.7f;
 
-        [SerializeField] private RockObstacle rockPrefab;
+        [SerializeField] private GameObject rockPrefab;
         [SerializeField] private Transform rocksRoot;
 
         private readonly List<RockObstacle> activeRocks = new List<RockObstacle>();
@@ -20,6 +20,11 @@ namespace Featurehole.Runner.Gameplay
 
         private RunnerGameConfig config;
         private HoleMover holeMover;
+
+        public void SetRockPrefab(GameObject prefab)
+        {
+            rockPrefab = prefab;
+        }
 
         public void Initialize(RunnerGameConfig runnerConfig, HoleMover runnerHoleMover)
         {
@@ -86,7 +91,7 @@ namespace Featurehole.Runner.Gameplay
         private void SpawnRock(int intervalIndex, float cycleStart)
         {
             RockObstacle rock = rockPrefab != null
-                ? Instantiate(rockPrefab, rocksRoot)
+                ? CreateRockFromPrefab(intervalIndex)
                 : CreateRuntimeRock(intervalIndex);
 
             rock.gameObject.name = $"Rock_{intervalIndex}";
@@ -174,6 +179,44 @@ namespace Featurehole.Runner.Gameplay
                 lumpRenderer.receiveShadows = false;
             }
 
+            return rock;
+        }
+
+        private RockObstacle CreateRockFromPrefab(int index)
+        {
+            GameObject root = new GameObject($"Rock_{index}");
+            root.transform.SetParent(rocksRoot, false);
+
+            RockObstacle rock = root.AddComponent<RockObstacle>();
+
+            GameObject visual = Instantiate(rockPrefab, root.transform);
+            visual.name = "Visual";
+            visual.transform.localPosition = Vector3.zero;
+            visual.transform.localRotation = Quaternion.identity;
+            visual.transform.localScale *= 0.0035f;
+
+            Collider prefabCollider = visual.GetComponent<Collider>();
+            if (prefabCollider == null)
+            {
+                Renderer[] renderers = visual.GetComponentsInChildren<Renderer>(true);
+                if (renderers.Length > 0)
+                {
+                    Bounds bounds = renderers[0].bounds;
+                    for (int indexRenderer = 1; indexRenderer < renderers.Length; indexRenderer++)
+                    {
+                        bounds.Encapsulate(renderers[indexRenderer].bounds);
+                    }
+
+                    BoxCollider collider = visual.AddComponent<BoxCollider>();
+                    collider.center = visual.transform.InverseTransformPoint(bounds.center);
+                    collider.size = new Vector3(
+                        bounds.size.x / visual.transform.lossyScale.x,
+                        bounds.size.y / visual.transform.lossyScale.y,
+                        bounds.size.z / visual.transform.lossyScale.z);
+                }
+            }
+
+            rock.SetVisual(visual.transform);
             return rock;
         }
 

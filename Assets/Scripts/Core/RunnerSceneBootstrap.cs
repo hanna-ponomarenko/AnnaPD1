@@ -5,6 +5,9 @@ using Featurehole.Runner.Level;
 using Featurehole.Runner.Audio;
 using System.IO;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Featurehole.Runner.Core
 {
@@ -16,6 +19,7 @@ namespace Featurehole.Runner.Core
         [SerializeField] private AudioClip backgroundMusic;
         [SerializeField] private AudioClip rockImpactSfx;
         [SerializeField] private AudioClip loseSfx;
+        [SerializeField] private GameObject rockObstaclePrefab;
         [SerializeField] private Material boostFireMaterial;
         [SerializeField] private UnityEngine.Object boostFirePrefab;
         [SerializeField] private bool autoStart = true;
@@ -692,7 +696,21 @@ namespace Featurehole.Runner.Core
                 rockSpawner = spawnerRoot.gameObject.AddComponent<RockObstacleSpawner>();
             }
 
+            rockSpawner.SetRockPrefab(GetRockObstaclePrefab());
             return rockSpawner;
+        }
+
+        private GameObject GetRockObstaclePrefab()
+        {
+            if (rockObstaclePrefab != null)
+            {
+                return rockObstaclePrefab;
+            }
+
+#if UNITY_EDITOR
+            rockObstaclePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Audio/Prefabs/rock.013.prefab");
+#endif
+            return rockObstaclePrefab;
         }
 
         private RunnerHud CreateHud()
