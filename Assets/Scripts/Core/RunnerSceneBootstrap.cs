@@ -2,6 +2,7 @@ using Featurehole.Runner.Data;
 using Featurehole.Runner.Gameplay;
 using Featurehole.Runner.Hole;
 using Featurehole.Runner.Level;
+using Featurehole.Runner.Audio;
 using System.IO;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ namespace Featurehole.Runner.Core
         [SerializeField] private RunnerGameConfig config;
         [SerializeField] private Sprite pepperSprite;
         [SerializeField] private Sprite appleSprite;
+        [SerializeField] private AudioClip backgroundMusic;
         [SerializeField] private Material boostFireMaterial;
         [SerializeField] private UnityEngine.Object boostFirePrefab;
         [SerializeField] private bool autoStart = true;
@@ -41,6 +43,7 @@ namespace Featurehole.Runner.Core
             PepperBoostSpawner pepperSpawner = CreatePepperSpawner();
             pepperSpawner.SetPepperSprite(pepperSprite);
             CoinSpawner coinSpawner = CreateCoinSpawner();
+            CreateMusicManager();
             RunnerHud hud = CreateHud();
 
             controller.Configure(runtimeConfig, holeMover, trackSpawner, appleSpawner, pepperSpawner, coinSpawner, hud, autoStart);
@@ -51,6 +54,26 @@ namespace Featurehole.Runner.Core
             }
 
             ConfigureBackdrop(runtimeConfig);
+        }
+
+        private MusicManager CreateMusicManager()
+        {
+            Transform musicRoot = transform.Find("MusicManager");
+            if (musicRoot == null)
+            {
+                GameObject musicObject = new GameObject("MusicManager");
+                musicObject.transform.SetParent(transform, false);
+                musicRoot = musicObject.transform;
+            }
+
+            MusicManager musicManager = musicRoot.GetComponent<MusicManager>();
+            if (musicManager == null)
+            {
+                musicManager = musicRoot.gameObject.AddComponent<MusicManager>();
+            }
+
+            musicManager.Configure(backgroundMusic);
+            return musicManager;
         }
 
         private HoleMover CreateHole(RunnerGameConfig runtimeConfig)
