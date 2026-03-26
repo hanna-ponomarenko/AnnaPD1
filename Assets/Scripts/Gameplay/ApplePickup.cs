@@ -4,7 +4,7 @@ namespace Featurehole.Runner.Gameplay
 {
     public sealed class ApplePickup : MonoBehaviour
     {
-        private const float BounceAmplitude = 0.14f;
+        private const float BounceAmplitude = 0.26f;
         private const float BounceFrequency = 3.2f;
 
         private Vector3 basePosition;

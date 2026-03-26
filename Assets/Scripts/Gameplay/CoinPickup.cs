@@ -4,7 +4,7 @@ namespace Featurehole.Runner.Gameplay
 {
     public sealed class CoinPickup : MonoBehaviour
     {
-        private const float BounceAmplitude = 0.12f;
+        private const float BounceAmplitude = 0.22f;
         private const float BounceFrequency = 4.1f;
 
         private Vector3 basePosition;

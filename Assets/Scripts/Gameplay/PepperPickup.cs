@@ -4,7 +4,7 @@ namespace Featurehole.Runner.Gameplay
 {
     public sealed class PepperPickup : MonoBehaviour
     {
-        private const float BounceAmplitude = 0.16f;
+        private const float BounceAmplitude = 0.3f;
         private const float BounceFrequency = 3.6f;
 
         private Vector3 basePosition;
