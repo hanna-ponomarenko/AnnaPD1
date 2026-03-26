@@ -176,6 +176,14 @@ namespace Featurehole.Runner.Level
                 GetRuntimeRiverFoamMaterial());
             CreateBlock(segmentObject.transform, "UnderwaterSand", new Vector3(0f, -0.18f, 0f), new Vector3(riverWidth * 0.78f, 0.08f, 1f), new Color(0.71f, 0.63f, 0.39f));
 
+            float sideOffsetX = riverWidth * 0.5f + 3.4f;
+            CreatePyramid(segmentObject.transform, "PyramidLeftNear", new Vector3(-sideOffsetX, 0.95f, -2.6f), new Vector3(1.6f, 1.45f, 1.6f), new Color(0.82f, 0.69f, 0.42f));
+            CreatePyramid(segmentObject.transform, "PyramidRightFar", new Vector3(sideOffsetX + 0.7f, 1.2f, 2.8f), new Vector3(2.1f, 1.9f, 2.1f), new Color(0.77f, 0.64f, 0.38f));
+            CreatePalm(segmentObject.transform, "PalmLeftNear", new Vector3(-sideOffsetX + 1.5f, 0.4f, -1.2f), -1f);
+            CreatePalm(segmentObject.transform, "PalmRightNear", new Vector3(sideOffsetX - 1.3f, 0.4f, 1.4f), 1f);
+            CreatePalm(segmentObject.transform, "PalmLeftFar", new Vector3(-sideOffsetX - 0.9f, 0.4f, 3.3f), -1f);
+            CreatePalm(segmentObject.transform, "PalmRightFar", new Vector3(sideOffsetX + 1.2f, 0.4f, -3.1f), 1f);
+
             return segment;
         }
 
@@ -283,8 +291,8 @@ namespace Featurehole.Runner.Level
                 runtimeRiverBaseMaterial.SetTexture("_WaveTex", runtimeRiverBaseTexture);
                 runtimeRiverBaseMaterial.SetTexture("_DetailTex", runtimeRiverCurrentTexture);
                 runtimeRiverBaseMaterial.SetTexture("_FoamTex", runtimeRiverFoamTexture);
-                runtimeRiverBaseMaterial.SetColor("_ShallowColor", new Color(0.32f, 0.68f, 0.96f, 0.84f));
-                runtimeRiverBaseMaterial.SetColor("_DeepColor", new Color(0.06f, 0.18f, 0.58f, 0.94f));
+                runtimeRiverBaseMaterial.SetColor("_ShallowColor", new Color(0.25f, 0.5f, 0.76f, 0.88f));
+                runtimeRiverBaseMaterial.SetColor("_DeepColor", new Color(0.18f, 0.46f, 0.72f, 0.96f));
                 runtimeRiverBaseMaterial.SetColor("_FoamColor", Color.white);
                 runtimeRiverBaseMaterial.SetFloat("_WaveScale", 2.1f);
                 runtimeRiverBaseMaterial.SetFloat("_DetailScale", 4.2f);
@@ -302,7 +310,7 @@ namespace Featurehole.Runner.Level
             else
             {
                 runtimeRiverBaseMaterial = CreateTransparentUnlitMaterial("RuntimeRiverBaseMaterial", runtimeRiverBaseTexture);
-                runtimeRiverBaseMaterial.color = new Color(0.62f, 0.9f, 1f, 0.96f);
+                runtimeRiverBaseMaterial.color = new Color(0.2f, 0.47f, 0.73f, 0.96f);
                 runtimeRiverBaseMaterial.mainTextureScale = new Vector2(1.45f, chunkLength * 0.16f);
             }
 

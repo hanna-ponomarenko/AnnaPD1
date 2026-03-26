@@ -40,9 +40,10 @@ namespace Featurehole.Runner.Core
             appleSpawner.SetAppleSprite(appleSprite);
             PepperBoostSpawner pepperSpawner = CreatePepperSpawner();
             pepperSpawner.SetPepperSprite(pepperSprite);
+            CoinSpawner coinSpawner = CreateCoinSpawner();
             RunnerHud hud = CreateHud();
 
-            controller.Configure(runtimeConfig, holeMover, trackSpawner, appleSpawner, pepperSpawner, hud, autoStart);
+            controller.Configure(runtimeConfig, holeMover, trackSpawner, appleSpawner, pepperSpawner, coinSpawner, hud, autoStart);
 
             if (configureMainCamera)
             {
@@ -607,6 +608,25 @@ namespace Featurehole.Runner.Core
             }
 
             return appleSpawner;
+        }
+
+        private CoinSpawner CreateCoinSpawner()
+        {
+            Transform spawnerRoot = transform.Find("CoinSpawner");
+            if (spawnerRoot == null)
+            {
+                GameObject spawnerObject = new GameObject("CoinSpawner");
+                spawnerObject.transform.SetParent(transform, false);
+                spawnerRoot = spawnerObject.transform;
+            }
+
+            CoinSpawner coinSpawner = spawnerRoot.GetComponent<CoinSpawner>();
+            if (coinSpawner == null)
+            {
+                coinSpawner = spawnerRoot.gameObject.AddComponent<CoinSpawner>();
+            }
+
+            return coinSpawner;
         }
 
         private RunnerHud CreateHud()

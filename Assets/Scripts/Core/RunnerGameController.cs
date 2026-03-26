@@ -13,6 +13,7 @@ namespace Featurehole.Runner.Core
         [SerializeField] private TrackSegmentSpawner trackSpawner;
         [SerializeField] private AppleSpawner appleSpawner;
         [SerializeField] private PepperBoostSpawner pepperSpawner;
+        [SerializeField] private CoinSpawner coinSpawner;
         [SerializeField] private RunnerHud hud;
         [SerializeField] private bool autoStart = true;
 
@@ -26,6 +27,7 @@ namespace Featurehole.Runner.Core
             TrackSegmentSpawner runnerTrackSpawner,
             AppleSpawner runnerAppleSpawner,
             PepperBoostSpawner runnerPepperSpawner,
+            CoinSpawner runnerCoinSpawner,
             RunnerHud runnerHud,
             bool shouldAutoStart = true)
         {
@@ -34,6 +36,7 @@ namespace Featurehole.Runner.Core
             trackSpawner = runnerTrackSpawner;
             appleSpawner = runnerAppleSpawner;
             pepperSpawner = runnerPepperSpawner;
+            coinSpawner = runnerCoinSpawner;
             hud = runnerHud;
             autoStart = shouldAutoStart;
         }
@@ -50,6 +53,7 @@ namespace Featurehole.Runner.Core
             trackSpawner.Initialize(config);
             appleSpawner.Initialize(config, holeMover);
             pepperSpawner.Initialize(config, holeMover);
+            coinSpawner.Initialize(config, holeMover);
             hud.Initialize(runtime, holeMover);
 
             if (autoStart)
@@ -78,6 +82,7 @@ namespace Featurehole.Runner.Core
             trackSpawner.Tick(deltaTime, currentForwardSpeed);
             appleSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             pepperSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
+            coinSpawner.Tick(deltaTime, runtime, currentForwardSpeed);
             runtime.Tick(deltaTime, config.ForwardSpeed);
             holeMover.SetBoostActive(runtime.IsBoostActive);
 
@@ -95,6 +100,7 @@ namespace Featurehole.Runner.Core
             holeMover.SetBoostActive(false);
             appleSpawner.ResetField();
             pepperSpawner.ResetField();
+            coinSpawner.ResetField();
             runtime.StartRun(config.MaxMissedCollectibles);
         }
 
@@ -112,6 +118,7 @@ namespace Featurehole.Runner.Core
             holeMover.SetBoostActive(false);
             appleSpawner.ResetField();
             pepperSpawner.ResetField();
+            coinSpawner.ResetField();
         }
 
         private bool ValidateScene()
@@ -121,6 +128,7 @@ namespace Featurehole.Runner.Core
                 && trackSpawner != null
                 && appleSpawner != null
                 && pepperSpawner != null
+                && coinSpawner != null
                 && hud != null)
             {
                 return true;
